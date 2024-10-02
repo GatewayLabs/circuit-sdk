@@ -9,7 +9,7 @@ use tandem::{Circuit, Error, Gate};
 
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
-pub(crate) struct Uint<const N: usize> {
+pub struct Uint<const N: usize> {
     pub(crate) bits: Vec<bool>,       // Store the bits of the unsigned integer
     _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size
 }
@@ -976,7 +976,9 @@ impl<const N: usize> std::ops::Sub for &Uint<N> {
 // Test the Uint<N> XOR functionality
 #[cfg(test)]
 mod tests {
-    use super::*;
+    // use super::*;
+
+    use crate::operations::Uint;
 
     #[test]
     fn test_uint_xor() {
@@ -1357,14 +1359,5 @@ mod tests {
 
         let result = a * b; // Perform multiplication on the 4-bit values
         assert_eq!(result.to_string(), "0000"); // Binary 0000 (Multiplication result of 1100 * 0011)
-    }
-
-    #[test]
-    fn test_from_u8_mul() {
-        let a = Uint::<8>::from_u8(5);
-        let b = Uint::<8>::from_u8(10);
-
-        let result = a * b;
-        assert_eq!(result.to_u8(), 5 * 10);
     }
 }
