@@ -1,0 +1,15 @@
+[package]
+name = "benchmark"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tfhe = { version = "0.8.0", features = [ "boolean", "shortint", "integer", "aarch64-unix" ] }
+compute = { path = "../compute" }
+
+[dev-dependencies]
+criterion = "0.4" # Use Criterion for stable benchmarking
+
+[[bench]]
+name = "benchmarks"
+harness = false
