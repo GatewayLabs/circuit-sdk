@@ -235,6 +235,7 @@ impl<const N: usize> Not for &Uint<N> {
 }
 
 // Implement Shift Left operation for Uint<N> and &Uint<N>
+#[allow(clippy::suspicious_arithmetic_impl)]
 impl<const N: usize> Shl<usize> for Uint<N> {
     type Output = Self;
 
@@ -445,14 +446,14 @@ mod tests {
         let a = Uint::<4>::new(vec![false, false, false, true]); // Binary 1000
 
         let result = a << 1; // Perform left shift by 1
-        assert_eq!(result.to_u8(), 0b0000 as u8); // Binary 0000 (Left shift result of 1000)
+        assert_eq!(result.to_u8(), 0b0000_u8); // Binary 0000 (Left shift result of 1000)
 
         // binary literal of 0000
 
         let a = Uint::<4>::new(vec![false, false, false, true]); // Binary 1000
 
         let result = a << 2; // Perform left shift by 2
-        assert_eq!(result.to_u8(), 0b0000); // Binary 0000 (Left shift result of 1000)
+        assert_eq!(result.to_u8(), 0b0000_u8); // Binary 0000 (Left shift result of 1000)
 
         let a = Uint::<4>::new(vec![false, false, false, true]); // Binary 1000
 

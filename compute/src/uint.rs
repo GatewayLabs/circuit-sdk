@@ -1,11 +1,8 @@
-use crate::u256::U256;
 use rand_chacha::rand_core::SeedableRng;
 use rand_chacha::ChaCha20Rng;
 use std::marker::PhantomData;
-use std::ops::{BitOr, BitXor, Not, Shl, Shr};
 use tandem::states::{Contributor, Evaluator};
-use tandem::GateIndex;
-use tandem::{Circuit, Error, Gate};
+use tandem::{Circuit, Error};
 
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
