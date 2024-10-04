@@ -2,7 +2,7 @@ use rand_chacha::rand_core::SeedableRng;
 use rand_chacha::ChaCha20Rng;
 use std::marker::PhantomData;
 use tandem::states::{Contributor, Evaluator};
-use tandem::{Circuit, Error};
+use tandem::Circuit;
 
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
@@ -190,7 +190,7 @@ impl<const N: usize> Uint<N> {
         circuit: &Circuit,
         input_contributor: &[bool],
         input_evaluator: &[bool],
-    ) -> Result<Vec<bool>, Error> {
+    ) -> anyhow::Result<Vec<bool>> {
         let mut eval = Evaluator::new(
             circuit.clone(),
             input_evaluator,
@@ -212,7 +212,7 @@ impl<const N: usize> Uint<N> {
 
             msg_for_eval = reply;
         }
-        eval.output(&msg_for_eval)
+        Ok(eval.output(&msg_for_eval)?)
     }
 }
 
