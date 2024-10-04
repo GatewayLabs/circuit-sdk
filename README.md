@@ -1,4 +1,38 @@
 # Cryptomata: The Encrypted Computer
+# cryptomata
+
+[![Crates.io](https://img.shields.io/crates/v/cryptomata.svg)](https://crates.io/crates/cryptomata)
+[![Docs.rs](https://docs.rs/cryptomata/badge.svg)](https://docs.rs/cryptomata)
+[![CI](https://github.com/Gateway-DAO/cryptomata/workflows/CI/badge.svg)](https://github.com/Gateway-DAO/cryptomata/actions)
+
+## Installation
+
+### Cargo
+
+* Install the rust toolchain in order to have cargo installed by following
+  [this](https://www.rust-lang.org/tools/install) guide.
+* run `cargo install cryptomata`
+
+## License
+
+Licensed under either of
+
+ * Apache License, Version 2.0
+   ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+ * MIT license
+   ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
+
+## Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
+dual licensed as above, without any additional terms or conditions.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Design
 
 Designing the "encrypted computer" as described in 0xparc's [Programmable Cryptography 1](https://0xparc.org/blog/programmable-cryptography-1) blog post, based on garbled circuits for computation in leiu of FHE, zk-SNARKs (Zero-Knowledge Succinct Non-Interactive Arguments of Knowledge) for inputs/outputs, and Oblivious RAM for intermediate state would combine several advanced cryptographic techniques. Here's how we can structure it:
 

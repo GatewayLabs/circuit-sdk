@@ -1,4 +1,4 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 
 // Function to benchmark (example function)
 fn tfhe_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
@@ -21,7 +21,7 @@ fn tfhe_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
     set_server_key(server_keys);
 
     // Clear equivalent computations: 12297829382473034410 + 1
-    let mut encrypted_res_mul = &encrypted_a + &encrypted_b;
+    let encrypted_res_mul = &encrypted_a + &encrypted_b;
 
     let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
     assert_eq!(clear_res, clear_a + clear_b);
@@ -31,7 +31,7 @@ fn tfhe_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
 
 // Another function to benchmark
 fn gateway_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
-    use compute::operations::Uint;
+    use compute::uint::Uint;
 
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
@@ -47,14 +47,14 @@ fn gateway_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
 // Benchmark 1: Benchmarking benchmark_gateway_encrypted_addition
 fn benchmark_gateway_encrypted_addition(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_addition", |b| {
-        b.iter(|| gateway_encrypted_addition())
+        b.iter(gateway_encrypted_addition)
     });
 }
 
 // Benchmark 2: Benchmarking benchmark_tfhe_encrypted_addition
 fn benchmark_tfhe_encrypted_addition(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_addition", |b| {
-        b.iter(|| tfhe_encrypted_addition())
+        b.iter(tfhe_encrypted_addition)
     });
 }
 
