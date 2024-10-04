@@ -13,7 +13,7 @@ tfhe = { version = "0.8.0", features = [ "boolean", "shortint", "integer", "x86_
 tfhe = { version = "0.8.0", features = [ "boolean", "shortint", "integer", "aarch64-unix" ] }
 
 [dev-dependencies]
-criterion = "0.4" # Use Criterion for stable benchmarking
+criterion = "0.5" # Use Criterion for stable benchmarking
 
 [[bench]]
 name = "benchmarks"
