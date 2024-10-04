@@ -1,43 +1,50 @@
 use crate::uint::Uint;
-use std::ops::{BitAnd, BitXor, Not, Shl, Shr};
+use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 use tandem::{Circuit, Gate};
+
+// Helper function to build and simulate a circuit for binary operations
+fn build_and_simulate<const N: usize>(
+    lhs: &Uint<N>,
+    rhs: Option<&Uint<N>>,
+    gate_fn: fn(u32, u32) -> Gate,
+) -> Uint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    // Define gates for each bit in lhs and rhs
+    for i in 0..N {
+        let gate = gate_fn(i as u32, (N + i) as u32);
+        gates.push(gate);
+    }
+
+    // Define the output indices (for N-bit operation)
+    let output_indices: Vec<u32> = (2 * N as u32..2 * N as u32 + N as u32).collect();
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // Simulate the circuit
+    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
+    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+
+    // Return the resulting Uint<N>
+    Uint::new(result)
+}
 
 // Implement the XOR operation for Uint<N>
 impl<const N: usize> BitXor for Uint<N> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit XOR operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for both Uint<N> objects
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From first Uint<N> (self)
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define XOR gates for each corresponding bit in self and rhs
-        for i in 0..N {
-            gates.push(Gate::Xor(
-                i.try_into().unwrap(),
-                (N + i).try_into().unwrap(),
-            )); // XOR gate between corresponding bits
-        }
-
-        // Define the output indices (for N-bit XOR)
-        let n = N as u32;
-        let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate(&self, Some(&rhs), Gate::Xor)
     }
 }
 
@@ -46,37 +53,7 @@ impl<const N: usize> BitXor for &Uint<N> {
     type Output = Uint<N>;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit XOR operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for both Uint<N> objects
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From first Uint<N> (self)
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define XOR gates for each corresponding bit in self and rhs
-        for i in 0..N {
-            gates.push(Gate::Xor(
-                i.try_into().unwrap(),
-                (N + i).try_into().unwrap(),
-            )); // XOR gate between corresponding bits
-        }
-
-        // Define the output indices (for N-bit XOR)
-        let n = N as u32;
-        let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate(self, Some(rhs), Gate::Xor)
     }
 }
 
@@ -85,37 +62,7 @@ impl<const N: usize> BitAnd for Uint<N> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit AND operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for both Uint<N> objects
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From first Uint<N> (self)
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define AND gates for each corresponding bit in self and rhs
-        for i in 0..N {
-            gates.push(Gate::And(
-                i.try_into().unwrap(),
-                (N + i).try_into().unwrap(),
-            )); // AND gate between corresponding bits
-        }
-
-        // Define the output indices (for N-bit AND)
-        let n = N as u32;
-        let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate(&self, Some(&rhs), Gate::And)
     }
 }
 
@@ -124,38 +71,40 @@ impl<const N: usize> BitAnd for &Uint<N> {
     type Output = Uint<N>;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit AND operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for both Uint<N> objects
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From first Uint<N> (self)
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define AND gates for each corresponding bit in self and rhs
-        for i in 0..N {
-            gates.push(Gate::And(
-                i.try_into().unwrap(),
-                (N + i).try_into().unwrap(),
-            )); // AND gate between corresponding bits
-        }
-
-        // Define the output indices (for N-bit AND)
-        let n = N as u32;
-        let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate(self, Some(rhs), Gate::And)
     }
+}
+
+// Helper function to handle NOT operation (unary)
+fn build_and_simulate_not<const N: usize>(input: &Uint<N>) -> Uint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for Uint<N> object
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    // Define NOT gates for each bit in the Uint<N>
+    for i in 0..N * 2 {
+        gates.push(Gate::Not(i.try_into().unwrap())); // NOT gate for each bit
+    }
+
+    // Define the output indices (for N-bit NOT)
+    let n = N as u32;
+    let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // Simulate the circuit
+    let result = input.simulate(&program, &input.bits, &input.bits).unwrap();
+
+    // Return the resulting Uint<N>
+    Uint::new(result)
 }
 
 // Implement the NOT operation for Uint<N>
@@ -163,36 +112,7 @@ impl<const N: usize> Not for Uint<N> {
     type Output = Self;
 
     fn not(self) -> Self::Output {
-        // Build a circuit that performs an N-bit NOT operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for the Uint<N> object
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From the Uint<N> object
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define NOT gates for each bit in the Uint<N>
-        for i in 0..N * 2 {
-            gates.push(Gate::Not(i.try_into().unwrap())); // NOT gate for each bit
-        }
-
-        // Define the output indices (for N-bit NOT)
-        let n = N as u32;
-        let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
-
-        //let output_indices = vec![2];
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &self.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate_not(&self)
     }
 }
 
@@ -201,70 +121,63 @@ impl<const N: usize> Not for &Uint<N> {
     type Output = Uint<N>;
 
     fn not(self) -> Self::Output {
-        // Build a circuit that performs an N-bit NOT operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for the Uint<N> object
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From the Uint<N> object
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define NOT gates for each bit in the Uint<N>
-        for i in 0..N * 2 {
-            gates.push(Gate::Not(i.try_into().unwrap())); // NOT gate for each bit
-        }
-
-        // Define the output indices (for N-bit NOT)
-        let n = N as u32;
-        let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
-
-        //let output_indices = vec![2];
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &self.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate_not(self)
     }
 }
 
-// Implement Shift Left operation for Uint<N> and &Uint<N>
-#[allow(clippy::suspicious_arithmetic_impl)]
+// Helper function for shift operations
+fn shift_bits_left<const N: usize>(bits: &mut Vec<bool>, shift: usize) {
+    for _ in 0..shift {
+        bits.remove(N - 1); // Remove the most significant bit
+        bits.insert(0, false); // Insert a 0 to the least significant bit
+    }
+}
+
+fn shift_bits_right<const N: usize>(bits: &mut Vec<bool>, shift: usize) {
+    for _ in 0..shift {
+        bits.remove(0); // Remove the least significant bit
+        bits.push(false); // Insert a 0 to the most significant bit
+    }
+}
+
+// Implement Shift Left operation for Uint<N>
 impl<const N: usize> Shl<usize> for Uint<N> {
     type Output = Self;
 
+    fn shl(mut self, shift: usize) -> Self::Output {
+        shift_bits_left::<N>(&mut self.bits, shift);
+        self
+    }
+}
+
+// Implement Shift Left operation for &Uint<N>
+impl<const N: usize> Shl<usize> for &Uint<N> {
+    type Output = Uint<N>;
+
     fn shl(self, shift: usize) -> Self::Output {
         let mut bits = self.bits.clone();
-
-        // Shift the bits to the left by the specified amount
-        for _ in 0..shift {
-            bits.remove(N - 1); // Remove the most significant bit in little-endian
-            bits.insert(0, false); // Add a 0 to the least significant bit in little-endian
-        }
-
+        shift_bits_left::<N>(&mut bits, shift);
         Uint::new(bits)
     }
 }
 
-// Implement Shift Right operation for Uint<N> and &Uint<N>
+// Implement Shift Right operation for Uint<N>
 impl<const N: usize> Shr<usize> for Uint<N> {
     type Output = Self;
 
+    fn shr(mut self, shift: usize) -> Self::Output {
+        shift_bits_right::<N>(&mut self.bits, shift);
+        self
+    }
+}
+
+// Implement Shift Right operation for &Uint<N>
+impl<const N: usize> Shr<usize> for &Uint<N> {
+    type Output = Uint<N>;
+
     fn shr(self, shift: usize) -> Self::Output {
         let mut bits = self.bits.clone();
-
-        // Shift the bits to the right by the specified amount
-        for _ in 0..shift {
-            bits.remove(0); // Remove the least significant bit in little-endian
-            bits.push(false); // Add a 0 to the most significant bit in little-endian
-        }
-
+        shift_bits_right::<N>(&mut bits, shift);
         Uint::new(bits)
     }
 }
