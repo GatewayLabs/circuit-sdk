@@ -6,3 +6,13 @@ members = [
     "compute",
     "vm"
 ]
+
+[workspace.package]
+authors = ["Gateway"]
+publish = true
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+anyhow = "1.0.89"
+tracing = { version = "0.1.40", features = ["log"] }

@@ -199,7 +199,7 @@ impl<const N: usize> Uint<N> {
         let (mut contrib, mut msg_for_eval) =
             Contributor::new(circuit, input_contributor, ChaCha20Rng::from_entropy())?;
 
-        //println!("contributor ciphertext: {:?}", hex::encode(&msg_for_eval));
+        tracing::debug!("contributor ciphertext: {:?}", hex::encode(&msg_for_eval));
 
         assert_eq!(contrib.steps(), eval.steps());
 
