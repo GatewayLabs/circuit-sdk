@@ -18,7 +18,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
-        run: cargo test --workspace --features tfhe/x86_64
+        run: cargo test --all-features --workspace
 
   rustfmt:
     name: Rustfmt
