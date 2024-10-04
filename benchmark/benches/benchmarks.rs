@@ -154,7 +154,7 @@ fn tfhe_encrypted_bitwise_not() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-fn gateway_encrypted_bitwise_not() -> Result<(), Box<dyn::std::error::Error>> {
+fn gateway_encrypted_bitwise_not() -> Result<(), Box<dyn ::std::error::Error>> {
     use compute::uint::Uint;
 
     let clear_a = 12297829382473034410u128;
@@ -166,7 +166,7 @@ fn gateway_encrypted_bitwise_not() -> Result<(), Box<dyn::std::error::Error>> {
     Ok(())
 }
 
-fn tfhe_encrypted_subtraction() -> Result<(), Box<dyn::std::error::Error>> {
+fn tfhe_encrypted_subtraction() -> Result<(), Box<dyn ::std::error::Error>> {
     use tfhe::prelude::*;
     use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
     // Basic configuration to use homomorphic integers
@@ -194,7 +194,7 @@ fn tfhe_encrypted_subtraction() -> Result<(), Box<dyn::std::error::Error>> {
     Ok(())
 }
 
-fn gateway_encrypted_subtraction() -> Result<(), Box<dyn::std::error::Error>> {
+fn gateway_encrypted_subtraction() -> Result<(), Box<dyn ::std::error::Error>> {
     use compute::uint::Uint;
 
     let clear_a = 12297829382473034410u128;
