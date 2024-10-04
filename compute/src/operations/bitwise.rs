@@ -1,5 +1,5 @@
 use crate::uint::Uint;
-use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
+use std::ops::{BitAnd, BitXor, Not, Shl, Shr};
 use tandem::{Circuit, Gate};
 
 // Helper function to build and simulate a circuit for binary operations

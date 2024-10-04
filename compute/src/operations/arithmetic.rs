@@ -3,6 +3,7 @@ use std::ops::{Add, Sub};
 use tandem::{Circuit, Gate};
 
 // Helper function to build and simulate a circuit for addition or subtraction
+#[allow(clippy::type_complexity)]
 fn build_and_simulate_arithmetic<const N: usize>(
     lhs: &Uint<N>,
     rhs: &Uint<N>,
@@ -38,10 +39,7 @@ fn build_and_simulate_arithmetic<const N: usize>(
     }
 
     // Define output indices (result bits from the arithmetic operation)
-    let output_indices: Vec<u32> = result_bit_indices
-        .iter()
-        .map(|&index| index as u32)
-        .collect();
+    let output_indices: Vec<u32> = result_bit_indices.to_vec();
 
     // Create the circuit
     let program = Circuit::new(gates, output_indices);
