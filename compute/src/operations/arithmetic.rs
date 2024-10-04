@@ -1,350 +1,181 @@
 use crate::uint::Uint;
+use std::ops::{Add, Sub};
 use tandem::{Circuit, Gate};
 
+// Helper function to build and simulate a circuit for addition or subtraction
+#[allow(clippy::type_complexity)]
+fn build_and_simulate_arithmetic<const N: usize>(
+    lhs: &Uint<N>,
+    rhs: &Uint<N>,
+    gate_fn: fn(u32, u32, Option<u32>, &mut Vec<Gate>, &mut Option<u32>) -> u32,
+) -> Uint<N> {
+    let mut gates = Vec::new();
+    let mut carry_or_borrow_index = None; // Carry/borrow bit
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    let mut result_bit_indices = Vec::with_capacity(N);
+
+    // Generate gates for each bit of the addition/subtraction
+    for i in 0..N {
+        let a = i as u32;
+        let b = (N + i) as u32;
+
+        // Use the provided gate function to define the behavior of each bit
+        let result_index = gate_fn(
+            a,
+            b,
+            carry_or_borrow_index,
+            &mut gates,
+            &mut carry_or_borrow_index,
+        );
+        result_bit_indices.push(result_index);
+    }
+
+    // Define output indices (result bits from the arithmetic operation)
+    let output_indices: Vec<u32> = result_bit_indices.to_vec();
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // Simulate the circuit
+    let result = lhs.simulate(&program, &lhs.bits, &rhs.bits).unwrap();
+
+    // Return the resulting Uint<N>
+    Uint::new(result)
+}
+
+// Helper function to generate gates for the addition of two bits
+fn add_gate_fn(
+    a: u32,
+    b: u32,
+    carry: Option<u32>,
+    gates: &mut Vec<Gate>,
+    carry_out: &mut Option<u32>,
+) -> u32 {
+    // XOR gate for sum bit (a ⊕ b)
+    let sum_xor_index = gates.len();
+    gates.push(Gate::Xor(a, b));
+
+    // If carry exists, XOR the result of the previous XOR with the carry
+    let final_sum_index = if let Some(carry) = carry {
+        let sum_with_carry_index = gates.len();
+        gates.push(Gate::Xor(sum_xor_index as u32, carry));
+        sum_with_carry_index as u32
+    } else {
+        sum_xor_index as u32
+    };
+
+    // Compute the new carry: (a & b) | (a & carry) | (b & carry)
+    let and_ab = gates.len();
+    gates.push(Gate::And(a, b));
+
+    if let Some(carry) = carry {
+        let and_a_carry = gates.len();
+        gates.push(Gate::And(a, carry));
+
+        let and_b_carry = gates.len();
+        gates.push(Gate::And(b, carry));
+
+        // Combine carry parts using XOR and AND to simulate OR
+        let xor_ab_carry = gates.len();
+        gates.push(Gate::Xor(and_ab as u32, and_a_carry as u32));
+        gates.push(Gate::Xor(xor_ab_carry as u32, and_b_carry as u32));
+        *carry_out = Some((gates.len() - 1) as u32);
+    } else {
+        *carry_out = Some(and_ab as u32);
+    }
+
+    final_sum_index
+}
+
+// Helper function to generate gates for the subtraction of two bits
+fn sub_gate_fn(
+    a: u32,
+    b: u32,
+    borrow: Option<u32>,
+    gates: &mut Vec<Gate>,
+    borrow_out: &mut Option<u32>,
+) -> u32 {
+    // XOR gate for difference bit (a ⊕ b)
+    let diff_xor_index = gates.len();
+    gates.push(Gate::Xor(a, b));
+
+    // If borrow exists, XOR the result of the previous XOR with the borrow
+    let final_diff_index = if let Some(borrow) = borrow {
+        let diff_with_borrow_index = gates.len();
+        gates.push(Gate::Xor(diff_xor_index as u32, borrow));
+        diff_with_borrow_index as u32
+    } else {
+        diff_xor_index as u32
+    };
+
+    // Compute the new borrow: (!a & b) | (a & borrow) | (!b & borrow)
+    let not_a = gates.len();
+    gates.push(Gate::Not(a));
+
+    let and_not_a_b = gates.len();
+    gates.push(Gate::And(not_a as u32, b));
+
+    if let Some(borrow) = borrow {
+        let and_a_borrow = gates.len();
+        gates.push(Gate::And(a, borrow));
+
+        let not_b = gates.len();
+        gates.push(Gate::Not(b));
+
+        let and_not_b_borrow = gates.len();
+        gates.push(Gate::And(not_b as u32, borrow));
+
+        // Combine borrow parts using XOR and AND to simulate OR
+        let xor_borrow_parts = gates.len();
+        gates.push(Gate::Xor(and_not_a_b as u32, and_a_borrow as u32));
+        gates.push(Gate::Xor(xor_borrow_parts as u32, and_not_b_borrow as u32));
+        *borrow_out = Some((gates.len() - 1) as u32);
+    } else {
+        *borrow_out = Some(and_not_a_b as u32);
+    }
+
+    final_diff_index
+}
+
 // Implement the Add operation for Uint<N> and &Uint<N>
-impl<const N: usize> std::ops::Add for Uint<N> {
+impl<const N: usize> Add for Uint<N> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit ADD operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for the Uint<N> object
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From the Uint<N> object
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define the carry bit
-        let mut carry_index = None; // No carry initially
-
-        // Define sum bit indices
-        let mut sum_bit_indices = Vec::with_capacity(N);
-
-        // Generate gates for N-bit addition
-        for i in 0..N {
-            let a = i; // Index for bit i of self
-            let b = N + i; // Index for bit i of rhs
-
-            // XOR gate for sum bit (a ⊕ b)
-            let sum_xor_index = gates.len();
-            gates.push(Gate::Xor(a.try_into().unwrap(), b.try_into().unwrap()));
-
-            // If carry exists, XOR the result of the previous XOR with the carry
-            let final_sum_index = if let Some(carry) = carry_index {
-                let sum_with_carry_index = gates.len();
-                gates.push(Gate::Xor(sum_xor_index.try_into().unwrap(), carry));
-                sum_with_carry_index
-            } else {
-                sum_xor_index
-            };
-
-            sum_bit_indices.push(final_sum_index);
-
-            // Compute the new carry: (a & b) | (a & carry) | (b & carry)
-            let and_ab = gates.len();
-            gates.push(Gate::And(a.try_into().unwrap(), b.try_into().unwrap())); // a & b
-
-            if let Some(carry) = carry_index {
-                let and_a_carry = gates.len();
-                gates.push(Gate::And(a.try_into().unwrap(), carry)); // a & carry
-
-                let and_b_carry = gates.len();
-                gates.push(Gate::And(b.try_into().unwrap(), carry)); // b & carry
-
-                // Combine the carry parts using XOR and AND to simulate OR
-                let xor_ab_carry = gates.len();
-                gates.push(Gate::Xor(
-                    and_ab.try_into().unwrap(),
-                    and_a_carry.try_into().unwrap(),
-                )); // XOR part 1
-                gates.push(Gate::Xor(
-                    xor_ab_carry.try_into().unwrap(),
-                    and_b_carry.try_into().unwrap(),
-                )); // Final carry (simulated OR)
-                carry_index = Some((gates.len() - 1).try_into().unwrap());
-            } else {
-                // If there is no previous carry, the carry is just a & b
-                carry_index = Some(and_ab.try_into().unwrap());
-            }
-        }
-
-        // Define output indices (sum bits from the addition)
-        let output_indices: Vec<u32> = sum_bit_indices.iter().map(|&index| index as u32).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate_arithmetic(&self, &rhs, add_gate_fn)
     }
 }
 
-impl<const N: usize> std::ops::Add for &Uint<N> {
+impl<const N: usize> Add for &Uint<N> {
     type Output = Uint<N>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit ADD operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for the Uint<N> object
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From the Uint<N> object
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define the carry bit
-        let mut carry_index = None; // No carry initially
-
-        // Define sum bit indices
-        let mut sum_bit_indices = Vec::with_capacity(N);
-
-        // Generate gates for N-bit addition
-        for i in 0..N {
-            let a = i; // Index for bit i of self
-            let b = N + i; // Index for bit i of rhs
-
-            // XOR gate for sum bit (a ⊕ b)
-            let sum_xor_index = gates.len();
-            gates.push(Gate::Xor(a.try_into().unwrap(), b.try_into().unwrap()));
-
-            // If carry exists, XOR the result of the previous XOR with the carry
-            let final_sum_index = if let Some(carry) = carry_index {
-                let sum_with_carry_index = gates.len();
-                gates.push(Gate::Xor(sum_xor_index.try_into().unwrap(), carry));
-                sum_with_carry_index
-            } else {
-                sum_xor_index
-            };
-
-            sum_bit_indices.push(final_sum_index);
-
-            // Compute the new carry: (a & b) | (a & carry) | (b & carry)
-            let and_ab = gates.len();
-            gates.push(Gate::And(a.try_into().unwrap(), b.try_into().unwrap())); // a & b
-
-            if let Some(carry) = carry_index {
-                let and_a_carry = gates.len();
-                gates.push(Gate::And(a.try_into().unwrap(), carry)); // a & carry
-
-                let and_b_carry = gates.len();
-                gates.push(Gate::And(b.try_into().unwrap(), carry)); // b & carry
-
-                // Combine the carry parts using XOR and AND to simulate OR
-                let xor_ab_carry = gates.len();
-                gates.push(Gate::Xor(
-                    and_ab.try_into().unwrap(),
-                    and_a_carry.try_into().unwrap(),
-                )); // XOR part 1
-                gates.push(Gate::Xor(
-                    xor_ab_carry.try_into().unwrap(),
-                    and_b_carry.try_into().unwrap(),
-                )); // Final carry (simulated OR)
-                carry_index = Some((gates.len() - 1).try_into().unwrap());
-            } else {
-                // If there is no previous carry, the carry is just a & b
-                carry_index = Some(and_ab.try_into().unwrap());
-            }
-        }
-
-        // Define output indices (sum bits from the addition)
-        let output_indices: Vec<u32> = sum_bit_indices.iter().map(|&index| index as u32).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate_arithmetic(self, rhs, add_gate_fn)
     }
 }
 
 // Implement the Sub operation for Uint<N> and &Uint<N>
-impl<const N: usize> std::ops::Sub for Uint<N> {
+impl<const N: usize> Sub for Uint<N> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit SUB operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for the Uint<N> object
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From the Uint<N> object
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define the borrow bit
-        let mut borrow_index = None; // No borrow initially
-
-        // Define difference bit indices
-        let mut diff_bit_indices = Vec::with_capacity(N);
-
-        // Generate gates for N-bit subtraction
-        for i in 0..N {
-            let a = i; // Index for bit i of self
-            let b = N + i; // Index for bit i of rhs
-
-            // XOR gate for difference bit (a ⊕ b)
-            let diff_xor_index = gates.len();
-            gates.push(Gate::Xor(a.try_into().unwrap(), b.try_into().unwrap()));
-
-            // If borrow exists, XOR the result of the previous XOR with the borrow
-            let final_diff_index = if let Some(borrow) = borrow_index {
-                let diff_with_borrow_index = gates.len();
-                gates.push(Gate::Xor(diff_xor_index.try_into().unwrap(), borrow));
-                diff_with_borrow_index
-            } else {
-                diff_xor_index
-            };
-
-            diff_bit_indices.push(final_diff_index);
-
-            // Compute the new borrow: (!a & b) | (a & borrow) | (!b & borrow)
-            let not_a = gates.len();
-            gates.push(Gate::Not(a.try_into().unwrap())); // !a
-
-            let and_not_a_b = gates.len();
-            gates.push(Gate::And(not_a.try_into().unwrap(), b.try_into().unwrap())); // !a & b
-
-            if let Some(borrow) = borrow_index {
-                let and_a_borrow = gates.len();
-                gates.push(Gate::And(a.try_into().unwrap(), borrow)); // a & borrow
-
-                let not_b = gates.len();
-                gates.push(Gate::Not(b.try_into().unwrap())); // !b
-
-                let and_not_borrow = gates.len();
-                gates.push(Gate::And(not_b.try_into().unwrap(), borrow)); // !b & borrow
-
-                // Combine the borrow parts using XOR and AND to simulate OR
-                let xor_borrow_parts = gates.len();
-                gates.push(Gate::Xor(
-                    and_not_a_b.try_into().unwrap(),
-                    and_a_borrow.try_into().unwrap(),
-                )); // XOR part 1
-                gates.push(Gate::Xor(
-                    xor_borrow_parts.try_into().unwrap(),
-                    and_not_borrow.try_into().unwrap(),
-                )); // Final borrow (simulated OR)
-                borrow_index = Some((gates.len() - 1).try_into().unwrap());
-            } else {
-                // If there is no previous borrow, the borrow is just !a & b
-                borrow_index = Some(and_not_a_b.try_into().unwrap());
-            }
-        }
-
-        // Define output indices (difference bits from the subtraction)
-        let output_indices: Vec<u32> = diff_bit_indices.iter().map(|&index| index as u32).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate_arithmetic(&self, &rhs, sub_gate_fn)
     }
 }
 
-// Implement the Sub operation for &Uint<N>
-impl<const N: usize> std::ops::Sub for &Uint<N> {
+impl<const N: usize> Sub for &Uint<N> {
     type Output = Uint<N>;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        // Build a circuit that performs an N-bit SUB operation
-        let mut gates = Vec::new();
-
-        // Push the input gates for the Uint<N> object
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // From the Uint<N> object
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // From second Uint<N> (rhs)
-        }
-
-        // Define the borrow bit
-        let mut borrow_index = None; // No borrow initially
-
-        // Define difference bit indices
-        let mut diff_bit_indices = Vec::with_capacity(N);
-
-        // Generate gates for N-bit subtraction
-        for i in 0..N {
-            let a = i; // Index for bit i of self
-            let b = N + i; // Index for bit i of rhs
-
-            // XOR gate for difference bit (a ⊕ b)
-            let diff_xor_index = gates.len();
-            gates.push(Gate::Xor(a.try_into().unwrap(), b.try_into().unwrap()));
-
-            // If borrow exists, XOR the result of the previous XOR with the borrow
-            let final_diff_index = if let Some(borrow) = borrow_index {
-                let diff_with_borrow_index = gates.len();
-                gates.push(Gate::Xor(diff_xor_index.try_into().unwrap(), borrow));
-                diff_with_borrow_index
-            } else {
-                diff_xor_index
-            };
-
-            diff_bit_indices.push(final_diff_index);
-
-            // Compute the new borrow: (!a & b) | (a & borrow) | (!b & borrow)
-            let not_a = gates.len();
-            gates.push(Gate::Not(a.try_into().unwrap())); // !a
-
-            let and_not_a_b = gates.len();
-            gates.push(Gate::And(not_a.try_into().unwrap(), b.try_into().unwrap())); // !a & b
-
-            if let Some(borrow) = borrow_index {
-                let and_a_borrow = gates.len();
-                gates.push(Gate::And(a.try_into().unwrap(), borrow)); // a & borrow
-
-                let not_b = gates.len();
-                gates.push(Gate::Not(b.try_into().unwrap())); // !b
-
-                let and_not_borrow = gates.len();
-                gates.push(Gate::And(not_b.try_into().unwrap(), borrow)); // !b & borrow
-
-                // Combine the borrow parts using XOR and AND to simulate OR
-                let xor_borrow_parts = gates.len();
-                gates.push(Gate::Xor(
-                    and_not_a_b.try_into().unwrap(),
-                    and_a_borrow.try_into().unwrap(),
-                )); // XOR part 1
-                gates.push(Gate::Xor(
-                    xor_borrow_parts.try_into().unwrap(),
-                    and_not_borrow.try_into().unwrap(),
-                )); // Final borrow (simulated OR)
-                borrow_index = Some((gates.len() - 1).try_into().unwrap());
-            } else {
-                // If there is no previous borrow, the borrow is just !a & b
-                borrow_index = Some(and_not_a_b.try_into().unwrap());
-            }
-        }
-
-        // Define output indices (difference bits from the subtraction)
-        let output_indices: Vec<u32> = diff_bit_indices.iter().map(|&index| index as u32).collect();
-
-        // Create the circuit
-        let program = Circuit::new(gates, output_indices);
-
-        // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the resulting Uint<N>
-        Uint::new(result)
+        build_and_simulate_arithmetic(self, rhs, sub_gate_fn)
     }
 }
 
