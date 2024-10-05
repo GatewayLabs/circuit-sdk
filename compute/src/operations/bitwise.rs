@@ -16,7 +16,7 @@ fn build_and_simulate<const N: usize>(
     }
 
     for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
     }
 
     // Define gates for each bit in lhs and rhs
@@ -193,7 +193,10 @@ mod tests {
 
         let result = a ^ b; // Perform XOR on the 2-bit values
         assert_eq!(result.to_u8(), 3); // Expected result of XOR between 10 and 01
+    }
 
+    #[test]
+    fn test_uint_xor2() {
         let a = Uint::<4>::new(vec![true, true, false, false]); // Binary 1100
         let b = Uint::<4>::new(vec![false, false, true, true]); // Binary 0011
 

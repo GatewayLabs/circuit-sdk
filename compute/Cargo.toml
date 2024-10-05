@@ -6,7 +6,8 @@ edition = "2021"
 [dependencies]
 tracing = { workspace = true, features = ["log"] }
 anyhow = { workspace = true }
-tandem = { git = "https://github.com/sine-fdn/tandem.git" }
+# tandem = { git = "https://github.com/sine-fdn/tandem.git" }
+tandem = { path = "../tandem" }
 garble_lang = { version = "0.5.0", features = ["serde"] }
 rand = "0.8.3"
 rand_chacha = "0.3.1"

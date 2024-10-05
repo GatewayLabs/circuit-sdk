@@ -217,7 +217,7 @@ dependencies = [
  "bincode",
  "blake3",
  "curve25519-dalek",
- "garble_lang",
+ "garble_lang 0.5.0",
  "hex",
  "rand",
  "rand_chacha",
@@ -413,6 +413,15 @@ name = "fiat-crypto"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
+
+[[package]]
+name = "garble_lang"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3eb0a03ea97c5eda25c8f7c82634da29b99eb4202e534b177396e04cfddebeb6"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "garble_lang"
@@ -855,14 +864,23 @@ dependencies = [
 [[package]]
 name = "tandem"
 version = "0.3.0"
-source = "git+https://github.com/sine-fdn/tandem.git#71e0f4015568fafbceab05795e1d299dcdec6ec8"
 dependencies = [
  "bincode",
  "blake3",
+ "criterion",
  "curve25519-dalek",
  "rand",
  "rand_chacha",
  "serde",
+ "tandem_garble_interop",
+]
+
+[[package]]
+name = "tandem_garble_interop"
+version = "0.3.0"
+dependencies = [
+ "garble_lang 0.1.8",
+ "tandem",
 ]
 
 [[package]]
