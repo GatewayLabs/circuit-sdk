@@ -145,6 +145,57 @@ fn sub_gate_fn(
     final_diff_index
 }
 
+
+ // Helper function to generate gates for the division of two bits
+fn div_gate_fn(
+    a: u32,
+    b: u32,
+    borrow: Option<u32>,
+    gates: &mut Vec<Gate>,
+    borrow_out: &mut Option<u32>,
+) -> u32 {
+    // XOR gate for difference bit (a ⊕ b)
+    let diff_xor_index = gates.len();
+    gates.push(Gate::Xor(a, b));
+
+    // If borrow exists, XOR the result of the previous XOR with the borrow
+    let final_diff_index = if let Some(borrow) = borrow {
+        let diff_with_borrow_index = gates.len();
+        gates.push(Gate::Xor(diff_xor_index as u32, borrow));
+        diff_with_borrow_index as u32
+    } else {
+        diff_xor_index as u32
+    };
+
+    // Compute the new borrow: (!a & b) | (a & borrow) | (!b & borrow)
+    let not_a = gates.len();
+    gates.push(Gate::Not(a));
+
+    let and_not_a_b = gates.len();
+    gates.push(Gate::And(not_a as u32, b));
+
+    if let Some(borrow) = borrow {
+        let and_a_borrow = gates.len();
+        gates.push(Gate::And(a, borrow));
+
+        let not_b = gates.len();
+        gates.push(Gate::Not(b));
+
+        let and_not_b_borrow = gates.len();
+        gates.push(Gate::And(not_b as u32, borrow));
+
+        // Combine borrow parts using XOR and AND to simulate OR
+        let xor_borrow_parts = gates.len();
+        gates.push(Gate::Xor(and_not_a_b as u32, and_a_borrow as u32));
+        gates.push(Gate::Xor(xor_borrow_parts as u32, and_not_b_borrow as u32));
+        *borrow_out = Some((gates.len() - 1) as u32);
+    } else {
+        *borrow_out = Some(and_not_a_b as u32);
+    }
+
+    final_diff_index
+}
+
 // Implement the Add operation for Uint<N> and &Uint<N>
 impl<const N: usize> Add for Uint<N> {
     type Output = Self;
@@ -178,6 +229,93 @@ impl<const N: usize> Sub for &Uint<N> {
         build_and_simulate_arithmetic(self, rhs, sub_gate_fn)
     }
 }
+
+impl<const N: usize> std::ops::Div for Uint<N> {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        let mut gates = Vec::new();
+
+        // Push input gates for both `self` and `rhs`
+        for _ in 0..N {
+            gates.push(Gate::InContrib); // For self bits
+        }
+        for _ in 0..N {
+            gates.push(Gate::InEval); // For rhs bits
+        }
+
+        // TODO: build efficient multiplication circuit here
+        let mut gates = Vec::new();
+    let mut carry_or_borrow_index = None; // Carry/borrow bit
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    let mut result_bit_indices = Vec::with_capacity(N);
+
+    // Generate gates for each bit of the addition/subtraction
+    for i in 0..N {
+        let a = i as u32;
+        let b = (N + i) as u32;
+
+        // Use the provided gate function to define the behavior of each bit
+        let result_index = div_gate_fn(
+            a,
+            b,
+            carry_or_borrow_index,
+            &mut gates,
+            &mut carry_or_borrow_index,
+        );
+        result_bit_indices.push(result_index);
+    }
+
+    // Define output indices (result bits from the arithmetic operation)
+    let output_indices: Vec<u32> = result_bit_indices.to_vec();       
+
+        // Create the circuit with gates and outputs
+        let program = Circuit::new(gates, output_indices);
+
+        // Simulate the circuit using the bits from `self` and `rhs`
+        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
+
+        // Return the final Uint result with the N-bit output
+        Uint::<N>::new(result)
+    }
+}
+
+/*
+impl<const N: usize> std::ops::Mul for Uint<N> {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let mut gates = Vec::new();
+
+        // Push input gates for both `self` and `rhs`
+        for _ in 0..N {
+            gates.push(Gate::InContrib); // For self bits
+        }
+        for _ in 0..N {
+            gates.push(Gate::InEval); // For rhs bits
+        }
+
+        // TODO: build efficient multiplication circuit here
+       
+        // Create the circuit with gates and outputs
+        let program = Circuit::new(gates, output_indices);
+
+        // Simulate the circuit using the bits from `self` and `rhs`
+        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
+
+        // Return the final Uint result with the N-bit output
+        Uint::<N>::new(result)
+    }
+}
+*/
 
 // tests
 #[cfg(test)]
