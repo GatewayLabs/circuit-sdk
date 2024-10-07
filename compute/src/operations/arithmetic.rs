@@ -145,32 +145,7 @@ fn sub_gate_fn(
     final_diff_index
 }
 
-/// Multiply by a u32
-    /*
-	pub fn mul_u32(self, other: u32) -> Self {
-		let mut carry = [0u64; N];
-		let mut ret = [0u64; N];
 
-		for i in 0..N {
-			let not_last_word = i < N - 1;
-			let upper = other as u64 * (self.0[i] >> 32);
-			let lower = other as u64 * (self.0[i] & 0xFFFFFFFF);
-
-			if not_last_word {
-				carry[i + 1] += upper >> 32;
-			}
-
-			let (sum, overflow) = lower.overflowing_add(upper << 32);
-			ret[i] = sum;
-
-			if overflow && not_last_word {
-				carry[i + 1] += 1;
-			}
-		}
-
-		Self(ret) + Self(carry)
-	}
-   */
 
 // Implement the Add operation for Uint<N> and &Uint<N>
 impl<const N: usize> Add for Uint<N> {
@@ -206,63 +181,7 @@ impl<const N: usize> Sub for &Uint<N> {
     }
 }
 
-impl<const N: usize> std::ops::Div for Uint<N> {
-    type Output = Self;
 
-    fn div(self, rhs: Self) -> Self::Output {
-         let mut sub_copy = self;
-		let mut shift_copy = rhs;
-		let mut ret = [0u64; N];
-
-		let my_bits = self.bits();
-		let your_bits = rhs.bits();
-
-		// Check for division by 0
-		assert!(your_bits != 0);
-
-		// Early return in case we are dividing by a larger number than us
-		if my_bits < your_bits {
-			return Self(ret);
-		}
-
-		// Bitwise long division
-		let mut shift = my_bits - your_bits;
-		shift_copy = shift_copy << shift;
-
-		loop {
-			if sub_copy >= shift_copy {
-				ret[shift / 64] |= 1 << (shift % 64);
-				sub_copy = sub_copy - shift_copy;
-			}
-			shift_copy = shift_copy >> 1;
-
-			if shift == 0 {
-				break;
-			}
-
-			shift -= 1;
-		}
-
-		Self(ret)
-
-    }    
-}
-
-/*
-impl<const N: usize> std::ops::Mul for Uint<N> {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        let mut me = Self::MIN;
-
-		for i in 0..(2 * N) {
-			let to_mul = (rhs >> (32 * i)).low_u32();
-			me = me + (self.mul_u32(to_mul) << (32 * i));
-		}
-		me
-    }
-}
-*/
 
 // tests
 #[cfg(test)]
