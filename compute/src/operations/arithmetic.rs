@@ -234,58 +234,42 @@ impl<const N: usize> std::ops::Div for Uint<N> {
     type Output = Self;
 
     fn div(self, rhs: Self) -> Self::Output {
-        let mut gates = Vec::new();
+         let mut sub_copy = self;
+		let mut shift_copy = rhs;
+		let mut ret = [0u64; N];
 
-        // Push input gates for both `self` and `rhs`
-        for _ in 0..N {
-            gates.push(Gate::InContrib); // For self bits
-        }
-        for _ in 0..N {
-            gates.push(Gate::InEval); // For rhs bits
-        }
+		let my_bits = self.bits();
+		let your_bits = rhs.bits();
 
-        // TODO: build efficient multiplication circuit here
-        let mut gates = Vec::new();
-    let mut carry_or_borrow_index = None; // Carry/borrow bit
+		// Check for division by 0
+		assert!(your_bits != 0);
 
-    // Push input gates for both Uint<N> objects
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
+		// Early return in case we are dividing by a larger number than us
+		if my_bits < your_bits {
+			return Self(ret);
+		}
 
-    let mut result_bit_indices = Vec::with_capacity(N);
+		// Bitwise long division
+		let mut shift = my_bits - your_bits;
+		shift_copy = shift_copy << shift;
 
-    // Generate gates for each bit of the addition/subtraction
-    for i in 0..N {
-        let a = i as u32;
-        let b = (N + i) as u32;
+		loop {
+			if sub_copy >= shift_copy {
+				ret[shift / 64] |= 1 << (shift % 64);
+				sub_copy = sub_copy - shift_copy;
+			}
+			shift_copy = shift_copy >> 1;
 
-        // Use the provided gate function to define the behavior of each bit
-        let result_index = div_gate_fn(
-            a,
-            b,
-            carry_or_borrow_index,
-            &mut gates,
-            &mut carry_or_borrow_index,
-        );
-        result_bit_indices.push(result_index);
-    }
+			if shift == 0 {
+				break;
+			}
 
-    // Define output indices (result bits from the arithmetic operation)
-    let output_indices: Vec<u32> = result_bit_indices.to_vec();       
+			shift -= 1;
+		}
 
-        // Create the circuit with gates and outputs
-        let program = Circuit::new(gates, output_indices);
+		Self(ret)
 
-        // Simulate the circuit using the bits from `self` and `rhs`
-        let result = self.simulate(&program, &self.bits, &rhs.bits).unwrap();
-
-        // Return the final Uint result with the N-bit output
-        Uint::<N>::new(result)
-    }
+    }    
 }
 
 /*
