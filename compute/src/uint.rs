@@ -4,6 +4,15 @@ use std::marker::PhantomData;
 use tandem::states::{Contributor, Evaluator};
 use tandem::Circuit;
 
+pub type Uint1 = Uint<1>;
+pub type Uint2 = Uint<2>;
+pub type Uint4 = Uint<4>;
+pub type Uint8 = Uint<8>;
+pub type Uint16 = Uint<16>;
+pub type Uint32 = Uint<32>;
+pub type Uint64 = Uint<64>;
+pub type Uint128 = Uint<128>;
+
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
 pub struct Uint<const N: usize> {
@@ -223,31 +232,31 @@ mod tests {
 
     #[test]
     fn test_from_u8() {
-        let a = Uint::<8>::from_u8(170); // Binary 10101010
+        let a = Uint8::from_u8(170); // Binary 10101010
         assert_eq!(a.to_u8(), 170);
     }
 
     #[test]
     fn test_from_u16() {
-        let a = Uint::<16>::from_u16(43707); // Binary 1010101010101011
+        let a = Uint16::from_u16(43707); // Binary 1010101010101011
         assert_eq!(a.to_u16(), 43707);
     }
 
     #[test]
     fn test_from_u32() {
-        let a = Uint::<32>::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let a = Uint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
         assert_eq!(a.to_u32(), 2863311530);
     }
 
     #[test]
     fn test_from_u64() {
-        let a = Uint::<64>::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let a = Uint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
         assert_eq!(a.to_u64(), 12297829382473034410);
     }
 
     #[test]
     fn test_from_u128() {
-        let a = Uint::<128>::from_u128(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let a = Uint128::from_u128(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
         assert_eq!(a.to_u128(), 12297829382473034410);
     }
 }
