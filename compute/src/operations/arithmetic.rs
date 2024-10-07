@@ -145,8 +145,32 @@ fn sub_gate_fn(
     final_diff_index
 }
 
+/// Multiply by a u32
+    /*
+	pub fn mul_u32(self, other: u32) -> Self {
+		let mut carry = [0u64; N];
+		let mut ret = [0u64; N];
 
+		for i in 0..N {
+			let not_last_word = i < N - 1;
+			let upper = other as u64 * (self.0[i] >> 32);
+			let lower = other as u64 * (self.0[i] & 0xFFFFFFFF);
 
+			if not_last_word {
+				carry[i + 1] += upper >> 32;
+			}
+
+			let (sum, overflow) = lower.overflowing_add(upper << 32);
+			ret[i] = sum;
+
+			if overflow && not_last_word {
+				carry[i + 1] += 1;
+			}
+		}
+
+		Self(ret) + Self(carry)
+	}
+   */
 
 // Implement the Add operation for Uint<N> and &Uint<N>
 impl<const N: usize> Add for Uint<N> {
@@ -224,7 +248,7 @@ impl<const N: usize> std::ops::Div for Uint<N> {
     }    
 }
 
-
+/*
 impl<const N: usize> std::ops::Mul for Uint<N> {
     type Output = Self;
 
@@ -238,7 +262,7 @@ impl<const N: usize> std::ops::Mul for Uint<N> {
 		me
     }
 }
-
+*/
 
 // tests
 #[cfg(test)]
