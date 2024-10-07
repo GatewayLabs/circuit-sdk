@@ -183,6 +183,7 @@ impl<const N: usize> Sub for &Uint<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::uint::{Uint128, Uint16, Uint32, Uint64, Uint8};
 
     #[test]
     fn test_uint_add() {
@@ -195,8 +196,8 @@ mod tests {
 
     #[test]
     fn test_from_u8_add() {
-        let a = Uint::<8>::from_u8(170); // Binary 10101010
-        let b = Uint::<8>::from_u8(85); // Binary 01010101
+        let a = Uint8::from_u8(170); // Binary 10101010
+        let b = Uint8::from_u8(85); // Binary 01010101
 
         let result = a + b; // Perform addition on the 4-bit values
         assert_eq!(result.to_u8(), 170 + 85); // Expected result of addition between 10101010 and 01010101
@@ -204,8 +205,8 @@ mod tests {
 
     #[test]
     fn test_from_u16_add() {
-        let a = Uint::<16>::from_u16(43690); // Binary 1010101010101010
-        let b = Uint::<16>::from_u16(21845); // Binary 0101010101010101
+        let a = Uint16::from_u16(43690); // Binary 1010101010101010
+        let b = Uint16::from_u16(21845); // Binary 0101010101010101
 
         let result = a + b;
         assert_eq!(result.to_u16(), 43690 + 21845); // Expected result of addition between 1010101010101010 and 0101010101010101
@@ -213,8 +214,8 @@ mod tests {
 
     #[test]
     fn test_from_u32_add() {
-        let a = Uint::<32>::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = Uint::<32>::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a = Uint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = Uint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
 
         let result = a + b;
         assert_eq!(result.to_u32(), 2863311530 + 1431655765); // Expected result of addition between 10101010101010101010101010101010 and 01010101010101010101010101010101
@@ -222,8 +223,8 @@ mod tests {
 
     #[test]
     fn test_from_u64_add() {
-        let a = Uint::<64>::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = Uint::<64>::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a = Uint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = Uint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
         let result = a + b;
         assert_eq!(result.to_u64(), 12297829382473034410 + 6148914691236517205);
@@ -232,8 +233,8 @@ mod tests {
 
     #[test]
     fn test_from_u128_add() {
-        let a = Uint::<128>::from_u128(12297829382473034410); // Binary 10101010
-        let b = Uint::<128>::from_u128(6148914691236517205); // Binary 01010101
+        let a = Uint128::from_u128(12297829382473034410); // Binary 10101010
+        let b = Uint128::from_u128(6148914691236517205); // Binary 01010101
 
         let result = a + b;
         assert_eq!(result.to_u128(), 12297829382473034410 + 6148914691236517205);
@@ -253,8 +254,8 @@ mod tests {
 
     #[test]
     fn test_from_u8_sub() {
-        let a = Uint::<8>::from_u8(170); // Binary 10101010
-        let b = Uint::<8>::from_u8(100); // Binary 01100100
+        let a = Uint8::from_u8(170); // Binary 10101010
+        let b = Uint8::from_u8(100); // Binary 01100100
 
         let result = a - b;
         assert_eq!(result.to_u8(), 170 - 100); // Expected result of subtraction between 10101010 and 01010101
@@ -262,8 +263,8 @@ mod tests {
 
     #[test]
     fn test_from_u16_sub() {
-        let a = Uint::<16>::from_u16(43690); // Binary 1010101010101010
-        let b = Uint::<16>::from_u16(21845); // Binary 0101010101010101
+        let a = Uint16::from_u16(43690); // Binary 1010101010101010
+        let b = Uint16::from_u16(21845); // Binary 0101010101010101
 
         let result = a - b;
         assert_eq!(result.to_u16(), 43690 - 21845); // Expected result of subtraction between 1010101010101010 and 0101010101010101
@@ -271,8 +272,8 @@ mod tests {
 
     #[test]
     fn test_from_u32_sub() {
-        let a = Uint::<32>::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = Uint::<32>::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a = Uint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = Uint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
 
         let result = a - b;
         assert_eq!(result.to_u32(), 2863311530 - 1431655765); // Expected result of subtraction between 10101010101010101010101010101010 and 01010101010101010101010101010101
@@ -280,8 +281,8 @@ mod tests {
 
     #[test]
     fn test_from_u64_sub() {
-        let a = Uint::<64>::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = Uint::<64>::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a = Uint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = Uint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
         let result = a - b;
         assert_eq!(result.to_u64(), 12297829382473034410 - 6148914691236517205);
@@ -290,8 +291,8 @@ mod tests {
 
     #[test]
     fn test_from_u128_sub() {
-        let a = Uint::<128>::from_u128(170); // Binary 10101010
-        let b = Uint::<128>::from_u128(85); // Binary 01010101
+        let a = Uint128::from_u128(170); // Binary 10101010
+        let b = Uint128::from_u128(85); // Binary 01010101
 
         let result = a - b;
         assert_eq!(result.to_u128(), 170 - 85); // Expected result of subtraction between 10101010 and 01010101
