@@ -1,5 +1,5 @@
 use crate::uint::GarbledUint;
-use std::ops::{Add, Sub};
+use std::ops::{Add, Mul, Sub};
 use tandem::{Circuit, Gate};
 
 // Helper function to build and simulate a circuit for addition or subtraction
@@ -49,6 +49,128 @@ fn build_and_simulate_arithmetic<const N: usize>(
 
     // Return the resulting Uint<N>
     GarbledUint::new(result)
+}
+
+// Helper function to build and simulate a circuit for multiplication
+#[allow(clippy::type_complexity)]
+fn build_and_simulate_multiplication<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both GarbledUint<N> objects
+    let lhs_start = gates.len();
+    for _ in 0..N {
+        gates.push(Gate::InContrib);
+    }
+    let rhs_start = gates.len();
+    for _ in 0..N {
+        gates.push(Gate::InEval);
+    }
+
+    let mut partial_products = Vec::with_capacity(N);
+
+    // Generate partial products
+    for i in 0..N {
+        let shifted_product = generate_partial_product(&mut gates, lhs_start, rhs_start, i, N);
+        partial_products.push(shifted_product);
+    }
+
+    // Sum up all partial products
+    let mut result = partial_products[0].clone();
+    for i in 1..N {
+        result = add_garbled_uints(&mut gates, &result, &partial_products[i]);
+    }
+
+    // Define output indices (result bits from the multiplication)
+    let output_indices: Vec<u32> = result.iter().map(|&x| x as u32).collect();
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // Simulate the circuit
+    let result = lhs.simulate(&program, &lhs.bits, &rhs.bits).unwrap();
+
+    // Return the resulting GarbledUint<N>
+    GarbledUint::new(result)
+}
+
+// Helper function to generate a partial product
+fn generate_partial_product(
+    gates: &mut Vec<Gate>,
+    lhs_start: usize,
+    rhs_start: usize,
+    shift: usize,
+    n: usize,
+) -> Vec<usize> {
+    let mut partial_product = Vec::with_capacity(n);
+
+    for i in 0..n {
+        if i < shift {
+            // For lower bits, we use a constant 0
+            let zero_bit = gates.len();
+            gates.push(Gate::Not(rhs_start as u32)); // NOT of any input bit is fine
+            gates.push(Gate::And(rhs_start as u32, zero_bit as u32)); // AND with its NOT is always 0
+            partial_product.push(gates.len() - 1);
+        } else {
+            let lhs_bit = lhs_start + i - shift;
+            let and_gate = gates.len();
+            gates.push(Gate::And(lhs_bit as u32, (rhs_start + shift) as u32));
+            partial_product.push(and_gate);
+        }
+    }
+
+    partial_product
+}
+
+// Helper function to add two GarbledUint<N>
+fn add_garbled_uints(gates: &mut Vec<Gate>, a: &[usize], b: &[usize]) -> Vec<usize> {
+    let mut result = Vec::with_capacity(a.len());
+    let mut carry = None;
+
+    for i in 0..a.len() {
+        let sum = full_adder(gates, a[i], b[i], carry);
+        result.push(sum.0);
+        carry = sum.1;
+    }
+
+    result
+}
+
+// Helper function to add two bits with optional carry
+fn full_adder(
+    gates: &mut Vec<Gate>,
+    a: usize,
+    b: usize,
+    carry: Option<usize>,
+) -> (usize, Option<usize>) {
+    let xor_ab = gates.len();
+    gates.push(Gate::Xor(a as u32, b as u32));
+
+    let sum = if let Some(c) = carry {
+        let sum_with_carry = gates.len();
+        gates.push(Gate::Xor(xor_ab as u32, c as u32));
+        sum_with_carry
+    } else {
+        xor_ab
+    };
+
+    let and_ab = gates.len();
+    gates.push(Gate::And(a as u32, b as u32));
+
+    let new_carry = if let Some(c) = carry {
+        let and_axorb_c = gates.len();
+        gates.push(Gate::And(xor_ab as u32, c as u32));
+
+        let or_gate = gates.len();
+        gates.push(Gate::Xor(and_ab as u32, and_axorb_c as u32));
+        Some(or_gate)
+    } else {
+        Some(and_ab)
+    };
+
+    (sum, new_carry)
 }
 
 // Helper function to generate gates for the addition of two bits
@@ -179,6 +301,22 @@ impl<const N: usize> Sub for &GarbledUint<N> {
     }
 }
 
+impl<const N: usize> Mul for GarbledUint<N> {
+    type Output = GarbledUint<N>; // TODO: check for overflows
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        build_and_simulate_multiplication(&self, &rhs)
+    }
+}
+
+impl<const N: usize> Mul for &GarbledUint<N> {
+    type Output = GarbledUint<N>; // TODO: check for overflows
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        build_and_simulate_multiplication(self, rhs)
+    }
+}
+
 // tests
 #[cfg(test)]
 mod tests {
@@ -296,5 +434,32 @@ mod tests {
 
         let result = a - b;
         assert_eq!(result.to_u128(), 170 - 85); // Expected result of subtraction between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_uint_mul() {
+        let a = GarbledUint::<4>::from_u8(3); // 0011
+        let b = GarbledUint::<4>::from_u8(2); // 0010
+
+        let result = a * b;
+        assert_eq!(result.to_u8(), 6); // 0011 * 0010 = 0110
+    }
+
+    #[test]
+    fn test_from_u8_mul() {
+        let a = GarbledUint8::from_u8(7); // 0000 0111
+        let b = GarbledUint8::from_u8(5); // 0000 0101
+
+        let result = a * b;
+        assert_eq!(result.to_u8(), 35); // 0010 0011
+    }
+
+    #[test]
+    fn test_from_u16_mul() {
+        let a = GarbledUint16::from_u16(300); // 0000 0001 0010 1100
+        let b = GarbledUint16::from_u16(7); // 0000 0000 0000 0111
+
+        let result = a * b;
+        assert_eq!(result.to_u16(), 2100); // 0000 1000 0010 0100
     }
 }
