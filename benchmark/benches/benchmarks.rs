@@ -31,13 +31,13 @@ fn tfhe_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
 
 // Another function to benchmark
 fn gateway_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
-    use compute::uint::Uint128;
+    use compute::uint::GarbledUint128;
 
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = Uint128::from_u128(clear_a);
-    let b = Uint128::from_u128(clear_b);
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
 
     let result = &a + &b;
     assert_eq!(result.to_u128(), clear_a + clear_b);
@@ -73,13 +73,13 @@ fn tfhe_encrypted_bitwise_and() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn gateway_encrypted_bitwise_and() -> Result<(), Box<dyn std::error::Error>> {
-    use compute::uint::Uint128;
+    use compute::uint::GarbledUint128;
 
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = Uint128::from_u128(clear_a);
-    let b = Uint128::from_u128(clear_b);
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
 
     let result = &a & &b;
     assert_eq!(result.to_u128(), clear_a & clear_b);
@@ -115,13 +115,13 @@ fn tfhe_encrypted_bitwise_xor() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn gateway_encrypted_bitwise_xor() -> Result<(), Box<dyn std::error::Error>> {
-    use compute::uint::Uint128;
+    use compute::uint::GarbledUint128;
 
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = Uint128::from_u128(clear_a);
-    let b = Uint128::from_u128(clear_b);
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
 
     let result = &a ^ &b;
     assert_eq!(result.to_u128(), clear_a ^ clear_b);
@@ -155,11 +155,11 @@ fn tfhe_encrypted_bitwise_not() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn gateway_encrypted_bitwise_not() -> Result<(), Box<dyn ::std::error::Error>> {
-    use compute::uint::Uint128;
+    use compute::uint::GarbledUint128;
 
     let clear_a = 12297829382473034410u128;
 
-    let a = Uint128::from_u128(clear_a);
+    let a = GarbledUint128::from_u128(clear_a);
 
     let result = !&a;
     assert_eq!(result.to_u128(), !clear_a);
@@ -195,13 +195,13 @@ fn tfhe_encrypted_subtraction() -> Result<(), Box<dyn ::std::error::Error>> {
 }
 
 fn gateway_encrypted_subtraction() -> Result<(), Box<dyn ::std::error::Error>> {
-    use compute::uint::Uint128;
+    use compute::uint::GarbledUint128;
 
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = Uint128::from_u128(clear_a);
-    let b = Uint128::from_u128(clear_b);
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
 
     let result = &a - &b;
     assert_eq!(result.to_u128(), clear_a - clear_b);
