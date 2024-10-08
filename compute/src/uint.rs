@@ -4,34 +4,34 @@ use std::marker::PhantomData;
 use tandem::states::{Contributor, Evaluator};
 use tandem::Circuit;
 
-pub type Uint1 = Uint<1>;
-pub type Uint2 = Uint<2>;
-pub type Uint4 = Uint<4>;
-pub type Uint8 = Uint<8>;
-pub type Uint16 = Uint<16>;
-pub type Uint32 = Uint<32>;
-pub type Uint64 = Uint<64>;
-pub type Uint128 = Uint<128>;
+pub type GarbledUint1 = GarbledUint<1>;
+pub type GarbledUint2 = GarbledUint<2>;
+pub type GarbledUint4 = GarbledUint<4>;
+pub type GarbledUint8 = GarbledUint<8>;
+pub type GarbledUint16 = GarbledUint<16>;
+pub type GarbledUint32 = GarbledUint<32>;
+pub type GarbledUint64 = GarbledUint<64>;
+pub type GarbledUint128 = GarbledUint<128>;
 
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
-pub struct Uint<const N: usize> {
+pub struct GarbledUint<const N: usize> {
     pub(crate) bits: Vec<bool>,       // Store the bits of the unsigned integer
     _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size
 }
 
 // Implement Uint<N>
-impl<const N: usize> Uint<N> {
-    // Constructor for Uint<N> from a boolean vector
+impl<const N: usize> GarbledUint<N> {
+    // Constructor for GarbledUint<N> from a boolean vector
     pub fn new(bits: Vec<bool>) -> Self {
         assert_eq!(bits.len(), N, "The number of bits must be {}", N);
-        Uint {
+        GarbledUint {
             bits,
             _phantom: PhantomData,
         }
     }
 
-    // Create a Uint<N> from a u8 value
+    // Create a GarbledUint<N> from a u8 value
     pub fn from_u8(value: u8) -> Self {
         assert!(N <= 8, "Uint<N> can only support up to 8 bits for from_u8");
 
@@ -41,10 +41,10 @@ impl<const N: usize> Uint<N> {
             bits.push((value >> i) & 1 == 1);
         }
 
-        Uint::new(bits)
+        GarbledUint::new(bits)
     }
 
-    // Convert a Uint<N> to a u8 value
+    // Convert a GarbledUint<N> to a u8 value
     pub fn to_u8(&self) -> u8 {
         assert!(N <= 8, "Uint<N> can only be converted to u8 if N <= 8");
 
@@ -60,7 +60,7 @@ impl<const N: usize> Uint<N> {
         value
     }
 
-    // Create a Uint<N> from a u16 value
+    // Create a GarbledUint<N> from a u16 value
     pub fn from_u16(value: u16) -> Self {
         assert!(
             N <= 16,
@@ -73,10 +73,10 @@ impl<const N: usize> Uint<N> {
             bits.push((value >> i) & 1 == 1);
         }
 
-        Uint::new(bits)
+        GarbledUint::new(bits)
     }
 
-    // Convert a Uint<N> to a u16 value
+    // Convert a GarbledUint<N> to a u16 value
     pub fn to_u16(&self) -> u16 {
         assert!(N <= 16, "Uint<N> can only be converted to u16 if N <= 16");
 
@@ -92,7 +92,7 @@ impl<const N: usize> Uint<N> {
         value
     }
 
-    // Create a Uint<N> from a u32 value
+    // Create a GarbledUint<N> from a u32 value
     pub fn from_u32(value: u32) -> Self {
         assert!(
             N <= 32,
@@ -105,7 +105,7 @@ impl<const N: usize> Uint<N> {
             bits.push((value >> i) & 1 == 1);
         }
 
-        Uint::new(bits)
+        GarbledUint::new(bits)
     }
 
     pub fn to_u32(&self) -> u32 {
@@ -123,7 +123,7 @@ impl<const N: usize> Uint<N> {
         value
     }
 
-    // Create a Uint<N> from a u64 value
+    // Create a GarbledUint<N> from a u64 value
     pub fn from_u64(value: u64) -> Self {
         assert!(
             N <= 64,
@@ -136,10 +136,10 @@ impl<const N: usize> Uint<N> {
             bits.push((value >> i) & 1 == 1);
         }
 
-        Uint::new(bits)
+        GarbledUint::new(bits)
     }
 
-    // Convert a Uint<N> to a u64 value
+    // Convert a GarbledUint<N> to a u64 value
     pub fn to_u64(&self) -> u64 {
         assert!(N <= 64, "Uint<N> can only be converted to u64 if N <= 64");
 
@@ -167,7 +167,7 @@ impl<const N: usize> Uint<N> {
             bits.push((value >> i) & 1 == 1);
         }
 
-        Uint::new(bits)
+        GarbledUint::new(bits)
     }
 
     pub fn to_u128(&self) -> u128 {
@@ -232,31 +232,31 @@ mod tests {
 
     #[test]
     fn test_from_u8() {
-        let a = Uint8::from_u8(170); // Binary 10101010
+        let a = GarbledUint8::from_u8(170); // Binary 10101010
         assert_eq!(a.to_u8(), 170);
     }
 
     #[test]
     fn test_from_u16() {
-        let a = Uint16::from_u16(43707); // Binary 1010101010101011
+        let a = GarbledUint16::from_u16(43707); // Binary 1010101010101011
         assert_eq!(a.to_u16(), 43707);
     }
 
     #[test]
     fn test_from_u32() {
-        let a = Uint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
         assert_eq!(a.to_u32(), 2863311530);
     }
 
     #[test]
     fn test_from_u64() {
-        let a = Uint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
         assert_eq!(a.to_u64(), 12297829382473034410);
     }
 
     #[test]
     fn test_from_u128() {
-        let a = Uint128::from_u128(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let a = GarbledUint128::from_u128(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
         assert_eq!(a.to_u128(), 12297829382473034410);
     }
 }

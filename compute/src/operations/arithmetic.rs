@@ -1,14 +1,14 @@
-use crate::uint::Uint;
+use crate::uint::GarbledUint;
 use std::ops::{Add, Sub};
 use tandem::{Circuit, Gate};
 
 // Helper function to build and simulate a circuit for addition or subtraction
 #[allow(clippy::type_complexity)]
 fn build_and_simulate_arithmetic<const N: usize>(
-    lhs: &Uint<N>,
-    rhs: &Uint<N>,
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
     gate_fn: fn(u32, u32, Option<u32>, &mut Vec<Gate>, &mut Option<u32>) -> u32,
-) -> Uint<N> {
+) -> GarbledUint<N> {
     let mut gates = Vec::new();
     let mut carry_or_borrow_index = None; // Carry/borrow bit
 
@@ -48,7 +48,7 @@ fn build_and_simulate_arithmetic<const N: usize>(
     let result = lhs.simulate(&program, &lhs.bits, &rhs.bits).unwrap();
 
     // Return the resulting Uint<N>
-    Uint::new(result)
+    GarbledUint::new(result)
 }
 
 // Helper function to generate gates for the addition of two bits
@@ -146,7 +146,7 @@ fn sub_gate_fn(
 }
 
 // Implement the Add operation for Uint<N> and &Uint<N>
-impl<const N: usize> Add for Uint<N> {
+impl<const N: usize> Add for GarbledUint<N> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
@@ -154,8 +154,8 @@ impl<const N: usize> Add for Uint<N> {
     }
 }
 
-impl<const N: usize> Add for &Uint<N> {
-    type Output = Uint<N>;
+impl<const N: usize> Add for &GarbledUint<N> {
+    type Output = GarbledUint<N>;
 
     fn add(self, rhs: Self) -> Self::Output {
         build_and_simulate_arithmetic(self, rhs, add_gate_fn)
@@ -163,7 +163,7 @@ impl<const N: usize> Add for &Uint<N> {
 }
 
 // Implement the Sub operation for Uint<N> and &Uint<N>
-impl<const N: usize> Sub for Uint<N> {
+impl<const N: usize> Sub for GarbledUint<N> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
@@ -171,8 +171,8 @@ impl<const N: usize> Sub for Uint<N> {
     }
 }
 
-impl<const N: usize> Sub for &Uint<N> {
-    type Output = Uint<N>;
+impl<const N: usize> Sub for &GarbledUint<N> {
+    type Output = GarbledUint<N>;
 
     fn sub(self, rhs: Self) -> Self::Output {
         build_and_simulate_arithmetic(self, rhs, sub_gate_fn)
@@ -183,12 +183,12 @@ impl<const N: usize> Sub for &Uint<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uint::{Uint128, Uint16, Uint32, Uint64, Uint8};
+    use crate::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
 
     #[test]
     fn test_uint_add() {
-        let a = Uint::<4>::new(vec![true, true, false, false]); // Binary 1100
-        let b = Uint::<4>::new(vec![false, false, true, true]); // Binary 0011
+        let a = GarbledUint::<4>::new(vec![true, true, false, false]); // Binary 1100
+        let b = GarbledUint::<4>::new(vec![false, false, true, true]); // Binary 0011
 
         let result = a + b; // Perform addition on the 4-bit values
         assert_eq!(result.to_u8(), 0b1111); // Binary 1111 (Addition result of 1100 + 0011)
@@ -196,8 +196,8 @@ mod tests {
 
     #[test]
     fn test_from_u8_add() {
-        let a = Uint8::from_u8(170); // Binary 10101010
-        let b = Uint8::from_u8(85); // Binary 01010101
+        let a = GarbledUint8::from_u8(170); // Binary 10101010
+        let b = GarbledUint8::from_u8(85); // Binary 01010101
 
         let result = a + b; // Perform addition on the 4-bit values
         assert_eq!(result.to_u8(), 170 + 85); // Expected result of addition between 10101010 and 01010101
@@ -205,8 +205,8 @@ mod tests {
 
     #[test]
     fn test_from_u16_add() {
-        let a = Uint16::from_u16(43690); // Binary 1010101010101010
-        let b = Uint16::from_u16(21845); // Binary 0101010101010101
+        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
+        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
 
         let result = a + b;
         assert_eq!(result.to_u16(), 43690 + 21845); // Expected result of addition between 1010101010101010 and 0101010101010101
@@ -214,8 +214,8 @@ mod tests {
 
     #[test]
     fn test_from_u32_add() {
-        let a = Uint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = Uint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
 
         let result = a + b;
         assert_eq!(result.to_u32(), 2863311530 + 1431655765); // Expected result of addition between 10101010101010101010101010101010 and 01010101010101010101010101010101
@@ -223,8 +223,8 @@ mod tests {
 
     #[test]
     fn test_from_u64_add() {
-        let a = Uint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = Uint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
         let result = a + b;
         assert_eq!(result.to_u64(), 12297829382473034410 + 6148914691236517205);
@@ -233,8 +233,8 @@ mod tests {
 
     #[test]
     fn test_from_u128_add() {
-        let a = Uint128::from_u128(12297829382473034410); // Binary 10101010
-        let b = Uint128::from_u128(6148914691236517205); // Binary 01010101
+        let a = GarbledUint128::from_u128(12297829382473034410); // Binary 10101010
+        let b = GarbledUint128::from_u128(6148914691236517205); // Binary 01010101
 
         let result = a + b;
         assert_eq!(result.to_u128(), 12297829382473034410 + 6148914691236517205);
@@ -245,8 +245,8 @@ mod tests {
 
     #[test]
     fn test_uint_sub() {
-        let a = Uint::<4>::from_u8(3);
-        let b = Uint::<4>::from_u8(2);
+        let a = GarbledUint::<4>::from_u8(3);
+        let b = GarbledUint::<4>::from_u8(2);
 
         let result = a - b; // Perform subtraction on the 4-bit values
         assert_eq!(result.to_u8(), 3 - 2);
@@ -254,8 +254,8 @@ mod tests {
 
     #[test]
     fn test_from_u8_sub() {
-        let a = Uint8::from_u8(170); // Binary 10101010
-        let b = Uint8::from_u8(100); // Binary 01100100
+        let a = GarbledUint8::from_u8(170); // Binary 10101010
+        let b = GarbledUint8::from_u8(100); // Binary 01100100
 
         let result = a - b;
         assert_eq!(result.to_u8(), 170 - 100); // Expected result of subtraction between 10101010 and 01010101
@@ -263,8 +263,8 @@ mod tests {
 
     #[test]
     fn test_from_u16_sub() {
-        let a = Uint16::from_u16(43690); // Binary 1010101010101010
-        let b = Uint16::from_u16(21845); // Binary 0101010101010101
+        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
+        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
 
         let result = a - b;
         assert_eq!(result.to_u16(), 43690 - 21845); // Expected result of subtraction between 1010101010101010 and 0101010101010101
@@ -272,8 +272,8 @@ mod tests {
 
     #[test]
     fn test_from_u32_sub() {
-        let a = Uint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = Uint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
 
         let result = a - b;
         assert_eq!(result.to_u32(), 2863311530 - 1431655765); // Expected result of subtraction between 10101010101010101010101010101010 and 01010101010101010101010101010101
@@ -281,8 +281,8 @@ mod tests {
 
     #[test]
     fn test_from_u64_sub() {
-        let a = Uint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = Uint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
         let result = a - b;
         assert_eq!(result.to_u64(), 12297829382473034410 - 6148914691236517205);
@@ -291,8 +291,8 @@ mod tests {
 
     #[test]
     fn test_from_u128_sub() {
-        let a = Uint128::from_u128(170); // Binary 10101010
-        let b = Uint128::from_u128(85); // Binary 01010101
+        let a = GarbledUint128::from_u128(170); // Binary 10101010
+        let b = GarbledUint128::from_u128(85); // Binary 01010101
 
         let result = a - b;
         assert_eq!(result.to_u128(), 170 - 85); // Expected result of subtraction between 10101010 and 01010101
