@@ -185,7 +185,7 @@ impl<const N: usize> Shr<usize> for &GarbledUint<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uint::{GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8, GarbledUint128};
+    use crate::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
 
     #[test]
     fn test_uint_xor() {
