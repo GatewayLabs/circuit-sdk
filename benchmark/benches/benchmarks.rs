@@ -208,6 +208,49 @@ fn gateway_encrypted_subtraction() -> Result<(), Box<dyn ::std::error::Error>> {
     Ok(())
 }
 
+fn tfhe_encrypted_multiplication() -> Result<(), Box<dyn ::std::error::Error>> {
+    use tfhe::prelude::*;
+    use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
+    // Basic configuration to use homomorphic integers
+    let config = ConfigBuilder::default().build();
+
+    // Key generation
+    let (client_key, server_keys) = generate_keys(config);
+
+    let clear_a = 12345678910u128;
+    let clear_b = 1234;
+
+    // Encrypting the input data using the (private) client_key
+    let encrypted_a = FheUint128::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint128::try_encrypt(clear_b, &client_key).unwrap();
+
+    // On the server side:
+    set_server_key(server_keys);
+
+    // Clear equivalent computations: 12345678910 * 1234
+    let encrypted_res_mul = &encrypted_a * &encrypted_b;
+
+    let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
+    assert_eq!(clear_res, clear_a * clear_b);
+
+    Ok(())
+}
+
+fn gateway_encrypted_multiplication() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint128;
+
+    let clear_a = 12345678910u128;
+    let clear_b = 1234;
+
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
+
+    // TODO: Implement the multiplication of two encrypted integers
+    let result = &a * &b;
+    assert_eq!(result.to_u128(), clear_a * clear_b);
+    Ok(())
+}
+
 // Benchmark 1: Benchmarking benchmark_gateway_encrypted_addition
 fn benchmark_gateway_encrypted_addition(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_addition", |b| {
@@ -278,6 +321,20 @@ fn benchmark_tfhe_encrypted_subtraction(c: &mut Criterion) {
     });
 }
 
+// Benchmark 11: Benchmarking benchmark_gateway_encrypted_multiplication
+fn benchmark_gateway_encrypted_multiplication(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_multiplication", |b| {
+        b.iter(gateway_encrypted_multiplication)
+    });
+}
+
+// Benchmark 12: Benchmarking benchmark_tfhe_encrypted_multiplication
+fn benchmark_tfhe_encrypted_multiplication(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_multiplication", |b| {
+        b.iter(tfhe_encrypted_multiplication)
+    });
+}
+
 // Configure Criterion with a sample size of 10
 fn custom_criterion() -> Criterion {
     Criterion::default().sample_size(10)
@@ -296,7 +353,9 @@ criterion_group!(
             benchmark_gateway_encrypted_bitwise_xor,
             benchmark_tfhe_encrypted_bitwise_xor,
             benchmark_gateway_encrypted_bitwise_not,
-            benchmark_tfhe_encrypted_bitwise_not
+            benchmark_tfhe_encrypted_bitwise_not,
+            benchmark_gateway_encrypted_multiplication,
+            benchmark_tfhe_encrypted_multiplication
 
 );
 criterion_main!(benches);
