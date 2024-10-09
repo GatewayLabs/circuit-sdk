@@ -1,45 +1,12 @@
 use crate::int::GarbledInt;
+use crate::operations::helpers::{
+    build_and_simulate, build_and_simulate_nand, build_and_simulate_nor, build_and_simulate_not,
+    build_and_simulate_xnor,
+};
 use crate::simulator::simulate;
 use crate::uint::GarbledUint;
 use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 use tandem::{Circuit, Gate};
-
-// Helper function to build and simulate a circuit for binary operations
-fn build_and_simulate<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
-    gate_fn: fn(u32, u32) -> Gate,
-) -> GarbledUint<N> {
-    let mut gates = Vec::new();
-
-    // Push input gates for both Uint<N>s
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
-    // Define gates for each bit in lhs and rhs
-    for i in 0..N {
-        let gate = gate_fn(i as u32, (N + i) as u32);
-        gates.push(gate);
-    }
-
-    // Define the output indices (for N-bit operation)
-    let output_indices: Vec<u32> = (2 * N as u32..2 * N as u32 + N as u32).collect();
-
-    // Create the circuit
-    let program = Circuit::new(gates, output_indices);
-
-    // Simulate the circuit
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
-
-    // Return the resulting Uint<N>
-    GarbledUint::new(result)
-}
 
 // Implement the XOR operation for Uint<N>
 impl<const N: usize> BitXor for GarbledUint<N> {
@@ -50,7 +17,7 @@ impl<const N: usize> BitXor for GarbledUint<N> {
     }
 }
 
-// Implement the XOR operation for &Uint<N>
+// Implement the XOR operation for &GarbledUint<N>
 impl<const N: usize> BitXor for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
@@ -59,7 +26,7 @@ impl<const N: usize> BitXor for &GarbledUint<N> {
     }
 }
 
-// Implement the XOR operation for Int<N>
+// Implement the XOR operation for GarbledInt<N>
 impl<const N: usize> BitXor for GarbledInt<N> {
     type Output = Self;
 
@@ -68,7 +35,7 @@ impl<const N: usize> BitXor for GarbledInt<N> {
     }
 }
 
-// Implement the XOR operation for &Int<N>
+// Implement the XOR operation for &GarbledInt<N>
 impl<const N: usize> BitXor for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
@@ -86,7 +53,7 @@ impl<const N: usize> BitAnd for GarbledUint<N> {
     }
 }
 
-// Implement the AND operation for &Uint<N>
+// Implement the AND operation for &GarbledUint<N>
 impl<const N: usize> BitAnd for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
@@ -95,7 +62,7 @@ impl<const N: usize> BitAnd for &GarbledUint<N> {
     }
 }
 
-// Implement the AND operation for Int<N>
+// Implement the AND operation for GarbledInt<N>
 impl<const N: usize> BitAnd for GarbledInt<N> {
     type Output = Self;
 
@@ -104,45 +71,13 @@ impl<const N: usize> BitAnd for GarbledInt<N> {
     }
 }
 
-// Implement the AND operation for &Int<N>
+// Implement the AND operation for &GarbledInt<N>
 impl<const N: usize> BitAnd for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn bitand(self, rhs: Self) -> Self::Output {
         build_and_simulate(&self.into(), Some(&rhs.into()), Gate::And).into()
     }
-}
-
-// Helper function to handle NOT operation (unary)
-fn build_and_simulate_not<const N: usize>(input: &GarbledUint<N>) -> GarbledUint<N> {
-    let mut gates = Vec::new();
-
-    // Push input gates for Uint<N> object
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
-    // Define NOT gates for each bit in the Uint<N>
-    for i in 0..N * 2 {
-        gates.push(Gate::Not(i.try_into().unwrap())); // NOT gate for each bit
-    }
-
-    // Define the output indices (for N-bit NOT)
-    let n = N as u32;
-    let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
-
-    // Create the circuit
-    let program = Circuit::new(gates, output_indices);
-
-    // Simulate the circuit
-    let result = simulate(&program, &input.bits, &input.bits).unwrap();
-
-    // Return the resulting Uint<N>
-    GarbledUint::new(result)
 }
 
 // Implement the NOT operation for Uint<N>
@@ -154,7 +89,7 @@ impl<const N: usize> Not for GarbledUint<N> {
     }
 }
 
-// Implement the NOT operation for &Uint<N>
+// Implement the NOT operation for &GarbledUint<N>
 impl<const N: usize> Not for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
@@ -250,7 +185,7 @@ impl<const N: usize> BitOr for &GarbledInt<N> {
     }
 }
 
-// Implement the NOT operation for Int<N>
+// Implement the NOT operation for GarbledInt<N>
 impl<const N: usize> Not for GarbledInt<N> {
     type Output = Self;
 
@@ -259,7 +194,7 @@ impl<const N: usize> Not for GarbledInt<N> {
     }
 }
 
-// Implement the NOT operation for &Int<N>
+// Implement the NOT operation for &GarbledInt<N>
 impl<const N: usize> Not for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
@@ -293,7 +228,7 @@ impl<const N: usize> Shl<usize> for GarbledUint<N> {
     }
 }
 
-// Implement Shift Left operation for &Uint<N>
+// Implement Shift Left operation for &GarbledUint<N>
 impl<const N: usize> Shl<usize> for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
@@ -304,7 +239,7 @@ impl<const N: usize> Shl<usize> for &GarbledUint<N> {
     }
 }
 
-// Implement Shift Left operation for Int<N>
+// Implement Shift Left operation for GarbledInt<N>
 impl<const N: usize> Shl<usize> for GarbledInt<N> {
     type Output = Self;
 
@@ -315,7 +250,7 @@ impl<const N: usize> Shl<usize> for GarbledInt<N> {
     }
 }
 
-// Implement Shift Left operation for &Int<N>
+// Implement Shift Left operation for &GarbledInt<N>
 impl<const N: usize> Shl<usize> for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
@@ -336,7 +271,7 @@ impl<const N: usize> Shr<usize> for GarbledUint<N> {
     }
 }
 
-// Implement Shift Right operation for &Uint<N>
+// Implement Shift Right operation for &GarbledUint<N>
 impl<const N: usize> Shr<usize> for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
@@ -347,7 +282,7 @@ impl<const N: usize> Shr<usize> for &GarbledUint<N> {
     }
 }
 
-// Implement Shift Right operation for Int<N>
+// Implement Shift Right operation for GarbledInt<N>
 impl<const N: usize> Shr<usize> for GarbledInt<N> {
     type Output = Self;
 
@@ -358,7 +293,7 @@ impl<const N: usize> Shr<usize> for GarbledInt<N> {
     }
 }
 
-// Implement Shift Right operation for &Int<N>
+// Implement Shift Right operation for &GarbledInt<N>
 impl<const N: usize> Shr<usize> for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
@@ -369,127 +304,7 @@ impl<const N: usize> Shr<usize> for &GarbledInt<N> {
     }
 }
 
-// Implement composite bitwise operations for GarbledUint<N>
-fn build_and_simulate_nand<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
-) -> GarbledUint<N> {
-    let mut gates = Vec::new();
-
-    // Push input gates for both Uint<N> objects
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
-    let mut output_indices = Vec::with_capacity(N);
-
-    for i in 0..N {
-        // Step 1: AND gate for (a & b)
-        let and_gate = Gate::And(i as u32, (N + i) as u32);
-        let and_gate_idx = gates.len() as u32;
-        gates.push(and_gate);
-
-        // Step 2: NOT gate to negate the AND result
-        let not_gate = Gate::Not(and_gate_idx);
-        gates.push(not_gate);
-
-        output_indices.push(gates.len() as u32 - 1);
-    }
-
-    let program = Circuit::new(gates, output_indices);
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
-
-    GarbledUint::new(result)
-}
-
-fn build_and_simulate_nor<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
-) -> GarbledUint<N> {
-    let mut gates = Vec::new();
-
-    // Push input gates for both Uint<N> objects
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
-    let mut output_indices = Vec::with_capacity(N);
-
-    for i in 0..N {
-        // Step 1: XOR gate for (a ⊕ b)
-        let xor_gate = Gate::Xor(i as u32, (N + i) as u32);
-        let xor_gate_idx = gates.len() as u32;
-        gates.push(xor_gate);
-
-        // Step 2: AND gate for (a & b)
-        let and_gate = Gate::And(i as u32, (N + i) as u32);
-        let and_gate_idx = gates.len() as u32;
-        gates.push(and_gate);
-
-        // Step 3: XOR gate to simulate OR (a ⊕ b) ⊕ (a & b)
-        let or_gate = Gate::Xor(xor_gate_idx, and_gate_idx);
-        gates.push(or_gate);
-
-        // Step 4: Apply NOT to the OR result to get NOR
-        let not_gate = Gate::Not(gates.len() as u32 - 1);
-        gates.push(not_gate);
-
-        output_indices.push(gates.len() as u32 - 1);
-    }
-
-    let program = Circuit::new(gates, output_indices);
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
-
-    GarbledUint::new(result)
-}
-
-fn build_and_simulate_xnor<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
-) -> GarbledUint<N> {
-    let mut gates = Vec::new();
-
-    // Push input gates for both Uint<N> objects
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
-    let mut output_indices = Vec::with_capacity(N);
-
-    for i in 0..N {
-        // Step 1: XOR gate for (a ⊕ b)
-        let xor_gate = Gate::Xor(i as u32, (N + i) as u32);
-        let xor_gate_idx = gates.len() as u32;
-        gates.push(xor_gate);
-
-        // Step 2: Apply NOT to the XOR result to get XNOR
-        let not_gate = Gate::Not(xor_gate_idx);
-        gates.push(not_gate);
-
-        output_indices.push(gates.len() as u32 - 1);
-    }
-
-    let program = Circuit::new(gates, output_indices);
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
-
-    GarbledUint::new(result)
-}
-
+// Implement the NAND, NOR, XNOR operators for GarbledUint<N>
 impl<const N: usize> GarbledUint<N> {
     pub fn nand(self, rhs: Self) -> Self {
         build_and_simulate_nand(&self, Some(&rhs))
@@ -504,6 +319,7 @@ impl<const N: usize> GarbledUint<N> {
     }
 }
 
+// Implement the NAND, NOR, XNOR operators for GarbledInt<N>
 impl<const N: usize> GarbledInt<N> {
     pub fn nand(self, rhs: Self) -> Self {
         build_and_simulate_nand(&self.into(), Some(&rhs.into())).into()
