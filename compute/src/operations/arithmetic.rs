@@ -54,6 +54,8 @@ fn build_and_simulate_arithmetic<const N: usize>(
 }
 
 // Helper function to build and simulate a circuit for multiplication
+// Implements the shift-and-add method for multiplication
+// To be replaced with Karatsuba's algorithm for better performance
 #[allow(clippy::type_complexity)]
 fn build_and_simulate_multiplication<const N: usize>(
     lhs: &GarbledUint<N>,
@@ -255,7 +257,7 @@ impl<const N: usize> Sub for &GarbledUint<N> {
 }
 
 impl<const N: usize> Mul for GarbledUint<N> {
-    type Output = GarbledUint<N>; // TODO: check for overflows
+    type Output = GarbledUint<N>;
 
     fn mul(self, rhs: Self) -> Self::Output {
         build_and_simulate_multiplication(&self, &rhs)
@@ -263,7 +265,7 @@ impl<const N: usize> Mul for GarbledUint<N> {
 }
 
 impl<const N: usize> Mul for &GarbledUint<N> {
-    type Output = GarbledUint<N>; // TODO: check for overflows
+    type Output = GarbledUint<N>;
 
     fn mul(self, rhs: Self) -> Self::Output {
         build_and_simulate_multiplication(self, rhs)
@@ -391,8 +393,8 @@ mod tests {
 
     #[test]
     fn test_uint_mul() {
-        let a = GarbledUint::<4>::from_u8(3); // 0011
-        let b = GarbledUint::<4>::from_u8(2); // 0010
+        let a = GarbledUint::<4>::from_u8(3); // Binary 0011
+        let b = GarbledUint::<4>::from_u8(2); // Binary 0010
 
         let result = a * b;
         assert_eq!(result.to_u8(), 6); // 0011 * 0010 = 0110
@@ -400,19 +402,19 @@ mod tests {
 
     #[test]
     fn test_from_u8_mul() {
-        let a = GarbledUint8::from_u8(7); // 0000 0111
-        let b = GarbledUint8::from_u8(5); // 0000 0101
+        let a = GarbledUint8::from_u8(7); // Binary 0000 0111
+        let b = GarbledUint8::from_u8(5); // Binary 0000 0101
 
         let result = a * b;
-        assert_eq!(result.to_u8(), 35); // 0010 0011
+        assert_eq!(result.to_u8(), 35); // Binary 0010 0011
     }
 
     #[test]
     fn test_from_u16_mul() {
-        let a = GarbledUint16::from_u16(300); // 0000 0001 0010 1100
-        let b = GarbledUint16::from_u16(7); // 0000 0000 0000 0111
+        let a = GarbledUint16::from_u16(300); // Binary 0000 0001 0010 1100
+        let b = GarbledUint16::from_u16(7); // Binary 0000 0000 0000 0111
 
         let result = a * b;
-        assert_eq!(result.to_u16(), 2100); // 0000 1000 0010 0100
+        assert_eq!(result.to_u16(), 2100); // Binary 0000 1000 0010 0100
     }
 }
