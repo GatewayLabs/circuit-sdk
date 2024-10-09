@@ -145,6 +145,81 @@ fn sub_gate_fn(
     final_diff_index
 }
 
+// Helper function to build and simulate a circuit for multiplication
+// Implements the shift-and-add method for multiplication
+// To be replaced with Karatsuba's algorithm for better performance
+#[allow(clippy::type_complexity)]
+fn build_and_simulate_division<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both GarbledUint<N> objects
+    let lhs_start = gates.len();
+    for _ in 0..N {
+        gates.push(Gate::InContrib);
+    }
+    let rhs_start = gates.len();
+    for _ in 0..N {
+        gates.push(Gate::InEval);
+    }
+
+    let mut partial_products = Vec::with_capacity(N);
+
+    // Generate partial products
+    for i in 0..N {
+        let shifted_product = generate_partial_product(&mut gates, lhs_start, rhs_start, i, N);
+        partial_products.push(shifted_product);
+    }
+
+    // Sum up all partial products
+    let mut result = partial_products[0].clone();
+    for i in partial_products.iter().take(N).skip(1) {
+        result = add_garbled_uints(&mut gates, &result, i);
+    }
+
+    // Define output indices (result bits from the multiplication)
+    let output_indices: Vec<u32> = result.iter().map(|&x| x as u32).collect();
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // Simulate the circuit
+    let result = lhs.simulate(&program, &lhs.bits, &rhs.bits).unwrap();
+
+    // Return the resulting GarbledUint<N>
+    GarbledUint::new(result)
+}
+
+// Helper function to generate a partial product
+fn generate_partial_product(
+    gates: &mut Vec<Gate>,
+    lhs_start: usize,
+    rhs_start: usize,
+    shift: usize,
+    n: usize,
+) -> Vec<usize> {
+    let mut partial_product = Vec::with_capacity(n);
+
+    for i in 0..n {
+        if i < shift {
+            // For lower bits, we use a constant 0
+            let zero_bit = gates.len();
+            gates.push(Gate::Not(rhs_start as u32)); // NOT of any input bit is fine
+            gates.push(Gate::And(rhs_start as u32, zero_bit as u32)); // AND with its NOT is always 0
+            partial_product.push(gates.len() - 1);
+        } else {
+            let lhs_bit = lhs_start + i - shift;
+            let and_gate = gates.len();
+            gates.push(Gate::And(lhs_bit as u32, (rhs_start + shift) as u32));
+            partial_product.push(and_gate);
+        }
+    }
+
+    partial_product
+}        
+
 
 
 // Implement the Add operation for Uint<N> and &Uint<N>
@@ -178,6 +253,14 @@ impl<const N: usize> Sub for &Uint<N> {
 
     fn sub(self, rhs: Self) -> Self::Output {
         build_and_simulate_arithmetic(self, rhs, sub_gate_fn)
+    }
+}
+
+impl<const N: usize> Div for GarbledUint<N> {
+    type Output = GarbledUint<N>;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        build_and_simulate_division(&self, &rhs)
     }
 }
 
