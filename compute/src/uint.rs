@@ -31,7 +31,7 @@ impl<const N: usize> GarbledUint<N> {
 
 impl<const N: usize> From<GarbledInt<N>> for GarbledUint<N> {
     fn from(uint: GarbledInt<N>) -> Self {
-        // Directly copy the bits from the unsigned Uint<N> to the signed Int<N>
+        // Directly copy the bits from the unsigned Uint<N> to the signed GarbledInt<N>
         GarbledUint {
             bits: uint.bits,
             _phantom: PhantomData,
