@@ -1,3 +1,4 @@
+use crate::int::GarbledInt;
 use rand_chacha::rand_core::SeedableRng;
 use rand_chacha::ChaCha20Rng;
 use std::marker::PhantomData;
@@ -12,6 +13,25 @@ pub type GarbledUint16 = GarbledUint<16>;
 pub type GarbledUint32 = GarbledUint<32>;
 pub type GarbledUint64 = GarbledUint<64>;
 pub type GarbledUint128 = GarbledUint<128>;
+
+impl<const N: usize> From<GarbledInt<N>> for GarbledUint<N> {
+    fn from(uint: GarbledInt<N>) -> Self {
+        // Directly copy the bits from the unsigned Uint<N> to the signed Int<N>
+        GarbledUint {
+            bits: uint.bits,
+            _phantom: PhantomData,
+        }
+    }
+}
+
+impl<const N: usize> From<&GarbledInt<N>> for GarbledUint<N> {
+    fn from(int: &GarbledInt<N>) -> Self {
+        GarbledUint {
+            bits: int.bits.clone(),
+            _phantom: PhantomData,
+        }
+    }
+}
 
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
