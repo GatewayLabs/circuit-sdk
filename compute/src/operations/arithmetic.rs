@@ -14,7 +14,7 @@ fn build_and_simulate_arithmetic<const N: usize>(
     gate_fn: fn(u32, u32, Option<u32>, &mut Vec<Gate>, &mut Option<u32>) -> u32,
 ) -> GarbledUint<N> {
     let mut gates = Vec::new();
-    let mut carry_or_borrow_index = None; // Carry/borrow bit
+    let mut carry_or_borrow_index = None;
 
     // Push input gates for both Uint<N> objects
     for _ in 0..N {

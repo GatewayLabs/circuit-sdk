@@ -12,7 +12,7 @@ fn build_and_simulate<const N: usize>(
 ) -> GarbledUint<N> {
     let mut gates = Vec::new();
 
-    // Push input gates for both Uint<N> objects
+    // Push input gates for both Uint<N>s
     for _ in 0..N {
         gates.push(Gate::InContrib); // From first Uint<N> (lhs)
     }
