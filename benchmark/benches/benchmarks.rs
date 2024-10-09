@@ -128,6 +128,47 @@ fn gateway_encrypted_bitwise_xor() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+fn tfhe_encrypted_bitwise_or() -> Result<(), Box<dyn std::error::Error>> {
+    use tfhe::prelude::*;
+    use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
+    // Basic configuration to use homomorphic integers
+    let config = ConfigBuilder::default().build();
+
+    // Key generation
+    let (client_key, server_keys) = generate_keys(config);
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 42424242424242424242u128;
+
+    // Encrypting the input data using the (private) client_key
+    let encrypted_a = FheUint128::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint128::try_encrypt(clear_b, &client_key).unwrap();
+
+    // On the server side:
+    set_server_key(server_keys);
+
+    let encrypted_res_mul = &encrypted_a | &encrypted_b;
+
+    let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
+    assert_eq!(clear_res, clear_a | clear_b);
+
+    Ok(())
+}
+
+fn gateway_encrypted_bitwise_or() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint128;
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 42424242424242424242u128;
+
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
+
+    let result = &a | &b;
+    assert_eq!(result.to_u128(), clear_a | clear_b);
+    Ok(())
+}
+
 fn tfhe_encrypted_bitwise_not() -> Result<(), Box<dyn std::error::Error>> {
     use tfhe::prelude::*;
     use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
@@ -245,9 +286,134 @@ fn gateway_encrypted_multiplication() -> Result<(), Box<dyn ::std::error::Error>
     let a = GarbledUint128::from_u128(clear_a);
     let b = GarbledUint128::from_u128(clear_b);
 
-    // TODO: Implement the multiplication of two encrypted integers
     let result = &a * &b;
     assert_eq!(result.to_u128(), clear_a * clear_b);
+    Ok(())
+}
+
+fn tfhe_encrypted_nand() -> Result<(), Box<dyn ::std::error::Error>> {
+    use tfhe::prelude::*;
+    use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
+    // Basic configuration to use homomorphic integers
+    let config = ConfigBuilder::default().build();
+
+    // Key generation
+    let (client_key, server_keys) = generate_keys(config);
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 424242424242u128;
+
+    // Encrypting the input data using the (private) client_key
+    let encrypted_a = FheUint128::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint128::try_encrypt(clear_b, &client_key).unwrap();
+
+    // On the server side:
+    set_server_key(server_keys);
+
+    // Clear equivalent computations: 12297829382473034410 + 1
+    let encrypted_res_mul = !(&encrypted_a & &encrypted_b);
+
+    let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
+    assert_eq!(clear_res, !(clear_a & clear_b));
+
+    Ok(())
+}
+
+fn gateway_encrypted_nand() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint128;
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 424242424242u128;
+
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
+
+    let result = a.nand(b);
+    assert_eq!(result.to_u128(), !(clear_a & clear_b));
+    Ok(())
+}
+
+fn tfhe_encrypted_nor() -> Result<(), Box<dyn ::std::error::Error>> {
+    use tfhe::prelude::*;
+    use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
+    // Basic configuration to use homomorphic integers
+    let config = ConfigBuilder::default().build();
+
+    // Key generation
+    let (client_key, server_keys) = generate_keys(config);
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 424242424242u128;
+
+    // Encrypting the input data using the (private) client_key
+    let encrypted_a = FheUint128::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint128::try_encrypt(clear_b, &client_key).unwrap();
+
+    // On the server side:
+    set_server_key(server_keys);
+
+    // Clear equivalent computations: 12297829382473034410 + 1
+    let encrypted_res_mul = !(&encrypted_a | &encrypted_b);
+
+    let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
+    assert_eq!(clear_res, !(clear_a | clear_b));
+
+    Ok(())
+}
+
+fn gateway_encrypted_nor() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint128;
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 424242424242u128;
+
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
+
+    let result = a.nor(b);
+    assert_eq!(result.to_u128(), !(clear_a | clear_b));
+    Ok(())
+}
+
+fn tfhe_encrypted_xnor() -> Result<(), Box<dyn ::std::error::Error>> {
+    use tfhe::prelude::*;
+    use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
+    // Basic configuration to use homomorphic integers
+    let config = ConfigBuilder::default().build();
+
+    // Key generation
+    let (client_key, server_keys) = generate_keys(config);
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 424242424242u128;
+
+    // Encrypting the input data using the (private) client_key
+    let encrypted_a = FheUint128::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint128::try_encrypt(clear_b, &client_key).unwrap();
+
+    // On the server side:
+    set_server_key(server_keys);
+
+    // Clear equivalent computations: 12297829382473034410 + 1
+    let encrypted_res_mul = !(&encrypted_a ^ &encrypted_b);
+
+    let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
+    assert_eq!(clear_res, !(clear_a ^ clear_b));
+
+    Ok(())
+}
+
+fn gateway_encrypted_xnor() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint128;
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 424242424242u128;
+
+    let a = GarbledUint128::from_u128(clear_a);
+    let b = GarbledUint128::from_u128(clear_b);
+
+    let result = a.xnor(b);
+    assert_eq!(result.to_u128(), !(clear_a ^ clear_b));
     Ok(())
 }
 
@@ -335,6 +501,50 @@ fn benchmark_tfhe_encrypted_multiplication(c: &mut Criterion) {
     });
 }
 
+// Benchmark 13: Benchmarking benchmark_gateway_encrypted_nand
+fn benchmark_gateway_encrypted_nand(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_nand", |b| b.iter(gateway_encrypted_nand));
+}
+
+// Benchmark 14: Benchmarking benchmark_tfhe_encrypted_nand
+fn benchmark_tfhe_encrypted_nand(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_nand", |b| b.iter(tfhe_encrypted_nand));
+}
+
+// Benchmark 15: Benchmarking benchmark_gateway_encrypted_nor
+fn benchmark_gateway_encrypted_nor(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_nor", |b| b.iter(gateway_encrypted_nor));
+}
+
+// Benchmark 16: Benchmarking benchmark_tfhe_encrypted_nor
+fn benchmark_tfhe_encrypted_nor(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_nor", |b| b.iter(tfhe_encrypted_nor));
+}
+
+// Benchmark 17: Benchmarking benchmark_gateway_encrypted_xnor
+fn benchmark_gateway_encrypted_xnor(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_xnor", |b| b.iter(gateway_encrypted_xnor));
+}
+
+// Benchmark 18: Benchmarking benchmark_tfhe_encrypted_xnor
+fn benchmark_tfhe_encrypted_xnor(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_xnor", |b| b.iter(tfhe_encrypted_xnor));
+}
+
+// Benchmark 19: Benchmarking benchmark_gateway_encrypted_bitwise_or
+fn benchmark_gateway_encrypted_bitwise_or(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_bitwise_or", |b| {
+        b.iter(gateway_encrypted_bitwise_or)
+    });
+}
+
+// Benchmark 20: Benchmarking benchmark_tfhe_encrypted_bitwise_or
+fn benchmark_tfhe_encrypted_bitwise_or(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_bitwise_or", |b| {
+        b.iter(tfhe_encrypted_bitwise_or)
+    });
+}
+
 // Configure Criterion with a sample size of 10
 fn custom_criterion() -> Criterion {
     Criterion::default().sample_size(10)
@@ -344,18 +554,27 @@ fn custom_criterion() -> Criterion {
 criterion_group!(
     name = benches;
     config = custom_criterion();
-    targets = benchmark_gateway_encrypted_addition,
+    targets =
+            benchmark_gateway_encrypted_addition,
             benchmark_tfhe_encrypted_addition,
             benchmark_gateway_encrypted_subtraction,
             benchmark_tfhe_encrypted_subtraction,
+            benchmark_gateway_encrypted_multiplication,
+            benchmark_tfhe_encrypted_multiplication,
             benchmark_gateway_encrypted_bitwise_and,
             benchmark_tfhe_encrypted_bitwise_and,
             benchmark_gateway_encrypted_bitwise_xor,
             benchmark_tfhe_encrypted_bitwise_xor,
             benchmark_gateway_encrypted_bitwise_not,
             benchmark_tfhe_encrypted_bitwise_not,
-            benchmark_gateway_encrypted_multiplication,
-            benchmark_tfhe_encrypted_multiplication
+            benchmark_gateway_encrypted_nand,
+            benchmark_tfhe_encrypted_nand,
+            benchmark_gateway_encrypted_nor,
+            benchmark_tfhe_encrypted_nor,
+            benchmark_gateway_encrypted_xnor,
+            benchmark_tfhe_encrypted_xnor,
+            benchmark_gateway_encrypted_bitwise_or,
+            benchmark_tfhe_encrypted_bitwise_or,
 
 );
 criterion_main!(benches);
