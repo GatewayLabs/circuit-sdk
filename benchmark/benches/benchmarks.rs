@@ -289,11 +289,11 @@ fn gateway_encrypted_multiplication() -> Result<(), Box<dyn ::std::error::Error>
     let clear_a = 12345678910u128;
     let clear_b = 1234;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
-    let result = &a * &b;
-    assert_eq!(result.to_u128(), clear_a * clear_b);
+    let result: u128 = (&a * &b).into();
+    assert_eq!(result, clear_a * clear_b);
     Ok(())
 }
 

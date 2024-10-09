@@ -96,7 +96,7 @@ fn build_and_simulate_multiplication<const N: usize>(
     let program = Circuit::new(gates, output_indices);
 
     // Simulate the circuit
-    let result = lhs.simulate(&program, &lhs.bits, &rhs.bits).unwrap();
+    let result = simulate(&program, &lhs.bits, &rhs.bits).unwrap();
 
     // Return the resulting GarbledUint<N>
     GarbledUint::new(result)
@@ -459,29 +459,29 @@ mod tests {
 
     #[test]
     fn test_uint_mul() {
-        let a = GarbledUint::<4>::from_u8(3); // Binary 0011
-        let b = GarbledUint::<4>::from_u8(2); // Binary 0010
+        let a: GarbledUint8 = 3_u8.into(); // Binary 0011
+        let b: GarbledUint8 = 2_u8.into(); // Binary 0010
 
-        let result = a * b;
-        assert_eq!(result.to_u8(), 6); // 0011 * 0010 = 0110
+        let result: u8 = (a * b).into();
+        assert_eq!(result, 6); // 0011 * 0010 = 0110
     }
 
     #[test]
     fn test_from_u8_mul() {
-        let a = GarbledUint8::from_u8(7); // Binary 0000 0111
-        let b = GarbledUint8::from_u8(5); // Binary 0000 0101
+        let a: GarbledUint8 = 7_u8.into(); // Binary 0000 0111
+        let b: GarbledUint8 = 5_u8.into(); // Binary 0000 0101
 
-        let result = a * b;
-        assert_eq!(result.to_u8(), 35); // Binary 0010 0011
+        let result: u8 = (a * b).into();
+        assert_eq!(result, 35); // Binary 0010 0011
     }
 
     #[test]
     fn test_from_u16_mul() {
-        let a = GarbledUint16::from_u16(300); // Binary 0000 0001 0010 1100
-        let b = GarbledUint16::from_u16(7); // Binary 0000 0000 0000 0111
+        let a: GarbledUint16 = 300_u16.into(); // Binary 1010101010101011
+        let b: GarbledUint16 = 7_u16.into(); // Binary 0101010101010101
 
-        let result = a * b;
-        assert_eq!(result.to_u16(), 2100); // Binary 0000 1000 0010 0100
+        let result: u16 = (a * b).into();
+        assert_eq!(result, 300_u16 * 7_u16); // Expected result of multiplication between 1010101010101011 and 0101010101010101
     }
 
     #[test]
