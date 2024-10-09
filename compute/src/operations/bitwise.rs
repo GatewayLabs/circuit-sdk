@@ -1,5 +1,5 @@
 use crate::uint::GarbledUint;
-use std::ops::{BitAnd, BitXor, Not, Shl, Shr};
+use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 use tandem::{Circuit, Gate};
 
 // Helper function to build and simulate a circuit for binary operations
@@ -122,6 +122,75 @@ impl<const N: usize> Not for &GarbledUint<N> {
 
     fn not(self) -> Self::Output {
         build_and_simulate_not(self)
+    }
+}
+
+// Helper function to build and simulate a circuit for OR operation
+fn build_and_simulate_or<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: Option<&GarbledUint<N>>,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both Uint<N> objects (lhs and rhs)
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    // Define gates for each bit in lhs and rhs
+    let mut output_indices = Vec::with_capacity(N);
+
+    for i in 0..N {
+        // OR(a, b) = (a ⊕ b) ⊕ (a & b)
+
+        // Step 1: XOR gate for (a ⊕ b)
+        let xor_gate = Gate::Xor(i as u32, (N + i) as u32);
+        let xor_gate_idx = gates.len() as u32;
+        gates.push(xor_gate);
+
+        // Step 2: AND gate for (a & b)
+        let and_gate = Gate::And(i as u32, (N + i) as u32);
+        let and_gate_idx = gates.len() as u32;
+        gates.push(and_gate);
+
+        // Step 3: XOR gate for final OR result (a ⊕ b) ⊕ (a & b)
+        let final_or_gate = Gate::Xor(xor_gate_idx, and_gate_idx);
+        gates.push(final_or_gate);
+
+        // Step 4: Store the output index of this bit's OR result
+        output_indices.push(gates.len() as u32 - 1);
+    }
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // Simulate the circuit
+    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
+    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+
+    // Return the resulting Uint<N>
+    GarbledUint::new(result)
+}
+
+// Implement the OR operation for GarbledUint<N>
+impl<const N: usize> BitOr for GarbledUint<N> {
+    type Output = Self;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        build_and_simulate_or(&self, Some(&rhs))
+    }
+}
+
+// Implement the OR operation for &GarbledUint<N>
+impl<const N: usize> BitOr for &GarbledUint<N> {
+    type Output = GarbledUint<N>;
+
+    fn bitor(self, rhs: Self) -> Self::Output {
+        build_and_simulate_or(self, Some(rhs))
     }
 }
 
@@ -312,6 +381,52 @@ mod tests {
 
         let result = a & b;
         assert_eq!(result.to_u128(), 170 & 85); // Expected result of AND between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_from_u8_or() {
+        let a = GarbledUint8::from_u8(170); // Binary 10101010
+        let b = GarbledUint8::from_u8(85); // Binary 01010101
+
+        let result = a | b;
+        assert_eq!(result.to_u8(), 170 | 85); // Expected result of OR between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_from_u16_or() {
+        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
+        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+
+        let result = a | b;
+        assert_eq!(result.to_u16(), 43690 | 21845); // Expected result of OR between 1010101010101010 and 0101010101010101
+    }
+
+    #[test]
+    fn test_from_u32_or() {
+        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+
+        let result = a | b;
+        assert_eq!(result.to_u32(), 2863311530 | 1431655765); // Expected result of OR between 10101010101010101010101010101010 and 01010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u64_or() {
+        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+
+        let result = a | b;
+        assert_eq!(result.to_u64(), 12297829382473034410 | 6148914691236517205);
+        // Expected result of OR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u128_or() {
+        let a = GarbledUint128::from_u128(170); // Binary 10101010
+        let b = GarbledUint128::from_u128(85); // Binary 01010101
+
+        let result = a | b;
+        assert_eq!(result.to_u128(), 170 | 85); // Expected result of OR between 10101010 and 01010101
     }
 
     #[test]
