@@ -474,14 +474,15 @@ fn benchmark_gateway_encrypted_xnor(c: &mut Criterion) {
 fn benchmark_tfhe_encrypted_xnor(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_xnor", |b| b.iter(tfhe_encrypted_xnor));
 }
-// Benchmark 11: Benchmarking benchmark_gateway_encrypted_bitwise_or
+
+// Benchmark 17: Benchmarking benchmark_gateway_encrypted_bitwise_or
 fn benchmark_gateway_encrypted_bitwise_or(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_bitwise_or", |b| {
         b.iter(gateway_encrypted_bitwise_or)
     });
 }
 
-// Benchmark 12: Benchmarking benchmark_tfhe_encrypted_bitwise_or
+// Benchmark 18: Benchmarking benchmark_tfhe_encrypted_bitwise_or
 fn benchmark_tfhe_encrypted_bitwise_or(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_bitwise_or", |b| {
         b.iter(tfhe_encrypted_bitwise_or)
