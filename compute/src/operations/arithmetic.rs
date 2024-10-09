@@ -1,3 +1,4 @@
+use crate::int::GarbledInt;
 use crate::uint::GarbledUint;
 use std::ops::{Add, Sub};
 use tandem::{Circuit, Gate};
@@ -162,6 +163,23 @@ impl<const N: usize> Add for &GarbledUint<N> {
     }
 }
 
+// Implement the Add operation for Int<N> and &Int<N>
+impl<const N: usize> Add for GarbledInt<N> {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        build_and_simulate_arithmetic(&self.into(), &rhs.into(), add_gate_fn).into()
+    }
+}
+
+impl<const N: usize> Add for &GarbledInt<N> {
+    type Output = GarbledInt<N>;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        build_and_simulate_arithmetic(&self.into(), &rhs.into(), add_gate_fn).into()
+    }
+}
+
 // Implement the Sub operation for Uint<N> and &Uint<N>
 impl<const N: usize> Sub for GarbledUint<N> {
     type Output = Self;
@@ -179,10 +197,30 @@ impl<const N: usize> Sub for &GarbledUint<N> {
     }
 }
 
+// Implement the Sub operation for Int<N> and &Int<N>
+impl<const N: usize> Sub for GarbledInt<N> {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        build_and_simulate_arithmetic(&self.into(), &rhs.into(), sub_gate_fn).into()
+    }
+}
+
+impl<const N: usize> Sub for &GarbledInt<N> {
+    type Output = GarbledInt<N>;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        build_and_simulate_arithmetic(&self.into(), &rhs.into(), sub_gate_fn).into()
+    }
+}
+
 // tests
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::int::{
+        GarbledInt128, GarbledInt16, GarbledInt32, GarbledInt4, GarbledInt64, GarbledInt8,
+    };
     use crate::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
 
     #[test]
@@ -244,6 +282,67 @@ mod tests {
     }
 
     #[test]
+    fn test_int_add() {
+        let a = GarbledInt4::from_i8(3);
+        let b = GarbledInt4::from_i8(2);
+
+        let result = a + b; // Perform addition on the 4-bit values
+        assert_eq!(result.to_i8(), 3 + 2);
+    }
+
+    #[test]
+    fn test_from_i8_add() {
+        let a = GarbledInt8::from_i8(3_i8);
+        let b = GarbledInt8::from_i8(2_i8);
+
+        let result = a + b; // Perform addition on the 8-bit values
+        assert_eq!(result.to_i8(), 3_i8 + 2_i8);
+    }
+
+    #[test]
+    fn test_from_i16_add() {
+        // use larger values to test the 16-bit addition
+        let a = GarbledInt16::from_i16(1340_i16);
+        let b = GarbledInt16::from_i16(8543_i16);
+
+        let result = a + b; // Perform addition on the 16-bit values
+        assert_eq!(result.to_i16(), 1340_i16 + 8543_i16);
+    }
+
+    #[test]
+    fn test_from_i32_add() {
+        // use larger values to test the 32-bit addition
+        let a = GarbledInt32::from_i32(17034322_i32);
+        let b = GarbledInt32::from_i32(84928323_i32);
+
+        let result = a + b; // Perform addition on the 32-bit values
+        assert_eq!(result.to_i32(), 17034322_i32 + 84928323_i32);
+    }
+
+    #[test]
+    fn test_from_i64_add() {
+        // use larger values to test the 64-bit addition
+        let a = GarbledInt64::from_i64(170343221234_i64);
+        let b = GarbledInt64::from_i64(849283231234_i64);
+
+        let result = a + b; // Perform addition on the 64-bit values
+        assert_eq!(result.to_i64(), 170343221234_i64 + 849283231234_i64);
+    }
+
+    #[test]
+    fn test_from_i128_add() {
+        // use larger values to test the 128-bit addition
+        let a = GarbledInt128::from_i128(170343221234567890_i128);
+        let b = GarbledInt128::from_i128(849283231234567890_i128);
+
+        let result = a + b; // Perform addition on the 128-bit values
+        assert_eq!(
+            result.to_i128(),
+            170343221234567890_i128 + 849283231234567890_i128
+        );
+    }
+
+    #[test]
     fn test_uint_sub() {
         let a = GarbledUint::<4>::from_u8(3);
         let b = GarbledUint::<4>::from_u8(2);
@@ -296,5 +395,66 @@ mod tests {
 
         let result = a - b;
         assert_eq!(result.to_u128(), 170 - 85); // Expected result of subtraction between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_int_sub() {
+        let a = GarbledInt4::from_i8(3);
+        let b = GarbledInt4::from_i8(2);
+
+        let result = a - b; // Perform subtraction on the 4-bit values
+        assert_eq!(result.to_i8(), 3 - 2);
+    }
+
+    #[test]
+    fn test_from_i8_sub() {
+        let a = GarbledInt8::from_i8(3_i8);
+        let b = GarbledInt8::from_i8(2_i8);
+
+        let result = a - b; // Perform subtraction on the 8-bit values
+        assert_eq!(result.to_i8(), 3_i8 - 2_i8);
+    }
+
+    #[test]
+    fn test_from_i16_sub() {
+        // use larger values to test the 16-bit subtraction
+        let a = GarbledInt16::from_i16(1340_i16);
+        let b = GarbledInt16::from_i16(8543_i16);
+
+        let result = a - b; // Perform subtraction on the 16-bit values
+        assert_eq!(result.to_i16(), 1340_i16 - 8543_i16);
+    }
+
+    #[test]
+    fn test_from_i32_sub() {
+        // use larger values to test the 32-bit subtraction
+        let a = GarbledInt32::from_i32(17034322_i32);
+        let b = GarbledInt32::from_i32(84928323_i32);
+
+        let result = a - b; // Perform subtraction on the 32-bit values
+        assert_eq!(result.to_i32(), 17034322_i32 - 84928323_i32);
+    }
+
+    #[test]
+    fn test_from_i64_sub() {
+        // use larger values to test the 64-bit subtraction
+        let a = GarbledInt64::from_i64(170343221234_i64);
+        let b = GarbledInt64::from_i64(849283231234_i64);
+
+        let result = a - b; // Perform subtraction on the 64-bit values
+        assert_eq!(result.to_i64(), 170343221234_i64 - 849283231234_i64);
+    }
+
+    #[test]
+    fn test_from_i128_sub() {
+        // use larger values to test the 128-bit subtraction
+        let a = GarbledInt128::from_i128(170343221234567890_i128);
+        let b = GarbledInt128::from_i128(849283231234567890_i128);
+
+        let result = a - b; // Perform subtraction on the 128-bit values
+        assert_eq!(
+            result.to_i128(),
+            170343221234567890_i128 - 849283231234567890_i128
+        );
     }
 }
