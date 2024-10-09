@@ -178,6 +178,7 @@ impl<const N: usize> PartialEq for GarbledUint<N> {
 
 impl<const N: usize> Eq for GarbledUint<N> {}
 
+#[allow(clippy::non_canonical_partial_ord_impl)]
 impl<const N: usize> PartialOrd for GarbledUint<N> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         Some(self.cmp_helper(other))
@@ -247,18 +248,18 @@ mod tests {
     fn test_uint_larger_comparison() {
         let a16 = GarbledUint16::from_u16(1000);
         let b16 = GarbledUint16::from_u16(2000);
-        assert!(&a16 < &b16);
+        assert!(a16 < b16);
 
         let a32 = GarbledUint32::from_u32(100000);
         let b32 = GarbledUint32::from_u32(200000);
-        assert!(&a32 < &b32);
+        assert!(a32 < b32);
 
         let a64 = GarbledUint64::from_u64(10000000000);
         let b64 = GarbledUint64::from_u64(20000000000);
-        assert!(&a64 < &b64);
+        assert!(a64 < b64);
 
         let a128 = GarbledUint128::from_u128(100000000000000000000);
         let b128 = GarbledUint128::from_u128(200000000000000000000);
-        assert!(&a128 < &b128);
+        assert!(a128 < b128);
     }
 }
