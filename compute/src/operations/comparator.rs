@@ -207,7 +207,7 @@ mod tests {
     use crate::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
 
     #[test]
-    fn test_equality() {
+    fn test_uint_equality() {
         let a = GarbledUint8::from_u8(123);
         let b = GarbledUint8::from_u8(123);
         let c = GarbledUint8::from_u8(124);
@@ -217,21 +217,34 @@ mod tests {
     }
 
     #[test]
-    fn test_ordering() {
-        let a = GarbledUint8::from_u8(123);
-        let b = GarbledUint8::from_u8(124);
-        let c = GarbledUint8::from_u8(122);
+    fn test_unsigned_comparison() {
+        let a = GarbledUint8::from_u8(100);
+        let b = GarbledUint8::from_u8(150);
 
-        assert!(&a < &b);
-        assert!(&a > &c);
-        assert!(&a <= &a);
-        assert!(&a >= &a);
-        assert!(&b > &a);
-        assert!(&c < &a);
+        assert!(a < b);
+        assert!(b > a);
+        assert!(a != b);
+
+        let c = GarbledUint8::from_u8(200);
+        let d = GarbledUint8::from_u8(200);
+
+        assert!(c == d);
+        assert!(c <= d);
+        assert!(c >= d);
     }
 
     #[test]
-    fn test_comparison_larger_types() {
+    fn test_uint_edge_cases() {
+        let zero = GarbledUint8::from_u8(0);
+        let max = GarbledUint8::from_u8(u8::MAX);
+
+        assert!(zero < max);
+        assert!(max > zero);
+        assert!(zero != max);
+    }
+
+    #[test]
+    fn test_uint_larger_comparison() {
         let a16 = GarbledUint16::from_u16(1000);
         let b16 = GarbledUint16::from_u16(2000);
         assert!(&a16 < &b16);
