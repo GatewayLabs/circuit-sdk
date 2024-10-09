@@ -182,6 +182,141 @@ impl<const N: usize> Shr<usize> for &GarbledUint<N> {
     }
 }
 
+// Implement composite bitwise operations for GarbledUint<N>
+fn build_and_simulate_nand<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: Option<&GarbledUint<N>>,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    let mut output_indices = Vec::with_capacity(N);
+
+    for i in 0..N {
+        // Step 1: AND gate for (a & b)
+        let and_gate = Gate::And(i as u32, (N + i) as u32);
+        let and_gate_idx = gates.len() as u32;
+        gates.push(and_gate);
+
+        // Step 2: NOT gate to negate the AND result
+        let not_gate = Gate::Not(and_gate_idx);
+        gates.push(not_gate);
+
+        output_indices.push(gates.len() as u32 - 1);
+    }
+
+    let program = Circuit::new(gates, output_indices);
+    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
+    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+
+    GarbledUint::new(result)
+}
+
+fn build_and_simulate_nor<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: Option<&GarbledUint<N>>,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    let mut output_indices = Vec::with_capacity(N);
+
+    for i in 0..N {
+        // Step 1: XOR gate for (a ⊕ b)
+        let xor_gate = Gate::Xor(i as u32, (N + i) as u32);
+        let xor_gate_idx = gates.len() as u32;
+        gates.push(xor_gate);
+
+        // Step 2: AND gate for (a & b)
+        let and_gate = Gate::And(i as u32, (N + i) as u32);
+        let and_gate_idx = gates.len() as u32;
+        gates.push(and_gate);
+
+        // Step 3: XOR gate to simulate OR (a ⊕ b) ⊕ (a & b)
+        let or_gate = Gate::Xor(xor_gate_idx, and_gate_idx);
+        gates.push(or_gate);
+
+        // Step 4: Apply NOT to the OR result to get NOR
+        let not_gate = Gate::Not(gates.len() as u32 - 1);
+        gates.push(not_gate);
+
+        output_indices.push(gates.len() as u32 - 1);
+    }
+
+    let program = Circuit::new(gates, output_indices);
+    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
+    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+
+    GarbledUint::new(result)
+}
+
+fn build_and_simulate_xnor<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: Option<&GarbledUint<N>>,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+
+    for _ in 0..N {
+        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+    }
+
+    let mut output_indices = Vec::with_capacity(N);
+
+    for i in 0..N {
+        // Step 1: XOR gate for (a ⊕ b)
+        let xor_gate = Gate::Xor(i as u32, (N + i) as u32);
+        let xor_gate_idx = gates.len() as u32;
+        gates.push(xor_gate);
+
+        // Step 2: Apply NOT to the XOR result to get XNOR
+        let not_gate = Gate::Not(xor_gate_idx);
+        gates.push(not_gate);
+
+        output_indices.push(gates.len() as u32 - 1);
+    }
+
+    let program = Circuit::new(gates, output_indices);
+    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
+    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+
+    GarbledUint::new(result)
+}
+
+impl<const N: usize> GarbledUint<N> {
+    pub fn nand(self, rhs: Self) -> Self {
+        build_and_simulate_nand(&self, Some(&rhs))
+    }
+
+    pub fn nor(self, rhs: Self) -> Self {
+        build_and_simulate_nor(&self, Some(&rhs))
+    }
+
+    pub fn xnor(self, rhs: Self) -> Self {
+        build_and_simulate_xnor(&self, Some(&rhs))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -408,5 +543,155 @@ mod tests {
 
         let result = a >> 3; // Perform right shift by 3
         assert_eq!(result.to_u8(), 0b0001); // Binary 0001 (Right shift result of 1000)
+    }
+
+    #[test]
+    fn test_from_u8_nand() {
+        let a = GarbledUint8::from_u8(170); // Binary 10101010
+        let b = GarbledUint8::from_u8(85); // Binary 01010101
+
+        let result = a.nand(b);
+        assert_eq!(result.to_u8(), !(170 & 85)); // Expected result of NAND between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_from_u16_nand() {
+        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
+        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+
+        let result = a.nand(b);
+        assert_eq!(result.to_u16(), !(43690 & 21845)); // Expected result of NAND between 1010101010101010 and 0101010101010101
+    }
+
+    #[test]
+    fn test_from_u32_nand() {
+        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+
+        let result = a.nand(b);
+        assert_eq!(result.to_u32(), !(2863311530 & 1431655765));
+        // Expected result of NAND between 10101010101010101010101010101010 and 01010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u64_nand() {
+        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+
+        let result = a.nand(b);
+        assert_eq!(
+            result.to_u64(),
+            !(12297829382473034410 & 6148914691236517205)
+        );
+        // Expected result of NAND between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u128_nand() {
+        let a = GarbledUint128::from_u128(170); // Binary 10101010
+        let b = GarbledUint128::from_u128(85); // Binary 01010101
+
+        let result = a.nand(b);
+        assert_eq!(result.to_u128(), !(170 & 85)); // Expected result of NAND between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_from_u8_nor() {
+        let a = GarbledUint8::from_u8(170); // Binary 10101010
+        let b = GarbledUint8::from_u8(85); // Binary 01010101
+
+        let result = a.nor(b);
+        assert_eq!(result.to_u8(), !(170 | 85)); // Expected result of NOR between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_from_u16_nor() {
+        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
+        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+
+        let result = a.nor(b);
+        assert_eq!(result.to_u16(), !(43690 | 21845)); // Expected result of NOR between 1010101010101010 and 0101010101010101
+    }
+
+    #[test]
+    fn test_from_u32_nor() {
+        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+
+        let result = a.nor(b);
+        assert_eq!(result.to_u32(), !(2863311530 | 1431655765));
+        // Expected result of NOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u64_nor() {
+        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+
+        let result = a.nor(b);
+        assert_eq!(
+            result.to_u64(),
+            !(12297829382473034410 | 6148914691236517205)
+        );
+        // Expected result of NOR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u128_nor() {
+        let a = GarbledUint128::from_u128(170); // Binary 10101010
+        let b = GarbledUint128::from_u128(85); // Binary 01010101
+
+        let result = a.nor(b);
+        assert_eq!(result.to_u128(), !(170 | 85)); // Expected result of NOR between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_from_u8_xnor() {
+        let a = GarbledUint8::from_u8(170); // Binary 10101010
+        let b = GarbledUint8::from_u8(85); // Binary 01010101
+
+        let result = a.xnor(b);
+        assert_eq!(result.to_u8(), !(170 ^ 85)); // Expected result of XNOR between 10101010 and 01010101
+    }
+
+    #[test]
+    fn test_from_u16_xnor() {
+        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
+        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+
+        let result = a.xnor(b);
+        assert_eq!(result.to_u16(), !(43690 ^ 21845)); // Expected result of XNOR between 1010101010101010 and 0101010101010101
+    }
+
+    #[test]
+    fn test_from_u32_xnor() {
+        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+
+        let result = a.xnor(b);
+        assert_eq!(result.to_u32(), !(2863311530 ^ 1431655765));
+        // Expected result of XNOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u64_xnor() {
+        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+
+        let result = a.xnor(b);
+        assert_eq!(
+            result.to_u64(),
+            !(12297829382473034410 ^ 6148914691236517205)
+        );
+        // Expected result of XNOR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
+    }
+
+    #[test]
+    fn test_from_u128_xnor() {
+        let a = GarbledUint128::from_u128(170); // Binary 10101010
+        let b = GarbledUint128::from_u128(85); // Binary 01010101
+
+        let result = a.xnor(b);
+        assert_eq!(result.to_u128(), !(170 ^ 85)); // Expected result of XNOR between 10101010 and 01010101
     }
 }
