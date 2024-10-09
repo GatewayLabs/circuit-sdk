@@ -1,7 +1,5 @@
-use crate::int::GarbledInt;
 use crate::simulator::simulate;
 use crate::uint::GarbledUint;
-use std::ops::{Add, Mul, Sub};
 use tandem::Circuit;
 use tandem::Gate;
 
