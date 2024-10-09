@@ -84,8 +84,8 @@ fn build_and_simulate_multiplication<const N: usize>(
 
     // Sum up all partial products
     let mut result = partial_products[0].clone();
-    for i in 1..N {
-        result = add_garbled_uints(&mut gates, &result, &partial_products[i]);
+    for i in partial_products.iter().take(N).skip(1) {
+        result = add_garbled_uints(&mut gates, &result, i);
     }
 
     // Define output indices (result bits from the multiplication)
@@ -517,6 +517,7 @@ mod tests {
         assert_eq!(result.to_u16(), 2100); // Binary 0000 1000 0010 0100
     }
 
+    #[test]
     fn test_int_sub() {
         let a = GarbledInt4::from_i8(3);
         let b = GarbledInt4::from_i8(2);
