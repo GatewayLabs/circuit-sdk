@@ -460,8 +460,8 @@ fn gateway_encrypted_eq() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 12297829382473034410u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a == b;
     assert_eq!(result, clear_a == clear_b);
@@ -502,8 +502,8 @@ fn gateway_encrypted_neq() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 12297829382473034400u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a != b;
     assert_eq!(result, clear_a != clear_b);
@@ -544,8 +544,8 @@ fn gateway_encrypted_gt() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 12297829382473034409u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a > b;
     assert_eq!(result, clear_a > clear_b);
@@ -586,8 +586,8 @@ fn gateway_encrypted_ge() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 12297829382473034410u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a >= b;
     assert_eq!(result, clear_a >= clear_b);
@@ -628,8 +628,8 @@ fn gateway_encrypted_lt() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034409u128;
     let clear_b = 12297829382473034410u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a < b;
     assert_eq!(result, clear_a < clear_b);
@@ -670,8 +670,8 @@ fn gateway_encrypted_le() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 12297829382473034410u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a <= b;
     assert_eq!(result, clear_a <= clear_b);

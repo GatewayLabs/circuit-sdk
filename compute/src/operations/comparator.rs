@@ -1,3 +1,4 @@
+use crate::simulator::simulate;
 use crate::uint::GarbledUint;
 use std::cmp::Ordering;
 use tandem::{Circuit, Gate};
@@ -112,7 +113,7 @@ fn build_and_simulate_comparison<const N: usize>(
     let program = Circuit::new(gates, output_indices);
 
     // Simulate the circuit
-    let result = lhs.simulate(&program, &lhs.bits, &rhs.bits).unwrap();
+    let result = simulate(&program, &lhs.bits, &rhs.bits).unwrap();
 
     // Return the boolean result
     result[0]
@@ -154,7 +155,7 @@ impl<const N: usize> GarbledUint<N> {
         let program = Circuit::new(gates, output_indices);
 
         // Simulate the circuit
-        let result = self.simulate(&program, &self.bits, &other.bits).unwrap();
+        let result = simulate(&program, &self.bits, &other.bits).unwrap();
 
         // Interpret the result
         let lt = result[0];
@@ -209,9 +210,9 @@ mod tests {
 
     #[test]
     fn test_uint_equality() {
-        let a = GarbledUint8::from_u8(123);
-        let b = GarbledUint8::from_u8(123);
-        let c = GarbledUint8::from_u8(124);
+        let a: GarbledUint8 = 123_u8.into();
+        let b: GarbledUint8 = 123_u8.into();
+        let c: GarbledUint8 = 124_u8.into();
 
         assert_eq!(&a, &b);
         assert_ne!(&a, &c);
@@ -219,15 +220,15 @@ mod tests {
 
     #[test]
     fn test_unsigned_comparison() {
-        let a = GarbledUint8::from_u8(100);
-        let b = GarbledUint8::from_u8(150);
+        let a: GarbledUint8 = 100_u8.into();
+        let b: GarbledUint8 = 150_u8.into();
 
         assert!(a < b);
         assert!(b > a);
         assert!(a != b);
 
-        let c = GarbledUint8::from_u8(200);
-        let d = GarbledUint8::from_u8(200);
+        let c: GarbledUint8 = 200_u8.into();
+        let d: GarbledUint8 = 200_u8.into();
 
         assert!(c == d);
         assert!(c <= d);
@@ -236,8 +237,8 @@ mod tests {
 
     #[test]
     fn test_uint_edge_cases() {
-        let zero = GarbledUint8::from_u8(0);
-        let max = GarbledUint8::from_u8(u8::MAX);
+        let zero: GarbledUint8 = 0_u8.into();
+        let max: GarbledUint8 = u8::MAX.into();
 
         assert!(zero < max);
         assert!(max > zero);
@@ -246,20 +247,20 @@ mod tests {
 
     #[test]
     fn test_uint_larger_comparison() {
-        let a16 = GarbledUint16::from_u16(1000);
-        let b16 = GarbledUint16::from_u16(2000);
+        let a16: GarbledUint16 = 1000_u16.into();
+        let b16: GarbledUint16 = 2000_u16.into();
         assert!(a16 < b16);
 
-        let a32 = GarbledUint32::from_u32(100000);
-        let b32 = GarbledUint32::from_u32(200000);
+        let a32: GarbledUint32 = 10000_u32.into();
+        let b32: GarbledUint32 = 20000_u32.into();
         assert!(a32 < b32);
 
-        let a64 = GarbledUint64::from_u64(10000000000);
-        let b64 = GarbledUint64::from_u64(20000000000);
+        let a64: GarbledUint64 = 10000000000_u64.into();
+        let b64: GarbledUint64 = 20000000000_u64.into();
         assert!(a64 < b64);
 
-        let a128 = GarbledUint128::from_u128(100000000000000000000);
-        let b128 = GarbledUint128::from_u128(200000000000000000000);
+        let a128: GarbledUint128 = 100000000000000000000_u128.into();
+        let b128: GarbledUint128 = 200000000000000000000_u128.into();
         assert!(a128 < b128);
     }
 }
