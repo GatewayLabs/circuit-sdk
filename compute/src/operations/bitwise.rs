@@ -1,4 +1,5 @@
 use crate::int::GarbledInt;
+use crate::simulator::simulate;
 use crate::uint::GarbledUint;
 use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
 use tandem::{Circuit, Gate};
@@ -11,7 +12,7 @@ fn build_and_simulate<const N: usize>(
 ) -> GarbledUint<N> {
     let mut gates = Vec::new();
 
-    // Push input gates for both Uint<N> objects
+    // Push input gates for both Uint<N>s
     for _ in 0..N {
         gates.push(Gate::InContrib); // From first Uint<N> (lhs)
     }
@@ -34,7 +35,7 @@ fn build_and_simulate<const N: usize>(
 
     // Simulate the circuit
     let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
 
     // Return the resulting Uint<N>
     GarbledUint::new(result)
@@ -138,7 +139,7 @@ fn build_and_simulate_not<const N: usize>(input: &GarbledUint<N>) -> GarbledUint
     let program = Circuit::new(gates, output_indices);
 
     // Simulate the circuit
-    let result = input.simulate(&program, &input.bits, &input.bits).unwrap();
+    let result = simulate(&program, &input.bits, &input.bits).unwrap();
 
     // Return the resulting Uint<N>
     GarbledUint::new(result)
@@ -207,7 +208,7 @@ fn build_and_simulate_or<const N: usize>(
 
     // Simulate the circuit
     let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
 
     // Return the resulting Uint<N>
     GarbledUint::new(result)
@@ -401,7 +402,7 @@ fn build_and_simulate_nand<const N: usize>(
 
     let program = Circuit::new(gates, output_indices);
     let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
 
     GarbledUint::new(result)
 }
@@ -447,7 +448,7 @@ fn build_and_simulate_nor<const N: usize>(
 
     let program = Circuit::new(gates, output_indices);
     let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
 
     GarbledUint::new(result)
 }
@@ -484,7 +485,7 @@ fn build_and_simulate_xnor<const N: usize>(
 
     let program = Circuit::new(gates, output_indices);
     let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = lhs.simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
 
     GarbledUint::new(result)
 }
@@ -520,303 +521,259 @@ impl<const N: usize> GarbledInt<N> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::int::GarbledInt8;
+    use crate::int::{GarbledInt128, GarbledInt16, GarbledInt32, GarbledInt64, GarbledInt8};
     use crate::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
 
     #[test]
-    fn test_uint_xor() {
-        let a = GarbledUint::<2>::new(vec![true, false]); // Binary 10
-        let b = GarbledUint::<2>::new(vec![false, true]); // Binary 01
-
-        let result = a ^ b; // Perform XOR on the 2-bit values
-        assert_eq!(result.to_u8(), 3); // Expected result of XOR between 10 and 01
-
-        let a = GarbledUint::<4>::new(vec![true, true, false, false]); // Binary 1100
-        let b = GarbledUint::<4>::new(vec![false, false, true, true]); // Binary 0011
-
-        let result = a ^ b; // Perform XOR on the 4-bit values
-        assert_eq!(result.to_u8(), 15); // Expected result of XOR between 1100 and 0011
-    }
-
-    #[test]
     fn test_from_u8_xor() {
-        let a = GarbledUint8::from_u8(170); // Binary 10101010
-        let b = GarbledUint8::from_u8(85); // Binary 01010101
+        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+        let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-        let result = &a ^ &b;
-        assert_eq!(result.to_u8(), 255); // Expected result of XOR between 10101010 and 01010101
+        let result: u8 = (&a ^ &b).into();
+        assert_eq!(result, 255); // Expected result of XOR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_u16_xor() {
-        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
-        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+        let a: GarbledUint16 = 43690_u16.into(); // Binary 1010101010101010
+        let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
-        let result = a ^ b;
-        assert_eq!(result.to_u16(), 65535); // Expected result of XOR between 1010101010101010 and 0101010101010101
+        let result: u16 = (&a ^ &b).into();
+        assert_eq!(result, 65535); // Expected result of XOR between 1010101010101010 and 0101010101010101
     }
 
     #[test]
     fn test_from_u32_xor() {
-        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+        let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
-        let result = a ^ b;
-        assert_eq!(result.to_u32(), 4294967295); // Expected result of XOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
+        let result: u32 = (&a ^ &b).into();
+        assert_eq!(result, 4294967295); // Expected result of XOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u64_xor() {
-        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a ^ b;
-        assert_eq!(result.to_u64(), 18446744073709551615); // Expected result of XOR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
+        let result: u64 = (&a ^ &b).into();
+        assert_eq!(result, 18446744073709551615); // Expected result of XOR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u128_xor() {
-        let a = GarbledUint128::from_u128(170); // Binary 10101010
-        let b = GarbledUint128::from_u128(85); // Binary 01010101
+        let a: GarbledUint128 = 170_u128.into(); // Binary 10101010
+        let b: GarbledUint128 = 85_u128.into(); // Binary 01010101
 
-        let result = a ^ b;
-        assert_eq!(result.to_u128(), 255); // Expected result of XOR between 10101010 and 01010101
+        let result: u128 = (&a ^ &b).into();
+        assert_eq!(result, 255); // Expected result of XOR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_i8_xor() {
-        let a = GarbledInt8::from_i8(-86); // Two's complement binary for -86 is 10101010
-        let b = GarbledInt8::from_i8(-43); // Two's complement binary for -43 is 11010101
+        let a: GarbledInt8 = (-86_i8).into(); // Two's complement binary for -86 is 10101010
+        let b: GarbledInt8 = (-43).into(); // Two's complement binary for -43 is 11010101
 
-        let result = a ^ b;
-        assert_eq!(result.to_i8(), -86_i8 ^ -43_i8); // Expected result of XOR between 10101010 and 11010101
+        let result: i8 = (a ^ b).into();
+        assert_eq!(result, -86_i8 ^ -43_i8); // Expected result of XOR between 10101010 and 11010101
     }
 
     #[test]
     fn test_from_i16_xor() {
-        let a = GarbledInt::<16>::from_i16(-21846); // Two's complement binary for -21846 is 1010101010101010
-        let b = GarbledInt::<16>::from_i16(-10923); // Two's complement binary for -10923 is 1101010101010101
+        let a: GarbledInt<16> = (-21846_i16).into(); // Two's complement binary for -21846 is 1010101010101010
+        let b: GarbledInt<16> = (-10923_i16).into(); // Two's complement binary for -10923 is 1101010101010101
 
-        let result = a ^ b;
-        assert_eq!(result.to_i16(), -21846_i16 ^ -10923_i16); // Expected result of XOR between 1010101010101010 and 1101010101010101
-    }
-
-    #[test]
-    fn test_uint_and() {
-        let a = GarbledUint::<2>::new(vec![true, false]); // Binary 10
-        let b = GarbledUint::<2>::new(vec![false, true]); // Binary 01
-
-        let result = a & b; // Perform AND on the 2-bit values
-        assert_eq!(result.to_u8(), 0); // Expected result of AND between 10 and 01
-
-        let a = GarbledUint::<4>::new(vec![true, true, false, false]); // Binary 1100
-        let b = GarbledUint::<4>::new(vec![false, false, true, true]); // Binary 0011
-
-        let result = a & b; // Perform AND on the 4-bit values
-        assert_eq!(result.to_u8(), 0); // Expected result of AND between 1100 and 0011
-
-        let a = GarbledUint::<4>::new(vec![true, false, false, true]); // Binary 1001
-        let b = GarbledUint::<4>::new(vec![false, false, false, false]); // Binary 0000
-
-        let result = a & b; // Perform AND on the 4-bit values
-        assert_eq!(result.to_u8(), 0); // Expected result of AND between 1001 and 0000
+        let result: i16 = (a ^ b).into();
+        assert_eq!(result, -21846_i16 ^ -10923_i16); // Expected result of XOR between 1010101010101010 and 1101010101010101
     }
 
     #[test]
     fn test_from_u8_and() {
-        let a = GarbledUint8::from_u8(170); // Binary 10101010
-        let b = GarbledUint8::from_u8(85); // Binary 01010101
+        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+        let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-        let result = a & b;
-        assert_eq!(result.to_u8(), 170 & 85); // Expected result of AND between 10101010 and 01010101
+        let result: u8 = (a & b).into();
+        assert_eq!(result, 170 & 85); // Expected result of AND between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_u16_and() {
-        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
-        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+        let a: GarbledUint16 = 43690_u16.into(); // Binary 1010101010101010
+        let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
-        let result = a & b;
-        assert_eq!(result.to_u16(), 43690 & 21845); // Expected result of AND between 1010101010101010 and 0101010101010101
+        let result: u16 = (a & b).into();
+        assert_eq!(result, 43690 & 21845); // Expected result of AND between 1010101010101010 and 0101010101010101
     }
 
     #[test]
     fn test_from_u32_and() {
-        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+        let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
-        let result = a & b;
-        assert_eq!(result.to_u32(), 2863311530 & 1431655765); // Expected result of AND between 10101010101010101010101010101010 and 01010101010101010101010101010101
+        let result: u32 = (a & b).into();
+        assert_eq!(result, 2863311530 & 1431655765); // Expected result of AND between 10101010101010101010101010101010 and 01010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u64_and() {
-        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a & b;
-        assert_eq!(result.to_u64(), 12297829382473034410 & 6148914691236517205);
+        let result: u64 = (a & b).into();
+        assert_eq!(result, 12297829382473034410 & 6148914691236517205);
         // Expected result of AND between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u128_and() {
-        let a = GarbledUint128::from_u128(170); // Binary 10101010
-        let b = GarbledUint128::from_u128(85); // Binary 01010101
+        let a: GarbledUint128 = 170_u128.into(); // Binary 10101010
+        let b: GarbledUint128 = 85_u128.into(); // Binary 01010101
 
-        let result = a & b;
-        assert_eq!(result.to_u128(), 170 & 85); // Expected result of AND between 10101010 and 01010101
+        let result: u128 = (a & b).into();
+        assert_eq!(result, 170 & 85); // Expected result of AND between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_u8_or() {
-        let a = GarbledUint8::from_u8(170); // Binary 10101010
-        let b = GarbledUint8::from_u8(85); // Binary 01010101
+        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+        let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-        let result = a | b;
-        assert_eq!(result.to_u8(), 170 | 85); // Expected result of OR between 10101010 and 01010101
+        let result: u8 = (a | b).into();
+        assert_eq!(result, 170 | 85); // Expected result of OR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_u16_or() {
-        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
-        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+        let a: GarbledUint16 = 43707_u16.into(); // Binary 1010101010101011
+        let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
-        let result = a | b;
-        assert_eq!(result.to_u16(), 43690 | 21845); // Expected result of OR between 1010101010101010 and 0101010101010101
+        let result: u16 = (a | b).into();
+        assert_eq!(result, 43707 | 21845); // Expected result of OR between 1010101010101011 and 0101010101010101
     }
 
     #[test]
     fn test_from_u32_or() {
-        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+        let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
-        let result = a | b;
-        assert_eq!(result.to_u32(), 2863311530 | 1431655765); // Expected result of OR between 10101010101010101010101010101010 and 01010101010101010101010101010101
+        let result: u32 = (a | b).into();
+        assert_eq!(result, 2863311530 | 1431655765); // Expected result of OR between 10101010101010101010101010101010 and 01010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u64_or() {
-        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a | b;
-        assert_eq!(result.to_u64(), 12297829382473034410 | 6148914691236517205);
+        let result: u64 = (a | b).into();
+        assert_eq!(result, 12297829382473034410 | 6148914691236517205);
         // Expected result of OR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u128_or() {
-        let a = GarbledUint128::from_u128(170); // Binary 10101010
-        let b = GarbledUint128::from_u128(85); // Binary 01010101
+        let a: GarbledUint128 = 170_u128.into(); // Binary 10101010
+        let b: GarbledUint128 = 85_u128.into(); // Binary 01010101
 
-        let result = a | b;
-        assert_eq!(result.to_u128(), 170 | 85); // Expected result of OR between 10101010 and 01010101
+        let result: u128 = (a | b).into();
+        assert_eq!(result, 170 | 85); // Expected result of OR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_i8_or() {
-        let a = GarbledInt8::from_i8(-86); // Two's complement binary for -86 is 10101010
-        let b = GarbledInt8::from_i8(-43); // Two's complement binary for -43 is 11010101
+        let a: GarbledInt8 = (-86).into(); // Two's complement binary for -86 is 10101010
+        let b: GarbledInt8 = (-43).into(); // Two's complement binary for -43 is 11010101
 
-        let result = a | b;
-        assert_eq!(result.to_i8(), -86_i8 | -43_i8); // Expected result of OR between 10101010 and 11010101
+        let result: i8 = (a | b).into();
+        assert_eq!(result, -86_i8 | -43_i8); // Expected result of OR between 10101010 and 11010101
     }
 
     #[test]
     fn test_from_i16_or() {
-        let a = GarbledInt::<16>::from_i16(-21846); // Two's complement binary for -21846 is 1010101010101010
-        let b = GarbledInt::<16>::from_i16(-10923); // Two's complement binary for -10923 is 1101010101010101
+        let a: GarbledInt<16> = (-21846).into(); // Two's complement binary for -21846 is 1010101010101010
+        let b: GarbledInt<16> = (-10923).into(); // Two's complement binary for -10923 is 1101010101010101
 
-        let result = a | b;
-        assert_eq!(result.to_i16(), -21846_i16 | -10923_i16); // Expected result of OR between 1010101010101010 and 1101010101010101
+        let result: i16 = (a | b).into();
+        assert_eq!(result, -21846_i16 | -10923_i16); // Expected result of OR between 1010101010101010 and 1101010101010101
     }
 
     #[test]
     fn test_from_i32_or() {
-        let a = GarbledInt::<32>::from_i32(-1431655766); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
-        let b = GarbledInt::<32>::from_i32(-715827883); // Two's complement binary for -715827883 is 11010101010101010101010101010101
+        let a: GarbledInt<32> = (-1431655766).into(); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
+        let b: GarbledInt<32> = (-715827883).into(); // Two's complement binary for -715827883 is 11010101010101010101010101010101
 
-        let result = a | b;
-        assert_eq!(result.to_i32(), -1431655766_i32 | -715827883_i32);
+        let result: i32 = (a | b).into();
+        assert_eq!(result, -1431655766_i32 | -715827883_i32);
         // Expected result of OR between 10101010101010101010101010101010 and 11010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i64_or() {
-        let a = GarbledInt::<64>::from_i64(-6148914691236517206); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<64>::from_i64(-3074457345618258603); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledInt<64> = (-6148914691236517206_i64).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt<64> = (-3074457345618258603_i64).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a | b;
-        assert_eq!(
-            result.to_i64(),
-            -6148914691236517206_i64 | -3074457345618258603_i64
-        );
-        // Expected result of OR between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
+        let result: i64 = (a | b).into();
+        assert_eq!(result, -6148914691236517206_i64 | -3074457345618258603_i64);
     }
 
     #[test]
     fn test_from_i128_or() {
-        let a = GarbledInt::<128>::from_i128(-6148914691236517206); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<128>::from_i128(-3074457345618258603); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledInt<128> = (-6148914691236517206_i128).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt<128> = (-3074457345618258603_i128).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a | b;
+        let result: i128 = (a | b).into();
         assert_eq!(
-            result.to_i128(),
+            result,
             -6148914691236517206_i128 | -3074457345618258603_i128
         );
-        // Expected result of OR between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_int_and() {
-        let a = GarbledInt8::from_i8(-86); // Two's complement binary for -86 is 10101010
-        let b = GarbledInt8::from_i8(-43); // Two's complement binary for -43 is 11010101
+        let a: GarbledInt8 = (-86).into(); // Two's complement binary for -86 is 10101010
+        let b: GarbledInt8 = (-43).into(); // Two's complement binary for -43 is 11010101
 
-        let result = a & b;
-        assert_eq!(result.to_i8(), -86_i8 & -43_i8); // Expected result of AND between 10101010 and 11010101
+        let result: i8 = (a & b).into();
+        assert_eq!(result, -86_i8 & -43_i8); // Expected result of AND between 10101010 and 11010101
     }
 
     #[test]
     fn test_from_i16_and() {
-        let a = GarbledInt::<16>::from_i16(-21846); // Two's complement binary for -21846 is 1010101010101010
-        let b = GarbledInt::<16>::from_i16(-10923); // Two's complement binary for -10923 is 1101010101010101
+        let a: GarbledInt16 = (-21846).into(); // Two's complement binary for -21846 is 1010101010101010
+        let b: GarbledInt16 = (-10923).into(); // Two's complement binary for -10923 is 1101010101010101
 
-        let result = a & b;
-        assert_eq!(result.to_i16(), -21846_i16 & -10923_i16); // Expected result of AND between 1010101010101010 and 1101010101010101
+        let result: i16 = (a & b).into();
+        assert_eq!(result, -21846_i16 & -10923_i16); // Expected result of AND between 1010101010101010 and 1101010101010101
     }
 
     #[test]
     fn test_from_i32_and() {
-        let a = GarbledInt::<32>::from_i32(-1431655766); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
-        let b = GarbledInt::<32>::from_i32(-715827883); // Two's complement binary for -715827883 is 11010101010101010101010101010101
+        let a: GarbledInt32 = (-1431655766).into(); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
+        let b: GarbledInt32 = (-715827883).into(); // Two's complement binary for -715827883 is 11010101010101010101010101010101
 
-        let result = a & b;
-        assert_eq!(result.to_i32(), -1431655766_i32 & -715827883_i32);
+        let result: i32 = (a & b).into();
+        assert_eq!(result, -1431655766_i32 & -715827883_i32);
         // Expected result of AND between 10101010101010101010101010101010 and 11010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i64_and() {
-        let a = GarbledInt::<64>::from_i64(-6148914691236517206); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<64>::from_i64(-3074457345618258603); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledInt64 = (-6148914691236517206_i64).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt64 = (-3074457345618258603_i64).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a & b;
-        assert_eq!(
-            result.to_i64(),
-            -6148914691236517206_i64 & -3074457345618258603_i64
-        );
+        let result: i64 = (a & b).into();
+        assert_eq!(result, -6148914691236517206_i64 & -3074457345618258603_i64);
         // Expected result of AND between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i128_and() {
-        let a = GarbledInt::<128>::from_i128(-6148914691236517206); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<128>::from_i128(-3074457345618258603); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledInt128 = (-6148914691236517206_i128).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt128 = (-3074457345618258603_i128).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a & b;
+        let result: i128 = (a & b).into();
         assert_eq!(
-            result.to_i128(),
+            result,
             -6148914691236517206_i128 & -3074457345618258603_i128
         );
         // Expected result of AND between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
@@ -824,518 +781,488 @@ mod tests {
 
     #[test]
     fn test_from_u8_not() {
-        let a = GarbledUint8::from_u8(170); // Binary 10101010
+        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
 
-        let result = !a;
-        assert_eq!(result.to_u8(), !170); // Expected result of NOT on 10101010
+        let result: u8 = (!a).into();
+        assert_eq!(result, !170); // Expected result of NOT on 10101010
     }
 
     #[test]
     fn test_from_u16_not() {
-        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
+        let a: GarbledUint16 = 43690_u16.into(); // Binary 1010101010101010
 
-        let result = !a;
-        assert_eq!(result.to_u16(), !43690); // Expected result of NOT on 1010101010101010
+        let result: u16 = (!a).into();
+        assert_eq!(result, !43690); // Expected result of NOT on 1010101010101010
     }
 
     #[test]
     fn test_from_u32_not() {
-        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
+        let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
 
-        let result = !a;
-        assert_eq!(result.to_u32(), !2863311530); // Expected result of NOT on 10101010101010101010101010101010
+        let result: u32 = (!a).into();
+        assert_eq!(result, !2863311530); // Expected result of NOT on 10101010101010101010101010101010
     }
 
     #[test]
     fn test_from_u64_not() {
-        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
 
-        let result = !a;
-        assert_eq!(result.to_u64(), !12297829382473034410);
-        // Expected result of NOT on 1010101010101010101010101010101010101010101010101010101010101010
+        let result: u64 = (!a).into();
+        assert_eq!(result, !12297829382473034410); // Expected result of NOT on 1010101010101010101010101010101010101010101010101010101010101010
     }
 
     #[test]
     fn test_from_u128_not() {
-        let a = GarbledUint128::from_u128(170); // Binary 10101010
+        let a: GarbledUint128 = 170_u128.into(); // Binary 10101010
 
-        let result = !a;
-        assert_eq!(result.to_u128(), !170); // Expected result of NOT on 10101010
+        let result: u128 = (!a).into();
+        assert_eq!(result, !170); // Expected result of NOT on 10101010
     }
 
     #[test]
     fn test_from_i8_not() {
-        let a = GarbledInt8::from_i8(-86); // Two's complement binary for -86 is 10101010
+        let a: GarbledInt8 = (-86).into(); // Two's complement binary for -86 is 10101010
 
-        let result = !a;
-        assert_eq!(result.to_i8(), !-86_i8); // Expected result of NOT on 10101010
+        let result: i8 = (!a).into();
+        assert_eq!(result, !-86_i8); // Expected result of NOT on 10101010
     }
 
     #[test]
     fn test_from_i16_not() {
-        let a = GarbledInt::<16>::from_i16(-21846); // Two's complement binary for -21846 is 1010101010101010
+        let a: GarbledInt16 = (-21846).into(); // Two's complement binary for -21846 is 1010101010101010
 
-        let result = !a;
-        assert_eq!(result.to_i16(), !-21846_i16); // Expected result of NOT on 1010101010101010
+        let result: i16 = (!a).into();
+        assert_eq!(result, !-21846_i16); // Expected result of NOT on 1010101010101010
     }
 
     #[test]
     fn test_from_i32_not() {
-        let a = GarbledInt::<32>::from_i32(-1431655766); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
+        let a: GarbledInt32 = (-1431655766).into(); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
 
-        let result = !a;
-        assert_eq!(result.to_i32(), !-1431655766_i32); // Expected result of NOT on 10101010101010101010101010101010
+        let result: i32 = (!a).into();
+        assert_eq!(result, !-1431655766_i32); // Expected result of NOT on 10101010101010101010101010101010
     }
 
     #[test]
     fn test_from_i64_not() {
-        let a = GarbledInt::<64>::from_i64(-6148914691236517206); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let a: GarbledInt64 = (-6148914691236517206_i64).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
 
-        let result = !a;
-        assert_eq!(result.to_i64(), !-6148914691236517206_i64);
-        // Expected result of NOT on 1010101010101010101010101010101010101010101010101010101010101010
+        let result: i64 = (!a).into();
+        assert_eq!(result, !-6148914691236517206_i64); // Expected result of NOT on 1010101010101010101010101010101010101010101010101010101010101010
     }
 
     #[test]
     fn test_from_i128_not() {
-        let a = GarbledInt::<128>::from_i128(-6148914691236517206); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let a: GarbledInt128 = (-6148914691236517206_i128).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
 
-        let result = !a;
-        assert_eq!(result.to_i128(), !-6148914691236517206_i128);
-        // Expected result of NOT on 1010101010101010101010101010101010101010101010101010101010101010
+        let result: i128 = (!a).into();
+        assert_eq!(result, !-6148914691236517206_i128); // Expected result of NOT on 1010101010101010101010101010101010101010101010101010101010101010
     }
 
     #[test]
     fn test_left_shift_uint() {
-        let a = GarbledUint::<4>::new(vec![false, false, false, true]); // Binary 1000
+        let a: GarbledUint8 = 0b0001_u8.into(); // Binary 0001
+        let result: u8 = (a << 1).into(); // Perform left shift by 1
+        assert_eq!(result, 0b0010_u8);
 
-        let result = a << 1; // Perform left shift by 1
-        assert_eq!(result.to_u8(), 0b0000_u8); // Binary 0000 (Left shift result of 1000)
+        let a: GarbledUint8 = 0b0001_u8.into(); // Binary 0001
+        let result: u8 = (a << 2).into(); // Perform left shift by 2
+        assert_eq!(result, 0b0100_u8);
 
-        // binary literal of 0000
+        let a: GarbledUint8 = 0b0001_u8.into(); // Binary 0001
+        let result: u8 = (a << 3).into(); // Perform left shift by 3
+        assert_eq!(result, 0b1000);
 
-        let a = GarbledUint::<4>::new(vec![false, false, false, true]); // Binary 1000
-
-        let result = a << 2; // Perform left shift by 2
-        assert_eq!(result.to_u8(), 0b0000_u8); // Binary 0000 (Left shift result of 1000)
-
-        let a = GarbledUint::<4>::new(vec![false, false, false, true]); // Binary 1000
-
-        let result = a << 3; // Perform left shift by 3
-        assert_eq!(result.to_u8(), 0b0000); // Binary 0000 (Left shift result of 1000)
-
-        //let a = Uint::<4>::new(vec![false, false, false, true]); // Binary 0001
-
-        let a = GarbledUint8::from_u8(1); // Binary 0001
-
-        let result = a << 1; // Perform left shift by 1
-        assert_eq!(result.to_u8(), 0b0010); // Binary 0010 (Left shift result of 0001)
+        let a = GarbledUint::<4>::new(vec![true, false, false, false]); // Binary 0001
+        let result: u8 = (a << 2).into(); // Perform left shift by 2
+        assert_eq!(result, 0b0100); // Binary 0100 (Left shift result of 0001)
 
         let a = GarbledUint::<4>::new(vec![true, false, false, false]); // Binary 0001
 
-        let result = a << 2; // Perform left shift by 2
-        assert_eq!(result.to_u8(), 0b0100); // Binary 0100 (Left shift result of 0001)
-
-        let a = GarbledUint::<4>::new(vec![true, false, false, false]); // Binary 0001
-
-        let result = a << 3; // Perform left shift by 3
-        assert_eq!(result.to_u8(), 0b1000); // Binary 1000 (Left shift result of 0001)
+        let result: u8 = (a << 3).into(); // Perform left shift by 3
+        assert_eq!(result, 0b1000); // Binary 1000 (Left shift result of 0001)
     }
 
     #[test]
     fn test_left_shift_int() {
-        let a = GarbledInt8::from_i8(-128); // Two's complement binary for -128 is 10000000
+        let a: GarbledInt8 = 0b1000_i8.into(); // Binary 1000
 
-        let result = a << 1; // Perform left shift by 1
-        assert_eq!(result.to_i8(), -128_i8 << 1); // Expected result of left shift by 1 on 10000000
+        let result: i8 = (a << 1).into(); // Perform left shift by 1
+        assert_eq!(result, 0b10000_i8); // Binary 0000 (Left shift result of 1000)
 
-        let a = GarbledInt8::from_i8(-128); // Two's complement binary for -128 is 10000000
+        let a: GarbledInt8 = 0b1000_i8.into(); // Binary 1000
 
-        let result = a << 2; // Perform left shift by 2
-        assert_eq!(result.to_i8(), -128_i8 << 2); // Expected result of left shift by 2 on 10000000
+        let result: i8 = (a << 2).into(); // Perform left shift by 2
+        assert_eq!(result, 0b100000_i8); // Binary 0000 (Left shift result of 1000)
 
-        let a = GarbledInt8::from_i8(-128); // Two's complement binary for -128 is 10000000
+        let a: GarbledInt8 = 0b1000_i8.into(); // Binary 1000
 
-        let result = a << 3; // Perform left shift by 3
-        assert_eq!(result.to_i8(), -128_i8 << 3); // Expected result of left shift by 3 on 10000000
+        let result: i8 = (a << 3).into(); // Perform left shift by 3
+        assert_eq!(result, 0b1000000_i8); // Binary 0000 (Left shift result of 1000)
 
-        let a = GarbledInt8::from_i8(-1); // Two's complement binary for -1 is 11111111
+        let a: GarbledInt8 = 1_i8.into(); // Binary 1000
 
-        let result = a << 1; // Perform left shift by 1
-        assert_eq!(result.to_i8(), -1_i8 << 1); // Expected result of left shift by 1 on 11111111
+        let result: i8 = (a << 1).into(); // Perform left shift by 1
+        assert_eq!(result, 0b0010_i8); // Binary 0010 (Left shift result of 0001)
 
-        let a = GarbledInt8::from_i8(-1); // Two's complement binary for -1 is 11111111
+        let a = GarbledInt::<4>::new(vec![true, false, false, false]); // Binary 0001
 
-        let result = a << 2; // Perform left shift by 2
-        assert_eq!(result.to_i8(), -1_i8 << 2); // Expected result of left shift by 2 on 11111111
+        let result: i8 = (a << 2).into(); // Perform left shift by 2
+        assert_eq!(result, 0b0100_i8); // Binary 0100 (Left shift result of 0001)
 
-        let a = GarbledInt8::from_i8(-1); // Two's complement binary for -1 is 11111111
+        let a = GarbledInt::<4>::new(vec![true, false, false, false]); // Binary 0001
 
-        let result = a << 3; // Perform left shift by 3
-        assert_eq!(result.to_i8(), -1_i8 << 3); // Expected result of left shift by 3 on 11111111
+        let result: i8 = (a << 3).into(); // Perform left shift by 3
+        assert_eq!(result, 0b1000_i8); // Binary 1000 (Left shift result of 0001)
     }
 
     #[test]
     fn test_right_shift_uint() {
         let a = GarbledUint::<4>::new(vec![false, false, false, true]); // Binary 1000
 
-        let result = a >> 1; // Perform right shift by 1
-        assert_eq!(result.to_u8(), 0b0100); // Binary 0100 (Right shift result of 1000)
+        let result: u8 = (a >> 1).into(); // Perform right shift by 1
+        assert_eq!(result, 0b0100); // Binary 0100 (Right shift result of 1000)
 
         let a = GarbledUint::<4>::new(vec![false, false, false, true]); // Binary 1000
 
-        let result = a >> 2; // Perform right shift by 2
-        assert_eq!(result.to_u8(), 0b0010); // Binary 0010 (Right shift result of 1000)
+        let result: u8 = (a >> 2).into(); // Perform right shift by 2
+        assert_eq!(result, 0b0010); // Binary 0010 (Right shift result of 1000)
 
         let a = GarbledUint::<4>::new(vec![false, false, false, true]); // Binary 1000
 
-        let result = a >> 3; // Perform right shift by 3
-        assert_eq!(result.to_u8(), 0b0001); // Binary 0001 (Right shift result of 1000)
+        let result: u8 = (a >> 3).into(); // Perform right shift by 3
+        assert_eq!(result, 0b0001); // Binary 0001 (Right shift result of 1000)
     }
 
     #[test]
     fn test_from_u8_nand() {
-        let a = GarbledUint8::from_u8(170); // Binary 10101010
-        let b = GarbledUint8::from_u8(85); // Binary 01010101
+        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+        let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-        let result = a.nand(b);
-        assert_eq!(result.to_u8(), !(170 & 85)); // Expected result of NAND between 10101010 and 01010101
+        let result: u8 = a.nand(b).into();
+        assert_eq!(result, !(170 & 85)); // Expected result of NAND between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_u16_nand() {
-        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
-        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+        let a: GarbledUint16 = 43690_u16.into(); // Binary 1010101010101010
+        let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
-        let result = a.nand(b);
-        assert_eq!(result.to_u16(), !(43690 & 21845)); // Expected result of NAND between 1010101010101010 and 0101010101010101
+        let result: u16 = a.nand(b).into();
+        assert_eq!(result, !(43690 & 21845)); // Expected result of NAND between 1010101010101010 and 0101010101010101
     }
 
     #[test]
     fn test_from_u32_nand() {
-        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+        let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
-        let result = a.nand(b);
-        assert_eq!(result.to_u32(), !(2863311530 & 1431655765));
-        // Expected result of NAND between 10101010101010101010101010101010 and 01010101010101010101010101010101
+        let result: u32 = a.nand(b).into();
+        assert_eq!(result, !(2863311530 & 1431655765)); // Expected result of NAND between 10101010101010101010101010101010 and 01010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u64_nand() {
-        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.nand(b);
-        assert_eq!(
-            result.to_u64(),
-            !(12297829382473034410 & 6148914691236517205)
-        );
+        let result: u64 = a.nand(b).into();
+        assert_eq!(result, !(12297829382473034410 & 6148914691236517205));
         // Expected result of NAND between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u128_nand() {
-        let a = GarbledUint128::from_u128(170); // Binary 10101010
-        let b = GarbledUint128::from_u128(85); // Binary 01010101
+        let a: GarbledUint128 = 170_u128.into(); // Binary 10101010
+        let b: GarbledUint128 = 85_u128.into(); // Binary 01010101
 
-        let result = a.nand(b);
-        assert_eq!(result.to_u128(), !(170 & 85)); // Expected result of NAND between 10101010 and 01010101
+        let result: u128 = a.nand(b).into();
+        assert_eq!(result, !(170 & 85)); // Expected result of NAND between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_i8_nand() {
-        let a = GarbledInt8::from_i8(-86_i8); // Two's complement binary for -86 is 10101010
-        let b = GarbledInt8::from_i8(-43_i8); // Two's complement binary for -43 is 11010101
+        let a: GarbledInt8 = (-86).into(); // Two's complement binary for -86 is 10101010
+        let b: GarbledInt8 = (-43).into(); // Two's complement binary for -43 is 11010101
 
-        let result = a.nand(b);
-        assert_eq!(result.to_i8(), !(-86_i8 & -43_i8)); // Expected result of NAND between 10101010 and 11010101
+        let result: i8 = a.nand(b).into();
+        assert_eq!(result, !(-86_i8 & -43_i8)); // Expected result of NAND between 10101010 and 11010101
     }
 
     #[test]
     fn test_from_i16_nand() {
-        let a = GarbledInt::<16>::from_i16(-21846_i16); // Two's complement binary for -21846 is 1010101010101010
-        let b = GarbledInt::<16>::from_i16(-10923_i16); // Two's complement binary for -10923 is 11010101
+        let a: GarbledInt<16> = (-21846).into(); // Two's complement binary for -21846 is 1010101010101010
+        let b: GarbledInt<16> = (-10923).into(); // Two's complement binary for -10923 is 1101010101010101
 
-        let result = a.nand(b);
-        assert_eq!(result.to_i16(), !(-21846_i16 & -10923_i16)); // Expected result of NAND between 1010101010101010 and 11010101
+        let result: i16 = a.nand(b).into();
+        assert_eq!(result, !(-21846_i16 & -10923_i16)); // Expected result of NAND between 1010101010101010 and 1101010101010101
     }
 
     #[test]
     fn test_from_i32_nand() {
-        let a = GarbledInt::<32>::from_i32(-1431655766_i32); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
-        let b = GarbledInt::<32>::from_i32(-715827883_i32); // Two's complement binary for -715827883 is 11010101
+        let a: GarbledInt<32> = (-1431655766).into(); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
+        let b: GarbledInt<32> = (-715827883).into(); // Two's complement binary for -715827883 is 11010101010101010101010101010101
 
-        let result = a.nand(b);
-        assert_eq!(result.to_i32(), !(-1431655766_i32 & -715827883_i32));
-        // Expected result of NAND between 10101010101010101010101010101010 and 11010101
+        let result: i32 = a.nand(b).into();
+        assert_eq!(result, !(-1431655766_i32 & -715827883_i32));
+        // Expected result of NAND between 10101010101010101010101010101010 and 11010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i64_nand() {
-        let a = GarbledInt::<64>::from_i64(-6148914691236517206_i64); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<64>::from_i64(-3074457345618258603_i64); // Two's complement binary for -3074457345618258603 is 11010101
+        let a: GarbledInt64 = (-6148914691236517206_i64).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt64 = (-3074457345618258603_i64).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.nand(b);
+        let result: i64 = a.nand(b).into();
         assert_eq!(
-            result.to_i64(),
+            result,
             !(-6148914691236517206_i64 & -3074457345618258603_i64)
         );
-        // Expected result of NAND between 1010101010101010101010101010101010101010101010101010101010101010 and 11010101
     }
 
     #[test]
     fn test_from_i128_nand() {
-        let a = GarbledInt::<128>::from_i128(-6148914691236517206_i128); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<128>::from_i128(-3074457345618258603_i128); // Two's complement binary for -3074457345618258603 is 11010101
+        let a: GarbledInt<128> = (-6148914691236517206_i128).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt<128> = (-3074457345618258603_i128).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.nand(b);
+        let result: i128 = a.nand(b).into();
         assert_eq!(
-            result.to_i128(),
+            result,
             !(-6148914691236517206_i128 & -3074457345618258603_i128)
         );
-        // Expected result of NAND between 1010101010101010101010101010101010101010101010101010101010101010 and 11010101
     }
 
     #[test]
     fn test_from_u8_nor() {
-        let a = GarbledUint8::from_u8(170); // Binary 10101010
-        let b = GarbledUint8::from_u8(85); // Binary 01010101
+        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+        let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-        let result = a.nor(b);
-        assert_eq!(result.to_u8(), !(170 | 85)); // Expected result of NOR between 10101010 and 01010101
+        let result: u8 = a.nor(b).into();
+        assert_eq!(result, !(170 | 85)); // Expected result of NOR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_u16_nor() {
-        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
-        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+        let a: GarbledUint16 = 43707_u16.into(); // Binary 1010101010101011
+        let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
-        let result = a.nor(b);
-        assert_eq!(result.to_u16(), !(43690 | 21845)); // Expected result of NOR between 1010101010101010 and 0101010101010101
+        let result: u16 = a.nor(b).into();
+        assert_eq!(result, !(43707 | 21845)); // Expected result of NOR between 1010101010101011 and 0101010101010101
     }
 
     #[test]
     fn test_from_u32_nor() {
-        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+        let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
-        let result = a.nor(b);
-        assert_eq!(result.to_u32(), !(2863311530 | 1431655765));
-        // Expected result of NOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
+        let result: u32 = a.nor(b).into();
+        assert_eq!(result, !(2863311530 | 1431655765)); // Expected result of NOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u64_nor() {
-        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.nor(b);
-        assert_eq!(
-            result.to_u64(),
-            !(12297829382473034410 | 6148914691236517205)
-        );
+        let result: u64 = a.nor(b).into();
+        assert_eq!(result, !(12297829382473034410 | 6148914691236517205));
         // Expected result of NOR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u128_nor() {
-        let a = GarbledUint128::from_u128(170); // Binary 10101010
-        let b = GarbledUint128::from_u128(85); // Binary 01010101
+        let a: GarbledUint128 = 170_u128.into(); // Binary 10101010
+        let b: GarbledUint128 = 85_u128.into(); // Binary 01010101
 
-        let result = a.nor(b);
-        assert_eq!(result.to_u128(), !(170 | 85)); // Expected result of NOR between 10101010 and 01010101
+        let result: u128 = a.nor(b).into();
+        assert_eq!(result, !(170 | 85)); // Expected result of NOR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_i8_nor() {
-        let a = GarbledInt8::from_i8(-86_i8); // Two's complement binary for -86 is 10101010
-        let b = GarbledInt8::from_i8(-43_i8); // Two's complement binary for -43 is 11010101
+        let a: GarbledInt8 = (-86).into(); // Two's complement binary for -86 is 10101010
+        let b: GarbledInt8 = (-43).into(); // Two's complement binary for -43 is 11010101
 
-        let result = a.nor(b);
-        assert_eq!(result.to_i8(), !(-86_i8 | -43_i8)); // Expected result of NOR between 10101010 and 11010101
+        let result: i8 = a.nor(b).into();
+        assert_eq!(result, !(-86_i8 | -43_i8)); // Expected result of NOR between 10101010 and 11010101
     }
 
     #[test]
     fn test_from_i16_nor() {
-        let a = GarbledInt::<16>::from_i16(-21846_i16); // Two's complement binary for -21846 is 1010101010101010
-        let b = GarbledInt::<16>::from_i16(-10923_i16); // Two's complement binary for -10923 is 11010101
+        let a: GarbledInt<16> = (-21846).into(); // Two's complement binary for -21846 is 1010101010101010
+        let b: GarbledInt<16> = (-10923).into(); // Two's complement binary for -10923 is 1101010101010101
 
-        let result = a.nor(b);
-        assert_eq!(result.to_i16(), !(-21846_i16 | -10923_i16)); // Expected result of NOR between 1010101010101010 and 11010101
+        let result: i16 = a.nor(b).into();
+        assert_eq!(result, !(-21846_i16 | -10923_i16)); // Expected result of NOR between 1010101010101010 and 1101010101010101
     }
 
     #[test]
     fn test_from_i32_nor() {
-        let a = GarbledInt::<32>::from_i32(-1431655766_i32); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
-        let b = GarbledInt::<32>::from_i32(-715827883_i32); // Two's complement binary for -715827883 is 11010101
+        let a: GarbledInt<32> = (-1431655766).into(); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
+        let b: GarbledInt<32> = (-715827883).into(); // Two's complement binary for -715827883 is 11010101010101010101010101010101
 
-        let result = a.nor(b);
-        assert_eq!(result.to_i32(), !(-1431655766_i32 | -715827883_i32));
-        // Expected result of NOR between 10101010101010101010101010101010 and 11010101
+        let result: i32 = a.nor(b).into();
+        assert_eq!(result, !(-1431655766_i32 | -715827883_i32));
+        // Expected result of NOR between 10101010101010101010101010101010 and 11010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i64_nor() {
-        let a = GarbledInt::<64>::from_i64(-6148914691236517206_i64); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<64>::from_i64(-3074457345618258603_i64); // Two's complement binary for -3074457345618258603 is 11010101
+        let a: GarbledInt<64> = (-6148914691236517206_i64).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt<64> = (-3074457345618258603_i64).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.nor(b);
+        let result: i64 = a.nor(b).into();
         assert_eq!(
-            result.to_i64(),
+            result,
             !(-6148914691236517206_i64 | -3074457345618258603_i64)
         );
-        // Expected result of NOR between 1010101010101010101010101010101010101010101010101010101010101010 and 11010101
+        // Expected result of NOR between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i128_nor() {
-        let a = GarbledInt::<128>::from_i128(-6148914691236517206_i128); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<128>::from_i128(-3074457345618258603_i128); // Two's complement binary for -3074457345618258603 is 11010101
+        let a: GarbledInt<128> = (-6148914691236517206_i128).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt<128> = (-3074457345618258603_i128).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.nor(b);
+        let result: i128 = a.nor(b).into();
         assert_eq!(
-            result.to_i128(),
+            result,
             !(-6148914691236517206_i128 | -3074457345618258603_i128)
         );
-        // Expected result of NOR between 1010101010101010101010101010101010101010101010101010101010101010 and 11010101
+        // Expected result of NOR between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u8_xnor() {
-        let a = GarbledUint8::from_u8(170); // Binary 10101010
-        let b = GarbledUint8::from_u8(85); // Binary 01010101
+        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+        let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-        let result = a.xnor(b);
-        assert_eq!(result.to_u8(), !(170 ^ 85)); // Expected result of XNOR between 10101010 and 01010101
+        let result: u8 = a.xnor(b).into();
+        assert_eq!(result, !(170 ^ 85)); // Expected result of XNOR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_u16_xnor() {
-        let a = GarbledUint16::from_u16(43690); // Binary 1010101010101010
-        let b = GarbledUint16::from_u16(21845); // Binary 0101010101010101
+        let a: GarbledUint16 = 43690_u16.into(); // Binary 1010101010101010
+        let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
-        let result = a.xnor(b);
-        assert_eq!(result.to_u16(), !(43690 ^ 21845)); // Expected result of XNOR between 1010101010101010 and 0101010101010101
+        let result: u16 = a.xnor(b).into();
+        assert_eq!(result, !(43690 ^ 21845)); // Expected result of XNOR between 1010101010101010 and 0101010101010101
     }
 
     #[test]
     fn test_from_u32_xnor() {
-        let a = GarbledUint32::from_u32(2863311530); // Binary 10101010101010101010101010101010
-        let b = GarbledUint32::from_u32(1431655765); // Binary 01010101010101010101010101010101
+        let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+        let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
-        let result = a.xnor(b);
-        assert_eq!(result.to_u32(), !(2863311530 ^ 1431655765));
-        // Expected result of XNOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
+        let result: u32 = a.xnor(b).into();
+        assert_eq!(result, !(2863311530 ^ 1431655765)); // Expected result of XNOR between 10101010101010101010101010101010 and 01010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u64_xnor() {
-        let a = GarbledUint64::from_u64(12297829382473034410); // Binary 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledUint64::from_u64(6148914691236517205); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+        let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.xnor(b);
-        assert_eq!(
-            result.to_u64(),
-            !(12297829382473034410 ^ 6148914691236517205)
-        );
+        let result: u64 = a.xnor(b).into();
+        assert_eq!(result, !(12297829382473034410 ^ 6148914691236517205));
         // Expected result of XNOR between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_u128_xnor() {
-        let a = GarbledUint128::from_u128(170); // Binary 10101010
-        let b = GarbledUint128::from_u128(85); // Binary 01010101
+        let a: GarbledUint128 = 170_u128.into(); // Binary 10101010
+        let b: GarbledUint128 = 85_u128.into(); // Binary 01010101
 
-        let result = a.xnor(b);
-        assert_eq!(result.to_u128(), !(170 ^ 85)); // Expected result of XNOR between 10101010 and 01010101
+        let result: u128 = a.xnor(b).into();
+        assert_eq!(result, !(170 ^ 85)); // Expected result of XNOR between 10101010 and 01010101
     }
 
     #[test]
     fn test_from_i8_xnor() {
-        let a = GarbledInt8::from_i8(-86_i8); // Two's complement binary for -86 is 10101010
-        let b = GarbledInt8::from_i8(-43_i8); // Two's complement binary for -43 is 11010101
+        let a: GarbledInt8 = (-86).into(); // Two's complement binary for -86 is 10101010
+        let b: GarbledInt8 = (-43).into(); // Two's complement binary for -43 is 11010101
 
-        let result = a.xnor(b);
-        assert_eq!(result.to_i8(), !(-86_i8 ^ -43_i8)); // Expected result of XNOR between 10101010 and 11010101
+        let result: i8 = a.xnor(b).into();
+        assert_eq!(result, !(-86_i8 ^ -43_i8)); // Expected result of XNOR between 10101010 and 11010101
     }
 
     #[test]
     fn test_from_i16_xnor() {
-        let a = GarbledInt::<16>::from_i16(-21846_i16); // Two's complement binary for -21846 is 1010101010101010
-        let b = GarbledInt::<16>::from_i16(-10923_i16); // Two's complement binary for -10923 is 11010101
+        let a: GarbledInt16 = (-21846).into(); // Two's complement binary for -21846 is 1010101010101010
+        let b: GarbledInt16 = (-10923).into(); // Two's complement binary for -10923 is 1101010101010101
 
-        let result = a.xnor(b);
-        assert_eq!(result.to_i16(), !(-21846_i16 ^ -10923_i16)); // Expected result of XNOR between 1010101010101010 and 11010101
+        let result: i16 = a.xnor(b).into();
+        assert_eq!(result, !(-21846_i16 ^ -10923_i16)); // Expected result of XNOR between 1010101010101010 and 1101010101010101
     }
 
     #[test]
     fn test_from_i32_xnor() {
-        let a = GarbledInt::<32>::from_i32(-1431655766_i32); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
-        let b = GarbledInt::<32>::from_i32(-715827883_i32); // Two's complement binary for -715827883 is 11010101
+        let a: GarbledInt32 = (-1431655766).into(); // Two's complement binary for -1431655766 is 10101010101010101010101010101010
+        let b: GarbledInt32 = (-715827883).into(); // Two's complement binary for -715827883 is 11010101010101010101010101010101
 
-        let result = a.xnor(b);
-        assert_eq!(result.to_i32(), !(-1431655766_i32 ^ -715827883_i32));
-        // Expected result of XNOR between 10101010101010101010101010101010 and 11010101
+        let result: i32 = a.xnor(b).into();
+        assert_eq!(result, !(-1431655766_i32 ^ -715827883_i32));
+        // Expected result of XNOR between 10101010101010101010101010101010 and 11010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i64_xnor() {
-        let a = GarbledInt::<64>::from_i64(-6148914691236517206_i64); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<64>::from_i64(-3074457345618258603_i64); // Two's complement binary for -3074457345618258603 is 11010101
+        let a: GarbledInt64 = (-6148914691236517206_i64).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt64 = (-3074457345618258603_i64).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.xnor(b);
+        let result: i64 = a.xnor(b).into();
         assert_eq!(
-            result.to_i64(),
+            result,
             !(-6148914691236517206_i64 ^ -3074457345618258603_i64)
         );
-        // Expected result of XNOR between 1010101010101010101010101010101010101010101010101010101010101010 and 11010101
+        // Expected result of XNOR between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[test]
     fn test_from_i128_xnor() {
-        let a = GarbledInt::<128>::from_i128(-6148914691236517206_i128); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
-        let b = GarbledInt::<128>::from_i128(-3074457345618258603_i128); // Two's complement binary for -3074457345618258603 is 11010101
+        let a: GarbledInt128 = (-6148914691236517206_i128).into(); // Two's complement binary for -6148914691236517206 is 1010101010101010101010101010101010101010101010101010101010101010
+        let b: GarbledInt128 = (-3074457345618258603_i128).into(); // Two's complement binary for -3074457345618258603 is 1101010101010101010101010101010101010101010101010101010101010101
 
-        let result = a.xnor(b);
+        let result: i128 = a.xnor(b).into();
         assert_eq!(
-            result.to_i128(),
+            result,
             !(-6148914691236517206_i128 ^ -3074457345618258603_i128)
         );
-        // Expected result of XNOR between 1010101010101010101010101010101010101010101010101010101010101010 and 11010101
+        // Expected result of XNOR between 1010101010101010101010101010101010101010101010101010101010101010 and 1101010101010101010101010101010101010101010101010101010101010101
     }
 
     #[ignore = "still testing bitwise right shift int"]
     #[test]
     fn test_right_shift_int() {
-        let a = GarbledInt8::from_i8(-128); // Two's complement binary for -128 is 10000000
+        let a: GarbledInt8 = 0b1000_i8.into(); // Binary 1000
 
-        let result = a >> 1; // Perform right shift by 1
-        assert_eq!(result.to_i8(), -128_i8 >> 1); // Expected result of right shift by 1 on 10000000
+        let result: i8 = (a >> 1).into(); // Perform right shift by 1
+        assert_eq!(result, 0b0100_i8); // Binary 0100 (Right shift result of 1000)
 
-        let a = GarbledInt8::from_i8(-128); // Two's complement binary for -128 is 10000000
+        let a: GarbledInt8 = 0b1000_i8.into(); // Binary 1000
 
-        let result = a >> 2; // Perform right shift by 2
-        assert_eq!(result.to_i8(), -128_i8 >> 2); // Expected result of right shift by 2 on 10000000
+        let result: i8 = (a >> 2).into(); // Perform right shift by 2
+        assert_eq!(result, 0b0010_i8); // Binary 0010 (Right shift result of 1000)
 
-        let a = GarbledInt8::from_i8(-128); // Two's complement binary for -128 is 10000000
+        let a: GarbledInt8 = 0b1000_i8.into(); // Binary 1000
 
-        let result = a >> 3; // Perform right shift by 3
-        assert_eq!(result.to_i8(), -128_i8 >> 3); // Expected result of right shift by 3 on 10000000
+        let result: i8 = (a >> 3).into(); // Perform right shift by 3
+        assert_eq!(result, 0b0001_i8); // Binary 0001 (Right shift result of 1000)
 
-        let a = GarbledInt8::from_i8(-1); // Two's complement binary for -1 is 11111111
+        let a: GarbledInt8 = 1_i8.into(); // Binary 0001
 
-        let result = a >> 1; // Perform right shift by 1
-        assert_eq!(result.to_i8(), -1_i8 >> 1); // Expected result of right shift by 1 on 11111111
+        let result: i8 = (a >> 1).into(); // Perform right shift by 1
+        assert_eq!(result, 0b0000_i8); // Binary 0000 (Right shift result of 0001)
 
-        let a = GarbledInt8::from_i8(-1); // Two's complement binary for -1 is 11111111
+        let a = GarbledInt::<4>::new(vec![true, false, false, false]); // Binary 0001
 
-        let result = a >> 2; // Perform right shift by 2
-        assert_eq!(result.to_i8(), -1_i8 >> 2); // Expected result of right shift by 2 on 11111111
+        let result: i8 = (a >> 2).into(); // Perform right shift by 2
+        assert_eq!(result, 0b0000_i8); // Binary 0000 (Right shift result of 0001)
 
-        let a = GarbledInt8::from_i8(-1); // Two's complement binary for -1 is 11111111
+        let a = GarbledInt::<4>::new(vec![true, false, false, false]); // Binary 0001
 
-        let result = a >> 3; // Perform right shift by 3
-        assert_eq!(result.to_i8(), -1_i8 >> 3); // Expected result of right shift by 3 on 11111111
+        let result: i8 = (a >> 3).into(); // Perform right shift by 3
+        assert_eq!(result, 0b0000_i8); // Binary 0000 (Right shift result of 0001)
     }
 }

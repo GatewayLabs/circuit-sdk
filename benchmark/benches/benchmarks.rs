@@ -36,11 +36,12 @@ fn gateway_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = &a + &b;
-    assert_eq!(result.to_u128(), clear_a + clear_b);
+    let result: u128 = result.into();
+    assert_eq!(result, clear_a + clear_b);
     Ok(())
 }
 
@@ -78,11 +79,12 @@ fn gateway_encrypted_bitwise_and() -> Result<(), Box<dyn std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = &a & &b;
-    assert_eq!(result.to_u128(), clear_a & clear_b);
+    let result: u128 = result.into();
+    assert_eq!(result, clear_a & clear_b);
     Ok(())
 }
 
@@ -120,11 +122,12 @@ fn gateway_encrypted_bitwise_xor() -> Result<(), Box<dyn std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = &a ^ &b;
-    assert_eq!(result.to_u128(), clear_a ^ clear_b);
+    let result: u128 = result.into();
+    assert_eq!(result, clear_a ^ clear_b);
     Ok(())
 }
 
@@ -161,11 +164,12 @@ fn gateway_encrypted_bitwise_or() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 42424242424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = &a | &b;
-    assert_eq!(result.to_u128(), clear_a | clear_b);
+    let result: u128 = result.into();
+    assert_eq!(result, clear_a | clear_b);
     Ok(())
 }
 
@@ -200,10 +204,11 @@ fn gateway_encrypted_bitwise_not() -> Result<(), Box<dyn ::std::error::Error>> {
 
     let clear_a = 12297829382473034410u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
+    let a: GarbledUint128 = clear_a.into();
 
     let result = !&a;
-    assert_eq!(result.to_u128(), !clear_a);
+    let result: u128 = result.into();
+    assert_eq!(result, !clear_a);
     Ok(())
 }
 
@@ -241,11 +246,12 @@ fn gateway_encrypted_subtraction() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = &a - &b;
-    assert_eq!(result.to_u128(), clear_a - clear_b);
+    let result: u128 = result.into();
+    assert_eq!(result, clear_a - clear_b);
     Ok(())
 }
 
@@ -325,11 +331,12 @@ fn gateway_encrypted_nand() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a.nand(b);
-    assert_eq!(result.to_u128(), !(clear_a & clear_b));
+    let result: u128 = result.into();
+    assert_eq!(result, !(clear_a & clear_b));
     Ok(())
 }
 
@@ -367,11 +374,12 @@ fn gateway_encrypted_nor() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a.nor(b);
-    assert_eq!(result.to_u128(), !(clear_a | clear_b));
+    let result: u128 = result.into();
+    assert_eq!(result, !(clear_a | clear_b));
     Ok(())
 }
 
@@ -409,11 +417,12 @@ fn gateway_encrypted_xnor() -> Result<(), Box<dyn ::std::error::Error>> {
     let clear_a = 12297829382473034410u128;
     let clear_b = 424242424242u128;
 
-    let a = GarbledUint128::from_u128(clear_a);
-    let b = GarbledUint128::from_u128(clear_b);
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
 
     let result = a.xnor(b);
-    assert_eq!(result.to_u128(), !(clear_a ^ clear_b));
+    let result: u128 = result.into();
+    assert_eq!(result, !(clear_a ^ clear_b));
     Ok(())
 }
 
