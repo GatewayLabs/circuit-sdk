@@ -272,7 +272,8 @@ impl<const N: usize> std::ops::Div for Uint<N> {
             for i in 0..bits {
                 remainder[i] = self.push_mux(carry_or_overflow, remainder[i], x_sub[i]);
             }
-            let quotient_bit = self.push_not(carry);
+            gates.push(Gate::NOT(carry as u32)); 
+            let quotient_bit = Some(gates.len() as u32); // self.push_not(carry);
             quotient[bits - shift_amount - 1] = self.push_mux(overflow, 0, quotient_bit);
         }    
  
