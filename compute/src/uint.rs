@@ -199,30 +199,7 @@ impl<const N: usize> Uint<N> {
 		0x40 - self.0[0].leading_zeros() as usize
 	}
 
-	/// Multiply by a u32
-	pub fn mul_u32(self, other: u32) -> Self {
-		let mut carry = [0u64; N];
-		let mut ret = [0u64; N];
-
-		for i in 0..N {
-			let not_last_word = i < N - 1;
-			let upper = other as u64 * (self.0[i] >> 32);
-			let lower = other as u64 * (self.0[i] & 0xFFFFFFFF);
-
-			if not_last_word {
-				carry[i + 1] += upper >> 32;
-			}
-
-			let (sum, overflow) = lower.overflowing_add(upper << 32);
-			ret[i] = sum;
-
-			if overflow && not_last_word {
-				carry[i + 1] += 1;
-			}
-		}
-
-		Self(ret) + Self(carry)
-	}
+	
 
     /// Simulates the local execution of the circuit using a 2 Party MPC protocol.
     ///
@@ -262,60 +239,6 @@ impl<const N: usize> Uint<N> {
 
 }
 
-
-impl<const N: usize> Mul<Uint<N>> for Uint<N> {
-        type Output = Self;
-
-        fn mul(self, other: Self) -> Self {
-                let mut me = Self::MIN;
-
-                for i in 0..(2 * N) {
-                        let to_mul = (other >> (32 * i)).low_u32();
-                        me = me + (self.mul_u32(to_mul) << (32 * i));
-                }
-                me
-        }
-}
-impl<const N: usize> Div<Uint<N>> for Uint<N> {
-	type Output = Self;
-
-	fn div(self, other: Self) -> Self {
-		let mut sub_copy = self;
-		let mut shift_copy = other;
-		let mut ret = [0u64; N];
-
-		let my_bits = self.bits();
-		let your_bits = other.bits();
-
-		// Check for division by 0
-		assert!(your_bits != 0);
-
-		// Early return in case we are dividing by a larger number than us
-		if my_bits < your_bits {
-			return Self(ret);
-		}
-
-		// Bitwise long division
-		let mut shift = my_bits - your_bits;
-		shift_copy = shift_copy << shift;
-
-		loop {
-			if sub_copy >= shift_copy {
-				ret[shift / 64] |= 1 << (shift % 64);
-				sub_copy = sub_copy - shift_copy;
-			}
-			shift_copy = shift_copy >> 1;
-
-			if shift == 0 {
-				break;
-			}
-
-			shift -= 1;
-		}
-
-		Self(ret)
- 	}
-     }
 }
 
 // test conversions
