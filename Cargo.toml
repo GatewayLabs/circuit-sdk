@@ -4,7 +4,7 @@ resolver = "2"
 members = [ 
     "benchmark",
     "compute",
-    "vm"
+    "vm", 
 ]
 
 [workspace.package]

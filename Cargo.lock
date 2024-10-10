@@ -217,7 +217,6 @@ dependencies = [
  "bincode",
  "blake3",
  "curve25519-dalek",
- "garble_lang",
  "hex",
  "rand",
  "rand_chacha",
@@ -413,15 +412,6 @@ name = "fiat-crypto"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28dea519a9695b9977216879a3ebfddf92f1c08c05d984f8996aecd6ecdc811d"
-
-[[package]]
-name = "garble_lang"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9310f9d624fb9e4f6694acaf232abfc527aef2a4b232983870774e13ec2e9d5b"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "generic-array"

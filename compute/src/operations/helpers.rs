@@ -1,10 +1,64 @@
 use crate::simulator::simulate;
 use crate::uint::GarbledUint;
+use std::cmp::Ordering;
 use tandem::Circuit;
 use tandem::Gate;
 
+// Helper function to build and simulate a circuit for addition or subtraction
+#[allow(clippy::type_complexity)]
+pub(super) fn build_and_simulate_arithmetic<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
+    gate_fn: fn(u32, u32, Option<u32>, &mut Vec<Gate>, &mut Option<u32>) -> u32,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+    let mut carry_or_borrow_index = None;
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
+    }
+
+    let mut result_bit_indices = Vec::with_capacity(N);
+
+    // Generate gates for each bit of the addition/subtraction
+    for i in 0..N {
+        let a = i as u32;
+        let b = (N + i) as u32;
+
+        // Use the provided gate function to define the behavior of each bit
+        let result_index = gate_fn(
+            a,
+            b,
+            carry_or_borrow_index,
+            &mut gates,
+            &mut carry_or_borrow_index,
+        );
+        result_bit_indices.push(result_index);
+    }
+
+    // Define output indices (result bits from the arithmetic operation)
+    let output_indices: Vec<u32> = result_bit_indices.to_vec();
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
+    // Simulate the circuit
+    let result = simulate(&program, &input, &[]).unwrap();
+
+    // Return the resulting Uint<N>
+    GarbledUint::new(result)
+}
+
 // Helper function to add two GarbledUint<N>
-pub(super) fn add_garbled_uints(gates: &mut Vec<Gate>, a: &[usize], b: &[usize]) -> Vec<usize> {
+fn add_garbled_uints(gates: &mut Vec<Gate>, a: &[usize], b: &[usize]) -> Vec<usize> {
     let mut result = Vec::with_capacity(a.len());
     let mut carry = None;
 
@@ -18,7 +72,7 @@ pub(super) fn add_garbled_uints(gates: &mut Vec<Gate>, a: &[usize], b: &[usize])
 }
 
 // Helper function to add two bits with optional carry
-pub(super) fn full_adder(
+fn full_adder(
     gates: &mut Vec<Gate>,
     a: usize,
     b: usize,
@@ -52,55 +106,6 @@ pub(super) fn full_adder(
     (sum, new_carry)
 }
 
-// Helper function to build and simulate a circuit for addition or subtraction
-#[allow(clippy::type_complexity)]
-pub(super) fn build_and_simulate_arithmetic<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: &GarbledUint<N>,
-    gate_fn: fn(u32, u32, Option<u32>, &mut Vec<Gate>, &mut Option<u32>) -> u32,
-) -> GarbledUint<N> {
-    let mut gates = Vec::new();
-    let mut carry_or_borrow_index = None;
-
-    // Push input gates for both Uint<N> objects
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
-    let mut result_bit_indices = Vec::with_capacity(N);
-
-    // Generate gates for each bit of the addition/subtraction
-    for i in 0..N {
-        let a = i as u32;
-        let b = (N + i) as u32;
-
-        // Use the provided gate function to define the behavior of each bit
-        let result_index = gate_fn(
-            a,
-            b,
-            carry_or_borrow_index,
-            &mut gates,
-            &mut carry_or_borrow_index,
-        );
-        result_bit_indices.push(result_index);
-    }
-
-    // Define output indices (result bits from the arithmetic operation)
-    let output_indices: Vec<u32> = result_bit_indices.to_vec();
-
-    // Create the circuit
-    let program = Circuit::new(gates, output_indices);
-
-    // Simulate the circuit
-    let result = simulate(&program, &lhs.bits, &rhs.bits).unwrap();
-
-    // Return the resulting Uint<N>
-    GarbledUint::new(result)
-}
-
 // Helper function to build and simulate a circuit for multiplication
 // Implements the shift-and-add method for multiplication
 // To be replaced with Karatsuba's algorithm for better performance
@@ -118,7 +123,7 @@ pub(super) fn build_and_simulate_multiplication<const N: usize>(
     }
     let rhs_start = gates.len();
     for _ in 0..N {
-        gates.push(Gate::InEval);
+        gates.push(Gate::InContrib);
     }
 
     let mut partial_products = Vec::with_capacity(N);
@@ -141,15 +146,19 @@ pub(super) fn build_and_simulate_multiplication<const N: usize>(
     // Create the circuit
     let program = Circuit::new(gates, output_indices);
 
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
     // Simulate the circuit
-    let result = simulate(&program, &lhs.bits, &rhs.bits).unwrap();
+    let result = simulate(&program, &input, &[]).unwrap();
 
     // Return the resulting GarbledUint<N>
     GarbledUint::new(result)
 }
 
 // Helper function to generate a partial product
-pub(super) fn generate_partial_product(
+fn generate_partial_product(
     gates: &mut Vec<Gate>,
     lhs_start: usize,
     rhs_start: usize,
@@ -270,38 +279,95 @@ pub(super) fn sub_gate_fn(
     final_diff_index
 }
 
-// Helper function to build and simulate a circuit for binary operations
-pub(super) fn build_and_simulate<const N: usize>(
+// Helper function to build and simulate a circuit for OR operation
+pub(super) fn build_and_simulate_or<const N: usize>(
     lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
-    gate_fn: fn(u32, u32) -> Gate,
+    rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut gates = Vec::new();
 
-    // Push input gates for both Uint<N>s
+    // Push input gates for both Uint<N> objects (lhs and rhs)
     for _ in 0..N {
         gates.push(Gate::InContrib); // From first Uint<N> (lhs)
     }
 
     for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
     }
 
     // Define gates for each bit in lhs and rhs
-    for i in 0..N {
-        let gate = gate_fn(i as u32, (N + i) as u32);
-        gates.push(gate);
-    }
+    let mut output_indices = Vec::with_capacity(N);
 
-    // Define the output indices (for N-bit operation)
-    let output_indices: Vec<u32> = (2 * N as u32..2 * N as u32 + N as u32).collect();
+    for i in 0..N {
+        // OR(a, b) = (a ⊕ b) ⊕ (a & b)
+
+        // Step 1: XOR gate for (a ⊕ b)
+        let xor_gate = Gate::Xor(i as u32, (N + i) as u32);
+        let xor_gate_idx = gates.len() as u32;
+        gates.push(xor_gate);
+
+        // Step 2: AND gate for (a & b)
+        let and_gate = Gate::And(i as u32, (N + i) as u32);
+        let and_gate_idx = gates.len() as u32;
+        gates.push(and_gate);
+
+        // Step 3: XOR gate for final OR result (a ⊕ b) ⊕ (a & b)
+        let final_or_gate = Gate::Xor(xor_gate_idx, and_gate_idx);
+        gates.push(final_or_gate);
+
+        // Step 4: Store the output index of this bit's OR result
+        output_indices.push(gates.len() as u32 - 1);
+    }
 
     // Create the circuit
     let program = Circuit::new(gates, output_indices);
 
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
     // Simulate the circuit
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+    let result = simulate(&program, &input, &[]).unwrap();
+
+    // Return the resulting Uint<N>
+    GarbledUint::new(result)
+}
+
+// Helper function to build and simulate a circuit for binary operations
+pub(super) fn build_and_simulate<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
+    gate_fn: fn(u32, u32) -> Gate,
+) -> GarbledUint<N> {
+    let mut gates = Vec::new();
+
+    // Push input gates for both Uint<N>s, both from the contributor
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
+    }
+
+    let mut output_indices = Vec::with_capacity(N);
+
+    // Define gates for each bit in lhs and rhs
+    for i in 0..N {
+        output_indices.push(gates.len() as u32);
+        let gate = gate_fn(i as u32, (N + i) as u32);
+        gates.push(gate);
+    }
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
+    // Simulate the circuit
+    let result = simulate(&program, &input, &[]).unwrap();
 
     // Return the resulting Uint<N>
     GarbledUint::new(result)
@@ -316,24 +382,18 @@ pub(super) fn build_and_simulate_not<const N: usize>(input: &GarbledUint<N>) -> 
         gates.push(Gate::InContrib); // From first Uint<N> (lhs)
     }
 
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
+    let mut output_indices = Vec::with_capacity(N);
     // Define NOT gates for each bit in the Uint<N>
-    for i in 0..N * 2 {
+    for i in 0..N {
+        output_indices.push(gates.len() as u32);
         gates.push(Gate::Not(i.try_into().unwrap())); // NOT gate for each bit
     }
-
-    // Define the output indices (for N-bit NOT)
-    let n = N as u32;
-    let output_indices: Vec<u32> = (2 * n..2 * n + n).collect();
 
     // Create the circuit
     let program = Circuit::new(gates, output_indices);
 
     // Simulate the circuit
-    let result = simulate(&program, &input.bits, &input.bits).unwrap();
+    let result = simulate(&program, &input.bits, &[]).unwrap();
 
     // Return the resulting Uint<N>
     GarbledUint::new(result)
@@ -342,7 +402,7 @@ pub(super) fn build_and_simulate_not<const N: usize>(input: &GarbledUint<N>) -> 
 // Implement composite bitwise operations for GarbledUint<N>
 pub(super) fn build_and_simulate_nand<const N: usize>(
     lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
+    rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut gates = Vec::new();
 
@@ -352,7 +412,7 @@ pub(super) fn build_and_simulate_nand<const N: usize>(
     }
 
     for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
     }
 
     let mut output_indices = Vec::with_capacity(N);
@@ -370,16 +430,22 @@ pub(super) fn build_and_simulate_nand<const N: usize>(
         output_indices.push(gates.len() as u32 - 1);
     }
 
+    // Create the circuit
     let program = Circuit::new(gates, output_indices);
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
+
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
+    // Simulate the circuit
+    let result = simulate(&program, &input, &[]).unwrap();
 
     GarbledUint::new(result)
 }
 
 pub(super) fn build_and_simulate_nor<const N: usize>(
     lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
+    rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut gates = Vec::new();
 
@@ -389,7 +455,7 @@ pub(super) fn build_and_simulate_nor<const N: usize>(
     }
 
     for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
     }
 
     let mut output_indices = Vec::with_capacity(N);
@@ -416,16 +482,23 @@ pub(super) fn build_and_simulate_nor<const N: usize>(
         output_indices.push(gates.len() as u32 - 1);
     }
 
+    // Create the circuit
     let program = Circuit::new(gates, output_indices);
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
 
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
+    // Simulate the circuit
+    let result = simulate(&program, &input, &[]).unwrap();
+
+    // Return the resulting Uint<N>
     GarbledUint::new(result)
 }
 
 pub(super) fn build_and_simulate_xnor<const N: usize>(
     lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
+    rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut gates = Vec::new();
 
@@ -435,7 +508,7 @@ pub(super) fn build_and_simulate_xnor<const N: usize>(
     }
 
     for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
     }
 
     let mut output_indices = Vec::with_capacity(N);
@@ -453,9 +526,187 @@ pub(super) fn build_and_simulate_xnor<const N: usize>(
         output_indices.push(gates.len() as u32 - 1);
     }
 
+    // Create the circuit
     let program = Circuit::new(gates, output_indices);
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
 
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
+    // Simulate the circuit
+    let result = simulate(&program, &input, &[]).unwrap();
+
+    // Return the resulting Uint<N>
     GarbledUint::new(result)
+}
+
+// Helper function to build and simulate a circuit for comparison operations
+pub(super) fn build_and_simulate_equality<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
+    gate_fn: fn(u32, u32, &mut Vec<Gate>) -> u32,
+) -> bool {
+    let mut gates = Vec::new();
+
+    // Push input gates for both Uint<N> objects
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
+    }
+    for _ in 0..N {
+        gates.push(Gate::InContrib); // From second Uint<N> (rhs)
+    }
+
+    // Build the comparison circuit
+    let mut result = gate_fn(0, N as u32, &mut gates);
+    for i in 1..N {
+        let current_comparison = gate_fn(i as u32, (N + i) as u32, &mut gates);
+        let new_result = gates.len() as u32;
+        gates.push(Gate::Xor(result, current_comparison));
+        result = new_result;
+    }
+
+    // The final gate is our output
+    let output_indices = vec![result];
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
+    // Simulate the circuit
+    let result = simulate(&program, &input, &[]).unwrap();
+
+    // Return the boolean result
+    result[0]
+}
+
+// Helper method for ordering comparison
+pub(super) fn build_and_simulate_comparator<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
+) -> Ordering {
+    let mut gates = Vec::new();
+
+    // Prepare input indices for both operands
+    let mut a_indices = Vec::with_capacity(N);
+    let mut b_indices = Vec::with_capacity(N);
+    for _ in 0..N {
+        a_indices.push(gates.len() as u32);
+        gates.push(Gate::InContrib); // Inputs from 'self'
+    }
+    for _ in 0..N {
+        b_indices.push(gates.len() as u32);
+        gates.push(Gate::InContrib); // Inputs from 'other'
+    }
+
+    // Build the comparator circuit
+    let (lt_output, eq_output) = comparator_circuit::<N>(&a_indices, &b_indices, &mut gates);
+
+    // Define outputs
+    let output_indices = vec![lt_output, eq_output];
+
+    // Create the circuit
+    let program = Circuit::new(gates, output_indices);
+
+    // Simulate the circuit
+    // let result = simulate(&program, &self.bits, &other.bits).unwrap();
+
+    // combine the bits of lhs and rhs
+    let mut input = lhs.bits.clone();
+    input.extend_from_slice(&rhs.bits);
+
+    // Simulate the circuit
+    let result = simulate(&program, &input, &[]).unwrap();
+
+    // Interpret the result
+    let lt = result[0];
+    let eq = result[1];
+
+    if lt {
+        Ordering::Less
+    } else if eq {
+        Ordering::Equal
+    } else {
+        Ordering::Greater
+    }
+}
+
+fn comparator_circuit<const N: usize>(
+    a_indices: &[u32],
+    b_indices: &[u32],
+    gates: &mut Vec<Gate>,
+) -> (u32, u32) {
+    let mut eq_list = vec![0; N];
+    let mut lt_list = vec![0; N];
+
+    let n = N;
+
+    // Start from the most significant bit (MSB)
+    let i = n - 1;
+
+    // Compute initial eq and lt for MSB
+    // eq[i] = ¬(A[i] ⊻ B[i])
+    let a_xor_b = gates.len() as u32;
+    gates.push(Gate::Xor(a_indices[i], b_indices[i]));
+
+    let eq_i = gates.len() as u32;
+    gates.push(Gate::Not(a_xor_b));
+
+    eq_list[i] = eq_i;
+
+    // lt[i] = ¬A[i] ∧ B[i]
+    let not_a = gates.len() as u32;
+    gates.push(Gate::Not(a_indices[i]));
+
+    let lt_i = gates.len() as u32;
+    gates.push(Gate::And(not_a, b_indices[i]));
+
+    lt_list[i] = lt_i;
+
+    // Iterate from MSB-1 down to LSB
+    for idx in (0..i).rev() {
+        // Compute eq[i] = eq[i+1] ∧ ¬(A[i] ⊻ B[i])
+        let a_xor_b = gates.len() as u32;
+        gates.push(Gate::Xor(a_indices[idx], b_indices[idx]));
+
+        let not_a_xor_b = gates.len() as u32;
+        gates.push(Gate::Not(a_xor_b));
+
+        let eq_i = gates.len() as u32;
+        gates.push(Gate::And(eq_list[idx + 1], not_a_xor_b));
+
+        eq_list[idx] = eq_i;
+
+        // Compute lt[i]
+        // temp_lt = ¬A[i] ∧ B[i]
+        let not_a = gates.len() as u32;
+        gates.push(Gate::Not(a_indices[idx]));
+
+        let not_a_and_b = gates.len() as u32;
+        gates.push(Gate::And(not_a, b_indices[idx]));
+
+        // temp_lt = eq[i+1] ∧ not_a_and_b
+        let temp_lt = gates.len() as u32;
+        gates.push(Gate::And(eq_list[idx + 1], not_a_and_b));
+
+        // lt[i] = lt[i+1] ∨ temp_lt
+        // Since we don't have an OR gate, use lt_i = (lt_prev ⊻ temp_lt) ⊻ (lt_prev ∧ temp_lt)
+        let lt_prev = lt_list[idx + 1];
+
+        let lt_xor_temp = gates.len() as u32;
+        gates.push(Gate::Xor(lt_prev, temp_lt));
+
+        let lt_and_temp = gates.len() as u32;
+        gates.push(Gate::And(lt_prev, temp_lt));
+
+        let lt_i = gates.len() as u32;
+        gates.push(Gate::Xor(lt_xor_temp, lt_and_temp));
+
+        lt_list[idx] = lt_i;
+    }
+
+    // Return the final lt and eq outputs
+    (lt_list[0], eq_list[0])
 }

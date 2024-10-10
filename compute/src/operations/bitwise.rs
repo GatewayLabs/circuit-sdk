@@ -1,19 +1,18 @@
 use crate::int::GarbledInt;
 use crate::operations::helpers::{
     build_and_simulate, build_and_simulate_nand, build_and_simulate_nor, build_and_simulate_not,
-    build_and_simulate_xnor,
+    build_and_simulate_or, build_and_simulate_xnor,
 };
-use crate::simulator::simulate;
 use crate::uint::GarbledUint;
 use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
-use tandem::{Circuit, Gate};
+use tandem::Gate;
 
 // Implement the XOR operation for Uint<N>
 impl<const N: usize> BitXor for GarbledUint<N> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self, Some(&rhs), Gate::Xor)
+        build_and_simulate(&self, &rhs, Gate::Xor)
     }
 }
 
@@ -22,7 +21,7 @@ impl<const N: usize> BitXor for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(self, Some(rhs), Gate::Xor)
+        build_and_simulate(self, rhs, Gate::Xor)
     }
 }
 
@@ -31,7 +30,7 @@ impl<const N: usize> BitXor for GarbledInt<N> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), Some(&rhs.into()), Gate::Xor).into()
+        build_and_simulate(&self.into(), &rhs.into(), Gate::Xor).into()
     }
 }
 
@@ -40,7 +39,7 @@ impl<const N: usize> BitXor for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), Some(&rhs.into()), Gate::Xor).into()
+        build_and_simulate(&self.into(), &rhs.into(), Gate::Xor).into()
     }
 }
 
@@ -49,7 +48,7 @@ impl<const N: usize> BitAnd for GarbledUint<N> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self, Some(&rhs), Gate::And)
+        build_and_simulate(&self, &rhs, Gate::And)
     }
 }
 
@@ -58,7 +57,7 @@ impl<const N: usize> BitAnd for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(self, Some(rhs), Gate::And)
+        build_and_simulate(self, rhs, Gate::And)
     }
 }
 
@@ -67,7 +66,7 @@ impl<const N: usize> BitAnd for GarbledInt<N> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), Some(&rhs.into()), Gate::And).into()
+        build_and_simulate(&self.into(), &rhs.into(), Gate::And).into()
     }
 }
 
@@ -76,7 +75,7 @@ impl<const N: usize> BitAnd for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), Some(&rhs.into()), Gate::And).into()
+        build_and_simulate(&self.into(), &rhs.into(), Gate::And).into()
     }
 }
 
@@ -98,63 +97,12 @@ impl<const N: usize> Not for &GarbledUint<N> {
     }
 }
 
-// Helper function to build and simulate a circuit for OR operation
-fn build_and_simulate_or<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: Option<&GarbledUint<N>>,
-) -> GarbledUint<N> {
-    let mut gates = Vec::new();
-
-    // Push input gates for both Uint<N> objects (lhs and rhs)
-    for _ in 0..N {
-        gates.push(Gate::InContrib); // From first Uint<N> (lhs)
-    }
-
-    for _ in 0..N {
-        gates.push(Gate::InEval); // From second Uint<N> (rhs)
-    }
-
-    // Define gates for each bit in lhs and rhs
-    let mut output_indices = Vec::with_capacity(N);
-
-    for i in 0..N {
-        // OR(a, b) = (a ⊕ b) ⊕ (a & b)
-
-        // Step 1: XOR gate for (a ⊕ b)
-        let xor_gate = Gate::Xor(i as u32, (N + i) as u32);
-        let xor_gate_idx = gates.len() as u32;
-        gates.push(xor_gate);
-
-        // Step 2: AND gate for (a & b)
-        let and_gate = Gate::And(i as u32, (N + i) as u32);
-        let and_gate_idx = gates.len() as u32;
-        gates.push(and_gate);
-
-        // Step 3: XOR gate for final OR result (a ⊕ b) ⊕ (a & b)
-        let final_or_gate = Gate::Xor(xor_gate_idx, and_gate_idx);
-        gates.push(final_or_gate);
-
-        // Step 4: Store the output index of this bit's OR result
-        output_indices.push(gates.len() as u32 - 1);
-    }
-
-    // Create the circuit
-    let program = Circuit::new(gates, output_indices);
-
-    // Simulate the circuit
-    let bits_rhs = rhs.map_or(lhs.bits.clone(), |r| r.bits.clone());
-    let result = simulate(&program, &lhs.bits, &bits_rhs).unwrap();
-
-    // Return the resulting Uint<N>
-    GarbledUint::new(result)
-}
-
 // Implement the OR operation for GarbledUint<N>
 impl<const N: usize> BitOr for GarbledUint<N> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(&self, Some(&rhs))
+        build_and_simulate_or(&self, &rhs)
     }
 }
 
@@ -163,7 +111,7 @@ impl<const N: usize> BitOr for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(self, Some(rhs))
+        build_and_simulate_or(self, rhs)
     }
 }
 
@@ -172,7 +120,7 @@ impl<const N: usize> BitOr for GarbledInt<N> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(&self.into(), Some(&rhs.into())).into()
+        build_and_simulate_or(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -181,7 +129,7 @@ impl<const N: usize> BitOr for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(&self.into(), Some(&rhs.into())).into()
+        build_and_simulate_or(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -307,30 +255,30 @@ impl<const N: usize> Shr<usize> for &GarbledInt<N> {
 // Implement the NAND, NOR, XNOR operators for GarbledUint<N>
 impl<const N: usize> GarbledUint<N> {
     pub fn nand(self, rhs: Self) -> Self {
-        build_and_simulate_nand(&self, Some(&rhs))
+        build_and_simulate_nand(&self, &rhs)
     }
 
     pub fn nor(self, rhs: Self) -> Self {
-        build_and_simulate_nor(&self, Some(&rhs))
+        build_and_simulate_nor(&self, &rhs)
     }
 
     pub fn xnor(self, rhs: Self) -> Self {
-        build_and_simulate_xnor(&self, Some(&rhs))
+        build_and_simulate_xnor(&self, &rhs)
     }
 }
 
 // Implement the NAND, NOR, XNOR operators for GarbledInt<N>
 impl<const N: usize> GarbledInt<N> {
     pub fn nand(self, rhs: Self) -> Self {
-        build_and_simulate_nand(&self.into(), Some(&rhs.into())).into()
+        build_and_simulate_nand(&self.into(), &rhs.into()).into()
     }
 
     pub fn nor(self, rhs: Self) -> Self {
-        build_and_simulate_nor(&self.into(), Some(&rhs.into())).into()
+        build_and_simulate_nor(&self.into(), &rhs.into()).into()
     }
 
     pub fn xnor(self, rhs: Self) -> Self {
-        build_and_simulate_xnor(&self.into(), Some(&rhs.into())).into()
+        build_and_simulate_xnor(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -345,8 +293,8 @@ mod tests {
         let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
         let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-        let result: u8 = (&a ^ &b).into();
-        assert_eq!(result, 255); // Expected result of XOR between 10101010 and 01010101
+        let result: u8 = (a ^ b).into();
+        assert_eq!(result, 170_u8 ^ 85_u8); // Expected result of XOR between 10101010 and 01010101
     }
 
     #[test]
@@ -355,7 +303,7 @@ mod tests {
         let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
         let result: u16 = (&a ^ &b).into();
-        assert_eq!(result, 65535); // Expected result of XOR between 1010101010101010 and 0101010101010101
+        assert_eq!(result, 43690_u16 ^ 21845_u16); // Expected result of XOR between 1010101010101010 and 0101010101010101
     }
 
     #[test]
@@ -405,11 +353,11 @@ mod tests {
 
     #[test]
     fn test_from_u8_and() {
-        let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+        let a: GarbledUint8 = 17_u8.into(); // Binary 10101010
         let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
         let result: u8 = (a & b).into();
-        assert_eq!(result, 170 & 85); // Expected result of AND between 10101010 and 01010101
+        assert_eq!(result, 17_u8 & 85_u8); // Expected result of AND between 10101010 and 01010101
     }
 
     #[test]
