@@ -1,4 +1,5 @@
 use crate::int::GarbledInt;
+use std::fmt::Display;
 use std::marker::PhantomData;
 
 pub type GarbledUint1 = GarbledUint<1>;
@@ -15,6 +16,12 @@ pub type GarbledUint128 = GarbledUint<128>;
 pub struct GarbledUint<const N: usize> {
     pub(crate) bits: Vec<bool>,       // Store the bits of the unsigned integer
     _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size
+}
+
+impl<const N: usize> Display for GarbledUint<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", u128::from(self.clone()))
+    }
 }
 
 // Implement Uint<N>
@@ -195,6 +202,24 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_display() {
+        let a: GarbledUint8 = 170u8.into(); // Binary 10101010
+        assert_eq!(format!("{}", a), "170");
+
+        let b: GarbledUint16 = 43707u16.into(); // Binary 1010101010101011
+        assert_eq!(format!("{}", b), "43707");
+
+        let c: GarbledUint32 = 2863311530u32.into(); // Binary 10101010101010101010101010101010
+        assert_eq!(format!("{}", c), "2863311530");
+
+        let d: GarbledUint64 = 12297829382473034410u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        assert_eq!(format!("{}", d), "12297829382473034410");
+
+        let e: GarbledUint128 = 12297829382473034410u128.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+        assert_eq!(format!("{}", e), "12297829382473034410");
+    }
 
     #[test]
     fn test_from_u8() {

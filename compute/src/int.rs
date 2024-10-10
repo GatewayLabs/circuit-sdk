@@ -1,5 +1,6 @@
 use crate::uint::GarbledUint;
 use std::convert::From;
+use std::fmt::Display;
 use std::marker::PhantomData;
 
 pub type GarbledInt1 = GarbledInt<1>;
@@ -16,6 +17,20 @@ pub type GarbledInt128 = GarbledInt<128>;
 pub struct GarbledInt<const N: usize> {
     pub(crate) bits: Vec<bool>, // Store the bits of the signed integer (in two's complement form)
     _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size
+}
+
+impl<const N: usize> Display for GarbledInt<N> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // Convert the bits to a signed integer
+        match N {
+            8 => write!(f, "{}", i8::from(self.clone())),
+            16 => write!(f, "{}", i16::from(self.clone())),
+            32 => write!(f, "{}", i32::from(self.clone())),
+            64 => write!(f, "{}", i64::from(self.clone())),
+            128 => write!(f, "{}", i128::from(self.clone())),
+            _ => panic!("Unsupported bit size for GarbledInt"),
+        }
+    }
 }
 
 // Implement GarbledInt<N>
@@ -210,6 +225,39 @@ impl<const N: usize> From<GarbledInt<N>> for i128 {
 mod tests {
     use super::*;
     use crate::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
+
+    #[test]
+    fn test_display() {
+        let a: GarbledInt8 = 123_i8.into();
+        assert_eq!(format!("{}", a), "123");
+
+        let b: GarbledInt16 = 12345_i16.into();
+        assert_eq!(format!("{}", b), "12345");
+
+        let c: GarbledInt32 = 1234567890_i32.into();
+        assert_eq!(format!("{}", c), "1234567890");
+
+        let d: GarbledInt64 = 123456789012345_i64.into();
+        assert_eq!(format!("{}", d), "123456789012345");
+
+        let e: GarbledInt128 = 1234567890123456789012345_i128.into();
+        assert_eq!(format!("{}", e), "1234567890123456789012345");
+
+        let f: GarbledInt8 = (-123_i8).into();
+        assert_eq!(format!("{}", f), "-123");
+
+        let g: GarbledInt16 = (-12345_i16).into();
+        assert_eq!(format!("{}", g), "-12345");
+
+        let h: GarbledInt32 = (-1234567890_i32).into();
+        assert_eq!(format!("{}", h), "-1234567890");
+
+        let i: GarbledInt64 = (-123456789012345_i64).into();
+        assert_eq!(format!("{}", i), "-123456789012345");
+
+        let j: GarbledInt128 = (-1234567890123456789012345_i128).into();
+        assert_eq!(format!("{}", j), "-1234567890123456789012345");
+    }
 
     #[test]
     fn test_from_negative_i8() {
