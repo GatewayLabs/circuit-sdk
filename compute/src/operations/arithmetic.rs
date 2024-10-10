@@ -145,6 +145,51 @@ fn sub_gate_fn(
     final_diff_index
 }
 
+
+// Helper function to generate gates for the addition of two bits
+fn div_gate_fn(
+    a: u32,
+    b: u32,
+    carry: Option<u32>,
+    gates: &mut Vec<Gate>,
+    carry_out: &mut Option<u32>,
+) -> u32 {
+    // XOR gate for sum bit (a ⊕ b)
+    let sum_xor_index = gates.len();
+    gates.push(Gate::Xor(a, b));
+
+    // If carry exists, XOR the result of the previous XOR with the carry
+    let final_sum_index = if let Some(carry) = carry {
+        let sum_with_carry_index = gates.len();
+        gates.push(Gate::Xor(sum_xor_index as u32, carry));
+        sum_with_carry_index as u32
+    } else {
+        sum_xor_index as u32
+    };
+
+    // Compute the new carry: (a & b) | (a & carry) | (b & carry)
+    let and_ab = gates.len();
+    gates.push(Gate::And(a, b));
+
+    if let Some(carry) = carry {
+        let and_a_carry = gates.len();
+        gates.push(Gate::And(a, carry));
+
+        let and_b_carry = gates.len();
+        gates.push(Gate::And(b, carry));
+
+        // Combine carry parts using XOR and AND to simulate OR
+        let xor_ab_carry = gates.len();
+        gates.push(Gate::Xor(and_ab as u32, and_a_carry as u32));
+        gates.push(Gate::Xor(xor_ab_carry as u32, and_b_carry as u32));
+        *carry_out = Some((gates.len() - 1) as u32);
+    } else {
+        *carry_out = Some(and_ab as u32);
+    }
+
+    final_sum_index
+}
+
 // Implement the Add operation for Uint<N> and &Uint<N>
 impl<const N: usize> Add for Uint<N> {
     type Output = Self;
@@ -193,7 +238,56 @@ impl<const N: usize> std::ops::Div for Uint<N> {
             gates.push(Gate::InEval); // For rhs bits
         }
 
-        // TODO: build efficient multiplication circuit here
+       let mut carry_or_borrow_index = None; // Carry/borrow bit 
+       
+       let mut result_bit_indices = Vec::with_capacity(N);
+
+       // Generate gates for each bit of the addition/subtraction
+       for i in 0..N {
+          let a = i as u32;
+          let b = (N + i) as u32;
+          
+          let bits = a.len();
+
+          let mut quotient = vec![0; bits];
+          
+          let mut remainder = a.to_vec();
+
+          for shift_amount in (0..bits).rev() {
+            let mut overflow = 0;
+            let mut y_shifted = vec![0; bits];
+            for y in y.iter().copied().take(shift_amount) {
+               // overflow = self.push_or(overflow, y);
+                gates.push(Gate::Xor(overflow as u32, y));
+                overflow = Some(gates.len() as u32);
+
+            }
+            y_shifted[..(bits - shift_amount)]
+                .clone_from_slice(&y[shift_amount..((bits - shift_amount) + shift_amount)]);
+
+            let (x_sub, carry) = self.push_subtraction_circuit(&remainder, &y_shifted, false);
+            gates.push(Gate::OR(carry as u32, overflow));
+       
+            let carry_or_overflow = Some(gates.len() as u32); //self.push_or(carry, overflow);
+            for i in 0..bits {
+                remainder[i] = self.push_mux(carry_or_overflow, remainder[i], x_sub[i]);
+            }
+            let quotient_bit = self.push_not(carry);
+            quotient[bits - shift_amount - 1] = self.push_mux(overflow, 0, quotient_bit);
+        }    
+ 
+        // Use the provided gate function to define the behavior of each bit
+        /*       
+        let result_index = gate_fn(
+            a,
+            b,
+            carry_or_borrow_index,
+            &mut gates,
+            &mut carry_or_borrow_index,
+        ); */
+        let result_index = 0;
+        result_bit_indices.push(result_index);
+    }
        
         // Create the circuit with gates and outputs
         let program = Circuit::new(gates, output_indices);
