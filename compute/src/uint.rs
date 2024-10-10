@@ -15,9 +15,9 @@ pub struct Uint<const N: usize> {
 impl<const N: usize> Uint<N> {
 
     /// The maximum value that can be represented by this type
-	pub const MAX: Self = Self([0xffffffffffffffff; N]);
+	//pub const MAX: Self = Self([0xffffffffffffffff; N]);
 	/// The minimum value that can be represented by this type
-	pub const MIN: Self = Self([0; N]); 
+	//pub const MIN: Self = Self([0; N]); 
 
     // Constructor for Uint<N> from a boolean vector
     pub fn new(bits: Vec<bool>) -> Self {
@@ -188,6 +188,7 @@ impl<const N: usize> Uint<N> {
 
 
     /// Return the least number of bits needed to represent the number
+        /*
 	pub fn bits(&self) -> usize {
 		for i in 1..N {
 			if self.0[N - i] > 0 {
@@ -198,7 +199,7 @@ impl<const N: usize> Uint<N> {
 
 		0x40 - self.0[0].leading_zeros() as usize
 	}
-
+        */   
 	
 
     /// Simulates the local execution of the circuit using a 2 Party MPC protocol.
@@ -237,7 +238,7 @@ impl<const N: usize> Uint<N> {
         Ok(eval.output(&msg_for_eval)?)
     }
 
-}
+
 
 }
 
