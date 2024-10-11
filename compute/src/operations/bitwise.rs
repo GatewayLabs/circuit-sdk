@@ -1,18 +1,17 @@
 use crate::int::GarbledInt;
-use crate::operations::helpers::{
-    build_and_simulate, build_and_simulate_nand, build_and_simulate_nor, build_and_simulate_not,
-    build_and_simulate_or, build_and_simulate_xnor,
+use crate::operations::circuits::{
+    build_and_execute_and, build_and_execute_nand, build_and_execute_nor, build_and_execute_not,
+    build_and_execute_or, build_and_execute_xnor, build_and_execute_xor,
 };
 use crate::uint::GarbledUint;
 use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
-use tandem::Gate;
 
 // Implement the XOR operation for Uint<N>
 impl<const N: usize> BitXor for GarbledUint<N> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self, &rhs, Gate::Xor)
+        build_and_execute_xor(&self, &rhs)
     }
 }
 
@@ -21,7 +20,7 @@ impl<const N: usize> BitXor for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(self, rhs, Gate::Xor)
+        build_and_execute_xor(self, rhs)
     }
 }
 
@@ -30,7 +29,7 @@ impl<const N: usize> BitXor for GarbledInt<N> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), &rhs.into(), Gate::Xor).into()
+        build_and_execute_xor(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -39,7 +38,7 @@ impl<const N: usize> BitXor for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), &rhs.into(), Gate::Xor).into()
+        build_and_execute_xor(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -48,7 +47,7 @@ impl<const N: usize> BitAnd for GarbledUint<N> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self, &rhs, Gate::And)
+        build_and_execute_and(&self, &rhs)
     }
 }
 
@@ -57,7 +56,7 @@ impl<const N: usize> BitAnd for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(self, rhs, Gate::And)
+        build_and_execute_and(self, rhs)
     }
 }
 
@@ -66,7 +65,7 @@ impl<const N: usize> BitAnd for GarbledInt<N> {
     type Output = Self;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), &rhs.into(), Gate::And).into()
+        build_and_execute_and(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -75,7 +74,7 @@ impl<const N: usize> BitAnd for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn bitand(self, rhs: Self) -> Self::Output {
-        build_and_simulate(&self.into(), &rhs.into(), Gate::And).into()
+        build_and_execute_and(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -84,7 +83,7 @@ impl<const N: usize> Not for GarbledUint<N> {
     type Output = Self;
 
     fn not(self) -> Self::Output {
-        build_and_simulate_not(&self)
+        build_and_execute_not(&self)
     }
 }
 
@@ -93,7 +92,7 @@ impl<const N: usize> Not for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn not(self) -> Self::Output {
-        build_and_simulate_not(self)
+        build_and_execute_not(self)
     }
 }
 
@@ -102,7 +101,7 @@ impl<const N: usize> BitOr for GarbledUint<N> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(&self, &rhs)
+        build_and_execute_or(&self, &rhs)
     }
 }
 
@@ -111,7 +110,7 @@ impl<const N: usize> BitOr for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(self, rhs)
+        build_and_execute_or(self, rhs)
     }
 }
 
@@ -120,7 +119,7 @@ impl<const N: usize> BitOr for GarbledInt<N> {
     type Output = Self;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(&self.into(), &rhs.into()).into()
+        build_and_execute_or(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -129,7 +128,7 @@ impl<const N: usize> BitOr for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn bitor(self, rhs: Self) -> Self::Output {
-        build_and_simulate_or(&self.into(), &rhs.into()).into()
+        build_and_execute_or(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -138,7 +137,7 @@ impl<const N: usize> Not for GarbledInt<N> {
     type Output = Self;
 
     fn not(self) -> Self::Output {
-        build_and_simulate_not(&self.into()).into()
+        build_and_execute_not(&self.into()).into()
     }
 }
 
@@ -147,7 +146,7 @@ impl<const N: usize> Not for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn not(self) -> Self::Output {
-        build_and_simulate_not(&self.into()).into()
+        build_and_execute_not(&self.into()).into()
     }
 }
 
@@ -255,30 +254,30 @@ impl<const N: usize> Shr<usize> for &GarbledInt<N> {
 // Implement the NAND, NOR, XNOR operators for GarbledUint<N>
 impl<const N: usize> GarbledUint<N> {
     pub fn nand(self, rhs: Self) -> Self {
-        build_and_simulate_nand(&self, &rhs)
+        build_and_execute_nand(&self, &rhs)
     }
 
     pub fn nor(self, rhs: Self) -> Self {
-        build_and_simulate_nor(&self, &rhs)
+        build_and_execute_nor(&self, &rhs)
     }
 
     pub fn xnor(self, rhs: Self) -> Self {
-        build_and_simulate_xnor(&self, &rhs)
+        build_and_execute_xnor(&self, &rhs)
     }
 }
 
 // Implement the NAND, NOR, XNOR operators for GarbledInt<N>
 impl<const N: usize> GarbledInt<N> {
     pub fn nand(self, rhs: Self) -> Self {
-        build_and_simulate_nand(&self.into(), &rhs.into()).into()
+        build_and_execute_nand(&self.into(), &rhs.into()).into()
     }
 
     pub fn nor(self, rhs: Self) -> Self {
-        build_and_simulate_nor(&self.into(), &rhs.into()).into()
+        build_and_execute_nor(&self.into(), &rhs.into()).into()
     }
 
     pub fn xnor(self, rhs: Self) -> Self {
-        build_and_simulate_xnor(&self.into(), &rhs.into()).into()
+        build_and_execute_xnor(&self.into(), &rhs.into()).into()
     }
 }
 

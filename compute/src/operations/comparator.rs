@@ -1,13 +1,12 @@
 use crate::int::GarbledInt;
-use crate::operations::helpers::{build_and_simulate_comparator, build_and_simulate_equality};
+use crate::operations::circuits::{build_and_execute_comparator, build_and_execute_equality};
 use crate::uint::GarbledUint;
 use std::cmp::Ordering;
-use tandem::Gate;
 
 // Implementing comparison operators for GarbledUint
 impl<const N: usize> PartialEq for GarbledUint<N> {
     fn eq(&self, other: &Self) -> bool {
-        matches!(build_and_simulate_comparator(self, other), Ordering::Equal)
+        matches!(build_and_execute_comparator(self, other), Ordering::Equal)
     }
 }
 
@@ -21,32 +20,28 @@ impl<const N: usize> Eq for GarbledUint<N> {
 #[allow(clippy::non_canonical_partial_ord_impl)]
 impl<const N: usize> PartialOrd for GarbledUint<N> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(build_and_simulate_comparator(self, other))
+        Some(build_and_execute_comparator(self, other))
     }
 }
 
 // Implementing comparison operators for GarbledUint
 impl<const N: usize> Ord for GarbledUint<N> {
     fn cmp(&self, other: &Self) -> Ordering {
-        build_and_simulate_comparator(self, other)
+        build_and_execute_comparator(self, other)
     }
 }
 
 // Implementing comparison operators for GarbledUint
 impl<const N: usize> PartialEq<&GarbledUint<N>> for GarbledUint<N> {
     fn eq(&self, other: &&Self) -> bool {
-        !build_and_simulate_equality(self, other, |a, b, gates| {
-            let xor = gates.len() as u32;
-            gates.push(Gate::Xor(a, b));
-            xor
-        })
+        !build_and_execute_equality(self, other)
     }
 }
 
 // Implementing comparison operators for GarbledUint
 impl<const N: usize> PartialOrd<&GarbledUint<N>> for GarbledUint<N> {
     fn partial_cmp(&self, other: &&Self) -> Option<Ordering> {
-        Some(build_and_simulate_comparator(self, *other))
+        Some(build_and_execute_comparator(self, *other))
     }
 }
 
@@ -54,7 +49,7 @@ impl<const N: usize> PartialOrd<&GarbledUint<N>> for GarbledUint<N> {
 impl<const N: usize> PartialEq for GarbledInt<N> {
     fn eq(&self, other: &Self) -> bool {
         matches!(
-            build_and_simulate_comparator(&self.into(), &other.into()),
+            build_and_execute_comparator(&self.into(), &other.into()),
             Ordering::Equal
         )
     }
@@ -70,14 +65,14 @@ impl<const N: usize> Eq for GarbledInt<N> {
 #[allow(clippy::non_canonical_partial_ord_impl)]
 impl<const N: usize> PartialOrd for GarbledInt<N> {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(build_and_simulate_comparator(&self.into(), &other.into()))
+        Some(build_and_execute_comparator(&self.into(), &other.into()))
     }
 }
 
 // Implementing comparison operators for GarbledInt
 impl<const N: usize> Ord for GarbledInt<N> {
     fn cmp(&self, other: &Self) -> Ordering {
-        build_and_simulate_comparator(&self.into(), &other.into())
+        build_and_execute_comparator(&self.into(), &other.into())
     }
 }
 
