@@ -140,8 +140,7 @@ impl<const N: usize> CircuitBuilder<N> {
         rhs: &GarbledUint<N>,
         output_indices: Vec<u32>,
     ) -> anyhow::Result<GarbledUint<N>> {
-        let mut input = lhs.bits.clone();
-        input.extend_from_slice(&rhs.bits);
+        let input = [lhs.bits.clone(), rhs.bits.clone()].concat();
         self.execute_with_input(&input, output_indices)
     }
 
@@ -432,19 +431,15 @@ pub(super) fn build_and_execute_equality<const N: usize>(
         let current_comparison = builder.add_xnor(i as u32, (N + i) as u32);
         result = builder.add_and(result, current_comparison);
     }
-
-    let program = builder.build(vec![result]);
-    let input = [lhs.bits.clone(), rhs.bits.clone()].concat();
-    let simulation_result = simulate(&program, &input, &[]).unwrap();
-
-    simulation_result[0]
+    let result = builder.execute(lhs, rhs, vec![result]).unwrap();
+    result.bits[0]
 }
 
 pub(super) fn build_and_execute_comparator<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> Ordering {
-    let mut builder = CircuitBuilder::default();
+    let mut builder: CircuitBuilder<N> = CircuitBuilder::default();
     builder.add_input(lhs);
     builder.add_input(rhs);
 
@@ -520,7 +515,7 @@ mod tests {
         const N: usize = 8;
 
         let mut builder: CircuitBuilder<N> = CircuitBuilder::default();
-        let a: GarbledUint8 = 35_u8.into(); // if true, output should be 35
+        let a: GarbledUint8 = 182_u8.into(); // if true, output should be 35
         let b: GarbledUint8 = 42_u8.into(); // if false, output should be 42
         let s: GarbledUint1 = true.into();
 
