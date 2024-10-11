@@ -506,8 +506,8 @@ pub(super) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> G
 }
 
 #[allow(dead_code)]
-pub(super) fn build_and_execute_mux<const N: usize>(
-    selector: &GarbledUint<N>,
+pub(super) fn build_and_execute_mux<const N: usize, const S: usize>(
+    selector: &GarbledUint<S>,
     if_true: &GarbledUint<N>,
     if_false: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -593,8 +593,8 @@ mod tests {
     #[test]
     fn test_build_and_execute_mux1() {
         let s: GarbledUint1 = true.into();
-        let a: GarbledUint1 = true.into();
-        let b: GarbledUint1 = false.into();
+        let a: GarbledUint1 = false.into();
+        let b: GarbledUint1 = true.into();
 
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, a);
@@ -606,14 +606,14 @@ mod tests {
 
     #[test]
     fn test_build_and_execute_mux() {
-        let s: GarbledUint8 = 0b11111111_u8.into();
+        let s: GarbledUint1 = true.into();
         let a: GarbledUint8 = 170_u8.into();
         let b: GarbledUint8 = 85_u8.into();
 
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, a);
 
-        let s: GarbledUint8 = 0_u8.into();
+        let s: GarbledUint1 = false.into();
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, b);
     }
