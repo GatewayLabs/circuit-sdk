@@ -1,6 +1,6 @@
 use crate::int::GarbledInt;
-use crate::operations::helpers::{
-    add_gate_fn, build_and_simulate_arithmetic, build_and_simulate_multiplication, sub_gate_fn,
+use crate::operations::circuits::{
+    build_and_execute_addition, build_and_execute_multiplication, build_and_execute_subtraction,
 };
 use crate::uint::GarbledUint;
 use std::ops::{Add, Mul, Sub};
@@ -10,7 +10,7 @@ impl<const N: usize> Add for GarbledUint<N> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(&self, &rhs, add_gate_fn)
+        build_and_execute_addition(&self, &rhs)
     }
 }
 
@@ -18,7 +18,7 @@ impl<const N: usize> Add for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(self, rhs, add_gate_fn)
+        build_and_execute_addition(self, rhs)
     }
 }
 
@@ -27,7 +27,7 @@ impl<const N: usize> Sub for GarbledUint<N> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(&self, &rhs, sub_gate_fn)
+        build_and_execute_subtraction(&self, &rhs)
     }
 }
 
@@ -35,7 +35,7 @@ impl<const N: usize> Sub for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(self, rhs, sub_gate_fn)
+        build_and_execute_subtraction(self, rhs)
     }
 }
 
@@ -43,7 +43,7 @@ impl<const N: usize> Mul for GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        build_and_simulate_multiplication(&self, &rhs)
+        build_and_execute_multiplication(&self, &rhs)
     }
 }
 
@@ -51,7 +51,7 @@ impl<const N: usize> Mul for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        build_and_simulate_multiplication(self, rhs)
+        build_and_execute_multiplication(self, rhs)
     }
 }
 
@@ -60,7 +60,7 @@ impl<const N: usize> Add for GarbledInt<N> {
     type Output = Self;
 
     fn add(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(&self.into(), &rhs.into(), add_gate_fn).into()
+        build_and_execute_addition(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -68,7 +68,7 @@ impl<const N: usize> Add for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(&self.into(), &rhs.into(), add_gate_fn).into()
+        build_and_execute_addition(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -77,7 +77,7 @@ impl<const N: usize> Sub for GarbledInt<N> {
     type Output = Self;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(&self.into(), &rhs.into(), sub_gate_fn).into()
+        build_and_execute_subtraction(&self.into(), &rhs.into()).into()
     }
 }
 
@@ -85,7 +85,7 @@ impl<const N: usize> Sub for &GarbledInt<N> {
     type Output = GarbledInt<N>;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        build_and_simulate_arithmetic(&self.into(), &rhs.into(), sub_gate_fn).into()
+        build_and_execute_subtraction(&self.into(), &rhs.into()).into()
     }
 }
 

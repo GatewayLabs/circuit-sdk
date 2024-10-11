@@ -14,13 +14,14 @@ pub fn simulate(
     input_contributor: &[bool],
     input_evaluator: &[bool],
 ) -> anyhow::Result<Vec<bool>> {
+    let (mut contrib, mut msg_for_eval) =
+        Contributor::new(circuit, input_contributor, ChaCha20Rng::from_entropy())?;
+
     let mut eval = Evaluator::new(
         circuit.clone(),
         input_evaluator,
         ChaCha20Rng::from_entropy(),
     )?;
-    let (mut contrib, mut msg_for_eval) =
-        Contributor::new(circuit, input_contributor, ChaCha20Rng::from_entropy())?;
 
     tracing::debug!("contributor ciphertext: {:?}", hex::encode(&msg_for_eval));
 
