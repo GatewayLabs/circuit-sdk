@@ -518,9 +518,8 @@ mod tests {
     #[test]
     fn test_mux() {
         const N: usize = 8;
-        //let mut builder: CircuitBuilder<N> = CircuitBuilder::new_with_input_sizes(8 * 2 + 1);
 
-        let mut builder = CircuitBuilder::default();
+        let mut builder: CircuitBuilder<N> = CircuitBuilder::default();
         let a: GarbledUint8 = 35_u8.into(); // if true, output should be 35
         let b: GarbledUint8 = 42_u8.into(); // if false, output should be 42
         let s: GarbledUint1 = true.into();
