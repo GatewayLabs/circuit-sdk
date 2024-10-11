@@ -16,7 +16,7 @@ impl<const N: usize> Default for CircuitBuilder<N> {
 }
 
 impl<const N: usize> CircuitBuilder<N> {
-    pub fn add_input<const R: usize>(&mut self, input: &GarbledUint<R>) {
+    pub fn push_input<const R: usize>(&mut self, input: &GarbledUint<R>) {
         for _ in &input.bits {
             self.gates.push(Gate::InContrib);
         }
@@ -27,58 +27,58 @@ impl<const N: usize> CircuitBuilder<N> {
     }
 
     // Add a XOR gate between two inputs and return the index
-    pub fn add_xor(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
+    pub fn push_xor(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
         let xor_index = self.gates.len() as u32;
         self.gates.push(Gate::Xor(a, b));
         xor_index
     }
 
     // Add an AND gate between two inputs and return the index
-    pub fn add_and(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
+    pub fn push_and(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
         let and_index = self.gates.len() as u32;
         self.gates.push(Gate::And(a, b));
         and_index
     }
 
     // Add a NOT gate for a single input and return the index
-    pub fn add_not(&mut self, a: GateIndex) -> GateIndex {
+    pub fn push_not(&mut self, a: GateIndex) -> GateIndex {
         let not_index = self.gates.len() as u32;
         self.gates.push(Gate::Not(a));
         not_index
     }
 
     // Add a gate for OR operation: OR(a, b) = (a ⊕ b) ⊕ (a & b)
-    pub fn add_or(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
-        let xor_gate = self.add_xor(a, b);
-        let and_gate = self.add_and(a, b);
-        self.add_xor(xor_gate, and_gate)
+    pub fn push_or(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
+        let xor_gate = self.push_xor(a, b);
+        let and_gate = self.push_and(a, b);
+        self.push_xor(xor_gate, and_gate)
     }
 
     // Add a NAND gate: NAND(a, b) = NOT(a & b)
-    pub fn add_nand(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
-        let and_gate = self.add_and(a, b);
-        self.add_not(and_gate)
+    pub fn push_nand(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
+        let and_gate = self.push_and(a, b);
+        self.push_not(and_gate)
     }
 
     // Add a NOR gate: NOR(a, b) = NOT(OR(a, b))
-    pub fn add_nor(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
-        let or_gate = self.add_or(a, b);
-        self.add_not(or_gate)
+    pub fn push_nor(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
+        let or_gate = self.push_or(a, b);
+        self.push_not(or_gate)
     }
 
     // Add an XNOR gate: XNOR(a, b) = NOT(a ⊕ b)
-    pub fn add_xnor(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
-        let xor_gate = self.add_xor(a, b);
-        self.add_not(xor_gate)
+    pub fn push_xnor(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
+        let xor_gate = self.push_xor(a, b);
+        self.push_not(xor_gate)
     }
 
     #[allow(dead_code)]
     // Add a MUX gate: MUX(a, b, s) = (a & !s) | (b & s)
-    pub fn add_mux(&mut self, a: GateIndex, b: GateIndex, s: GateIndex) -> GateIndex {
-        let not_s = self.add_not(s);
-        let and_a_not_s = self.add_and(a, not_s);
-        let and_b_s = self.add_and(b, s);
-        self.add_or(and_a_not_s, and_b_s)
+    pub fn push_mux(&mut self, a: GateIndex, b: GateIndex, s: GateIndex) -> GateIndex {
+        let not_s = self.push_not(s);
+        let and_a_not_s = self.push_and(a, not_s);
+        let and_b_s = self.push_and(b, s);
+        self.push_or(and_a_not_s, and_b_s)
     }
 
     // Build and return a Circuit from the current gates with given output indices
@@ -86,7 +86,11 @@ impl<const N: usize> CircuitBuilder<N> {
         Circuit::new(self.gates, output_indices)
     }
 
-    fn add_garbled_uints(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
+    fn push_garbled_uints(
+        &mut self,
+        a: &[GateIndex],
+        b: &[GateIndex],
+    ) -> (Vec<GateIndex>, Option<GateIndex>) {
         let mut result = Vec::with_capacity(a.len());
         let mut carry = None;
 
@@ -96,7 +100,7 @@ impl<const N: usize> CircuitBuilder<N> {
             carry = sum.1;
         }
 
-        result
+        (result, carry)
     }
 
     fn full_adder(
@@ -160,13 +164,13 @@ pub(super) fn build_and_execute_xor<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     // Add XOR gates for each bit
     let mut output_indices = Vec::with_capacity(N);
     for i in 0..N {
-        let xor_gate = builder.add_xor(i as u32, (N + i) as u32);
+        let xor_gate = builder.push_xor(i as u32, (N + i) as u32);
         output_indices.push(xor_gate);
     }
 
@@ -181,13 +185,13 @@ pub(super) fn build_and_execute_and<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     // Add AND gates for each bit
     let mut output_indices = Vec::with_capacity(N);
     for i in 0..N {
-        let and_gate = builder.add_and(i as u32, (N + i) as u32);
+        let and_gate = builder.push_and(i as u32, (N + i) as u32);
         output_indices.push(and_gate);
     }
 
@@ -202,13 +206,13 @@ pub(super) fn build_and_execute_or<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     // Add OR gates for each bit
     let mut output_indices = Vec::with_capacity(N);
     for i in 0..N {
-        let or_gate = builder.add_or(i as u32, (N + i) as u32);
+        let or_gate = builder.push_or(i as u32, (N + i) as u32);
         output_indices.push(or_gate);
     }
 
@@ -223,16 +227,14 @@ pub(super) fn build_and_execute_addition<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     let mut carry = None;
 
     // Create a full adder for each bit
     let mut output_indices = Vec::with_capacity(N);
     for i in 0..N {
-        // let (sum, new_carry) = full_adder(&mut builder, i as u32, (N + i) as u32, carry);
-
         let (sum, new_carry) = builder.full_adder(i as GateIndex, (N + i) as GateIndex, carry);
         output_indices.push(sum);
         carry = new_carry;
@@ -249,8 +251,8 @@ pub(super) fn build_and_execute_subtraction<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     let mut borrow = None;
 
@@ -275,27 +277,27 @@ fn full_subtractor<const N: usize>(
     borrow: Option<u32>,
 ) -> (u32, Option<u32>) {
     // XOR gate for difference bit (a ⊕ b)
-    let xor_ab = builder.add_xor(a, b);
+    let xor_ab = builder.push_xor(a, b);
 
     // If borrow exists, XOR the result of the previous XOR with the borrow
     let diff = if let Some(borrow) = borrow {
-        builder.add_xor(xor_ab, borrow)
+        builder.push_xor(xor_ab, borrow)
     } else {
         xor_ab
     };
 
     // Compute the new borrow: (!a & b) | (a & borrow) | (!b & borrow)
-    let not_a = builder.add_not(a);
-    let and_not_a_b = builder.add_and(not_a, b);
+    let not_a = builder.push_not(a);
+    let and_not_a_b = builder.push_and(not_a, b);
 
     let new_borrow = if let Some(borrow) = borrow {
-        let and_a_borrow = builder.add_and(a, borrow);
-        let not_b = builder.add_not(b);
-        let and_not_b_borrow = builder.add_and(not_b, borrow);
+        let and_a_borrow = builder.push_and(a, borrow);
+        let not_b = builder.push_not(b);
+        let and_not_b_borrow = builder.push_and(not_b, borrow);
 
         // Combine borrow parts using XOR and AND to simulate OR
-        let xor_borrow_parts = builder.add_xor(and_not_a_b, and_a_borrow);
-        builder.add_xor(xor_borrow_parts, and_not_b_borrow)
+        let xor_borrow_parts = builder.push_xor(and_not_a_b, and_a_borrow);
+        builder.push_xor(xor_borrow_parts, and_not_b_borrow)
     } else {
         and_not_a_b
     };
@@ -308,8 +310,8 @@ pub(super) fn build_and_execute_multiplication<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     let mut partial_products = Vec::with_capacity(N);
 
@@ -322,7 +324,7 @@ pub(super) fn build_and_execute_multiplication<const N: usize>(
     // Sum up all partial products
     let mut result = partial_products[0].clone();
     for partial_product in partial_products.iter().take(N).skip(1) {
-        result = builder.add_garbled_uints(&result, partial_product);
+        (result, _) = builder.push_garbled_uints(&result, partial_product);
     }
 
     // Simulate the circuit
@@ -343,13 +345,13 @@ fn generate_partial_product<const N: usize>(
         if i < shift {
             // For lower bits, we use a constant 0
             let zero_bit = builder.len();
-            builder.add_not(rhs_start);
-            builder.add_and(rhs_start, zero_bit); // Constant 0
+            builder.push_not(rhs_start);
+            builder.push_and(rhs_start, zero_bit); // Constant 0
             partial_product.push(builder.len() - 1);
         } else {
             let lhs_bit = lhs_start + (i - shift) as u32;
             let and_gate = builder.len();
-            builder.add_and(lhs_bit, rhs_start + shift as u32);
+            builder.push_and(lhs_bit, rhs_start + shift as u32);
             partial_product.push(and_gate);
         }
     }
@@ -362,13 +364,13 @@ pub(super) fn build_and_execute_nand<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     let mut output_indices = Vec::with_capacity(N);
 
     for i in 0..N {
-        let nand_gate = builder.add_nand(i as u32, (N + i) as u32);
+        let nand_gate = builder.push_nand(i as u32, (N + i) as u32);
         output_indices.push(nand_gate);
     }
 
@@ -382,13 +384,13 @@ pub(super) fn build_and_execute_nor<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     let mut output_indices = Vec::with_capacity(N);
 
     for i in 0..N {
-        let nor_gate = builder.add_nor(i as u32, (N + i) as u32);
+        let nor_gate = builder.push_nor(i as u32, (N + i) as u32);
         output_indices.push(nor_gate);
     }
 
@@ -402,13 +404,13 @@ pub(super) fn build_and_execute_xnor<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     let mut output_indices = Vec::with_capacity(N);
 
     for i in 0..N {
-        let xnor_gate = builder.add_xnor(i as u32, (N + i) as u32);
+        let xnor_gate = builder.push_xnor(i as u32, (N + i) as u32);
         output_indices.push(xnor_gate);
     }
 
@@ -422,14 +424,14 @@ pub(super) fn build_and_execute_equality<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> bool {
     let mut builder: CircuitBuilder<N> = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
-    let mut result = builder.add_xnor(0, N as u32);
+    let mut result = builder.push_xnor(0, N as u32);
 
     for i in 1..N {
-        let current_comparison = builder.add_xnor(i as u32, (N + i) as u32);
-        result = builder.add_and(result, current_comparison);
+        let current_comparison = builder.push_xnor(i as u32, (N + i) as u32);
+        result = builder.push_and(result, current_comparison);
     }
     let result = builder.execute(lhs, rhs, vec![result]).unwrap();
     result.bits[0]
@@ -440,8 +442,8 @@ pub(super) fn build_and_execute_comparator<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> Ordering {
     let mut builder: CircuitBuilder<N> = CircuitBuilder::default();
-    builder.add_input(lhs);
-    builder.add_input(rhs);
+    builder.push_input(lhs);
+    builder.push_input(rhs);
 
     let (lt_output, eq_output) = comparator_circuit::<N>(&mut builder);
 
@@ -466,22 +468,22 @@ fn comparator_circuit<const N: usize>(builder: &mut CircuitBuilder<N>) -> (u32, 
     let mut lt_list = vec![0; N];
 
     let i = N - 1;
-    let eq_i = builder.add_xnor(i as u32, (N + i) as u32);
+    let eq_i = builder.push_xnor(i as u32, (N + i) as u32);
     eq_list[i] = eq_i;
 
-    let nt = builder.add_not(i as u32);
-    let lt_i = builder.add_and(nt, (N + i) as u32);
+    let nt = builder.push_not(i as u32);
+    let lt_i = builder.push_and(nt, (N + i) as u32);
     lt_list[i] = lt_i;
 
     for idx in (0..i).rev() {
-        let xn = builder.add_xnor(idx as u32, (N + idx) as u32);
-        let eq_i = builder.add_and(eq_list[idx + 1], xn);
+        let xn = builder.push_xnor(idx as u32, (N + idx) as u32);
+        let eq_i = builder.push_and(eq_list[idx + 1], xn);
         eq_list[idx] = eq_i;
 
-        let nt = builder.add_not(idx as u32);
-        let aa = builder.add_and(nt, (N + idx) as u32);
-        let temp_lt = builder.add_and(eq_list[idx + 1], aa);
-        lt_list[idx] = builder.add_or(lt_list[idx + 1], temp_lt);
+        let nt = builder.push_not(idx as u32);
+        let aa = builder.push_and(nt, (N + idx) as u32);
+        let temp_lt = builder.push_and(eq_list[idx + 1], aa);
+        lt_list[idx] = builder.push_or(lt_list[idx + 1], temp_lt);
     }
 
     (lt_list[0], eq_list[0])
@@ -489,12 +491,12 @@ fn comparator_circuit<const N: usize>(builder: &mut CircuitBuilder<N>) -> (u32, 
 
 pub(super) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(input);
+    builder.push_input(input);
 
     let mut output_indices = Vec::with_capacity(N);
 
     for i in 0..N {
-        let not_gate = builder.add_not(i as u32);
+        let not_gate = builder.push_not(i as u32);
         output_indices.push(not_gate);
     }
 
@@ -510,14 +512,14 @@ pub(super) fn build_and_execute_mux<const N: usize>(
     if_false: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
-    builder.add_input(if_false);
-    builder.add_input(if_true);
-    builder.add_input(selector);
+    builder.push_input(if_false);
+    builder.push_input(if_true);
+    builder.push_input(selector);
 
     // Add MUX gates for each bit
     let mut output_indices = Vec::with_capacity(N);
     for i in 0..N {
-        let mux_gate = builder.add_mux(i as u32, (N + i) as u32, (2 * N) as u32);
+        let mux_gate = builder.push_mux(i as u32, (N + i) as u32, (2 * N) as u32);
         output_indices.push(mux_gate);
     }
 
@@ -553,14 +555,14 @@ mod tests {
         let b: GarbledUint32 = 771843900_u32.into(); // if s is true, output should be b
         let s: GarbledUint1 = true.into();
 
-        builder.add_input(&a);
-        builder.add_input(&b);
-        builder.add_input(&s);
+        builder.push_input(&a);
+        builder.push_input(&b);
+        builder.push_input(&s);
 
         // Add MUX gates for each bit
         let mut output_indices = Vec::with_capacity(N);
         for i in 0..N {
-            let mux_gate = builder.add_mux(i as u32, (N + i) as u32, (2 * N) as u32);
+            let mux_gate = builder.push_mux(i as u32, (N + i) as u32, (2 * N) as u32);
             output_indices.push(mux_gate);
         }
 
