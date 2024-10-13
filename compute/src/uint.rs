@@ -2,7 +2,8 @@ use crate::int::GarbledInt;
 use std::fmt::Display;
 use std::marker::PhantomData;
 
-pub type GarbledUint1 = GarbledUint<1>;
+pub type GarbledBoolean = GarbledUint<1>;
+pub type GarbledBit = GarbledUint<1>;
 pub type GarbledUint2 = GarbledUint<2>;
 pub type GarbledUint4 = GarbledUint<4>;
 pub type GarbledUint8 = GarbledUint<8>;
@@ -16,6 +17,16 @@ pub type GarbledUint128 = GarbledUint<128>;
 pub struct GarbledUint<const N: usize> {
     pub bits: Vec<bool>,              // Store the bits of the unsigned integer
     _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size
+}
+
+impl<const N: usize> GarbledUint<N> {
+    pub fn zero() -> Self {
+        GarbledUint::new(vec![false])
+    }
+
+    pub fn one() -> Self {
+        GarbledUint::new(vec![true])
+    }
 }
 
 impl<const N: usize> Display for GarbledUint<N> {
@@ -55,7 +66,7 @@ impl<const N: usize> From<&GarbledInt<N>> for GarbledUint<N> {
     }
 }
 
-impl From<bool> for GarbledUint1 {
+impl From<bool> for GarbledBit {
     fn from(value: bool) -> Self {
         GarbledUint::new(vec![value])
     }
@@ -126,7 +137,7 @@ impl<const N: usize> From<u128> for GarbledUint<N> {
     }
 }
 
-impl From<GarbledUint1> for bool {
+impl From<GarbledBit> for bool {
     fn from(guint: GarbledUint<1>) -> Self {
         guint.bits[0]
     }
@@ -209,7 +220,3 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
         value
     }
 }
-
-// test conversions
-#[cfg(test)]
-mod tests {}

@@ -507,14 +507,14 @@ pub(super) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> G
 
 #[allow(dead_code)]
 pub(super) fn build_and_execute_mux<const N: usize, const S: usize>(
-    selector: &GarbledUint<S>,
+    condition: &GarbledUint<S>,
     if_true: &GarbledUint<N>,
     if_false: &GarbledUint<N>,
 ) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
     builder.push_input(if_false);
     builder.push_input(if_true);
-    builder.push_input(selector);
+    builder.push_input(condition);
 
     // Add MUX gates for each bit
     let mut output_indices = Vec::with_capacity(N);
@@ -527,7 +527,7 @@ pub(super) fn build_and_execute_mux<const N: usize, const S: usize>(
     let input = [
         if_false.bits.clone(),
         if_true.bits.clone(),
-        selector.bits.clone(),
+        condition.bits.clone(),
     ]
     .concat();
 
@@ -541,7 +541,7 @@ pub(super) fn build_and_execute_mux<const N: usize, const S: usize>(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::uint::GarbledUint1;
+    use crate::uint::GarbledBit;
     use crate::uint::GarbledUint32;
     use crate::uint::GarbledUint64;
     use crate::uint::GarbledUint8;
@@ -553,7 +553,7 @@ mod tests {
         let mut builder: CircuitBuilder<N> = CircuitBuilder::default();
         let a: GarbledUint32 = 1900142_u32.into(); // if s is false, output should be a
         let b: GarbledUint32 = 771843900_u32.into(); // if s is true, output should be b
-        let s: GarbledUint1 = true.into();
+        let s: GarbledBit = true.into();
 
         builder.push_input(&a);
         builder.push_input(&b);
@@ -577,7 +577,7 @@ mod tests {
         println!("MUX result: {}", result);
         assert_eq!(result, b);
 
-        let s: GarbledUint1 = false.into();
+        let s: GarbledBit = false.into();
         // combine the three inputs into a single value
         let input = [a.bits.clone(), b.bits.clone(), s.bits].concat();
 
@@ -592,28 +592,28 @@ mod tests {
 
     #[test]
     fn test_build_and_execute_mux1() {
-        let s: GarbledUint1 = true.into();
-        let a: GarbledUint1 = false.into();
-        let b: GarbledUint1 = true.into();
+        let s: GarbledBit = true.into();
+        let a: GarbledBit = false.into();
+        let b: GarbledBit = true.into();
 
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, a);
 
-        let s: GarbledUint1 = false.into();
+        let s: GarbledBit = false.into();
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, b);
     }
 
     #[test]
     fn test_build_and_execute_mux() {
-        let s: GarbledUint1 = true.into();
+        let s: GarbledBit = true.into();
         let a: GarbledUint8 = 170_u8.into();
         let b: GarbledUint8 = 85_u8.into();
 
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, a);
 
-        let s: GarbledUint1 = false.into();
+        let s: GarbledBit = false.into();
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, b);
     }

@@ -678,6 +678,44 @@ fn gateway_encrypted_le() -> Result<(), Box<dyn ::std::error::Error>> {
     Ok(())
 }
 
+fn tfhe_encrypted_mux() {
+    use tfhe::boolean::prelude::*;
+    // We generate a set of client/server keys, using the default parameters:
+    let (client_key, server_key) = gen_keys();
+
+    let bool1 = true;
+    let bool2 = false;
+    let bool3 = true;
+
+    // We use the client secret key to encrypt a message:
+    let ct_1 = client_key.encrypt(true);
+    let ct_2 = client_key.encrypt(false);
+    let ct_3 = client_key.encrypt(false);
+
+    // We use the server public key to execute the NOT gate:
+    let ct_xor = server_key.mux(&ct_1, &ct_2, &ct_3);
+
+    // We use the client key to decrypt the output of the circuit:
+    let output = client_key.decrypt(&ct_xor);
+    assert_eq!(output, if bool1 { bool2 } else { bool3 });
+}
+
+fn gateway_encrypted_mux() {
+    use compute::uint::GarbledBoolean;
+
+    let bool1 = true;
+    let bool2 = false;
+    let bool3 = true;
+
+    let a: GarbledBoolean = bool1.into();
+    let b: GarbledBoolean = bool2.into();
+    let c: GarbledBoolean = bool3.into();
+
+    let result = a.mux(&b, &c);
+    let result: bool = result.into();
+    assert_eq!(result, if bool1 { bool2 } else { bool3 });
+}
+
 // Benchmark 1: Benchmarking benchmark_gateway_encrypted_addition
 fn benchmark_gateway_encrypted_addition(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_addition", |b| {
@@ -866,6 +904,16 @@ fn benchmark_tfhe_encrypted_le(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_le", |b| b.iter(tfhe_encrypted_le));
 }
 
+// Benchmark 33: Benchmarking benchmark_gateway_encrypted_mux
+fn benchmark_gateway_encrypted_mux(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_mux", |b| b.iter(gateway_encrypted_mux));
+}
+
+// Benchmark 34: Benchmarking benchmark_tfhe_encrypted_mux
+fn benchmark_tfhe_encrypted_mux(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_mux", |b| b.iter(tfhe_encrypted_mux));
+}
+
 // Configure Criterion with a sample size of 10
 fn custom_criterion() -> Criterion {
     Criterion::default().sample_size(10)
@@ -876,6 +924,9 @@ criterion_group!(
     name = benches;
     config = custom_criterion();
     targets =
+            benchmark_gateway_encrypted_mux,
+            benchmark_tfhe_encrypted_mux,
+
             benchmark_gateway_encrypted_addition,
             benchmark_tfhe_encrypted_addition,
             benchmark_gateway_encrypted_subtraction,
