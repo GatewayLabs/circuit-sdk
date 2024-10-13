@@ -1,47 +1,37 @@
 use compute::int::{
-    GarbledInt128, GarbledInt16, GarbledInt32, GarbledInt4, GarbledInt64, GarbledInt8,
+    GarbledInt, GarbledInt128, GarbledInt16, GarbledInt32, GarbledInt64, GarbledInt8,
 };
-use compute::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
+use compute::uint::{
+    GarbledUint, GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8,
+};
 
 #[test]
-fn test_from_u8_add() {
+fn test_uint_add() {
     let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
     let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
     let result: u8 = (a + b).into(); // Perform addition on the 4-bit values
     assert_eq!(result, 170_u8 + 85_u8); // Expected result of addition between 10101010 and 01010101
-}
 
-#[test]
-fn test_from_u16_add() {
     let a: GarbledUint16 = 4370_u16.into(); // Binary 1010101010101011
     let b: GarbledUint16 = 2184_u16.into(); // Binary 0101010101010101
 
     let result: u16 = (a + b).into(); // Perform addition on the 4-bit values
     assert_eq!(result, 4370_u16 + 2184_u16); // Expected result of addition between 1010101010101011 and 0101010101010101
-}
 
-#[test]
-fn test_from_u32_add() {
     let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
     let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
     let result: u32 = (a + b).into(); // Perform addition on the 4-bit values
     assert_eq!(result, 2863311530_u32 + 1431655765_u32); // Expected result of addition between 10101010101010101010101010101010 and 01010101010101010101010101010101
-}
 
-#[test]
-fn test_from_u64_add() {
     let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
     let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
     let result: u64 = (a + b).into(); // Perform addition on the 4-bit values
     assert_eq!(result, 12297829382473034410_u64 + 6148914691236517205_u64);
     // Expected result of addition between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
-}
 
-#[test]
-fn test_from_u128_add() {
     let a: GarbledUint128 = 12297829382473034410_u128.into(); // Binary 10101010
     let b: GarbledUint128 = 6148914691236517205_u128.into(); // Binary 01010101
 
@@ -50,46 +40,119 @@ fn test_from_u128_add() {
 }
 
 #[test]
-fn test_from_i8_add() {
-    let a: GarbledInt8 = 3_i8.into();
-    let b: GarbledInt8 = (-2_i8).into();
+fn test_uint_add_assign() {
+    let mut a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+    let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
-    let result: i8 = (a + b).into(); // Perform addition on the 8-bit values
-    assert_eq!(result, 3_i8 - 2_i8); // Expected result of addition between 3 and -2
+    a += b; // Perform addition on the 4-bit values
+    assert_eq!(<GarbledUint<8> as Into<u8>>::into(a), 170_u8 + 85_u8); // Expected result of addition between 10101010 and 01010101
+
+    let mut a: GarbledUint16 = 4370_u16.into(); // Binary 1010101010101011
+    let b: GarbledUint16 = 2184_u16.into(); // Binary 0101010101010101
+
+    a += b; // Perform addition on the 4-bit values
+    assert_eq!(<GarbledUint<16> as Into<u16>>::into(a), 4370_u16 + 2184_u16); // Expected result of addition between 1010101010101011 and 0101010101010101
+
+    let mut a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+    let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
+
+    a += b; // Perform addition on the 4-bit values
+    assert_eq!(
+        <GarbledUint<32> as Into<u32>>::into(a),
+        2863311530_u32 + 1431655765_u32
+    ); // Expected result of addition between 10101010101010101010101010101010 and 01010101010101010101010101010101
+
+    let mut a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+    let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+
+    a += b; // Perform addition on the 4-bit values
+    assert_eq!(
+        <GarbledUint<64> as Into<u64>>::into(a),
+        12297829382473034410_u64 + 6148914691236517205_u64
+    );
+    // Expected result of addition between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
+
+    let mut a: GarbledUint128 = 12297829382473034410_u128.into(); // Binary 10101010
+    let b: GarbledUint128 = 6148914691236517205_u128.into(); // Binary 01010101
+
+    a += b; // Perform addition on the 4-bit values
+    assert_eq!(
+        <GarbledUint<128> as Into<u128>>::into(a),
+        12297829382473034410_u128 + 6148914691236517205_u128
+    );
 }
 
 #[test]
-fn test_from_i16_add() {
+fn test_int_add_assign() {
+    let mut a: GarbledInt8 = 3_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    a += b; // Perform addition on the 8-bit values
+    assert_eq!(<GarbledInt<8> as Into<i8>>::into(a), 3_i8 + 2_i8); // Expected result of addition between 3 and 2
+
+    let mut a: GarbledInt16 = 1340_i16.into();
+    let b: GarbledInt16 = 8543_i16.into();
+
+    a += b; // Perform addition on the 16-bit values
+    assert_eq!(<GarbledInt<16> as Into<i16>>::into(a), 1340_i16 + 8543_i16);
+
+    let mut a: GarbledInt32 = 17034322_i32.into();
+    let b: GarbledInt32 = 84928323_i32.into();
+
+    a += b; // Perform addition on the 32-bit values
+    assert_eq!(
+        <GarbledInt<32> as Into<i32>>::into(a),
+        17034322_i32 + 84928323_i32
+    );
+
+    let mut a: GarbledInt64 = 170343221234_i64.into();
+    let b: GarbledInt64 = 849283231234_i64.into();
+
+    a += b; // Perform addition on the 64-bit values
+    assert_eq!(
+        <GarbledInt<64> as Into<i64>>::into(a),
+        170343221234_i64 + 849283231234_i64
+    );
+
+    let mut a: GarbledInt128 = 170343221234567890_i128.into();
+    let b: GarbledInt128 = 849283231234567890_i128.into();
+
+    a += b; // Perform addition on the 128-bit values
+    assert_eq!(
+        <GarbledInt<128> as Into<i128>>::into(a),
+        170343221234567890_i128 + 849283231234567890_i128
+    );
+}
+
+#[test]
+fn test_int_add() {
+    let a: GarbledInt8 = 3_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    let result: i8 = (a + b).into(); // Perform addition on the 8-bit values
+    assert_eq!(result, 3_i8 + 2_i8); // Expected result of addition between 3 and 2
+
     // use larger values to test the 16-bit addition
     let a: GarbledInt16 = 1340_i16.into();
     let b: GarbledInt16 = 8543_i16.into();
 
     let result: i16 = (a + b).into(); // Perform addition on the 16-bit values
     assert_eq!(result, 1340_i16 + 8543_i16);
-}
 
-#[test]
-fn test_from_i32_add() {
     // use larger values to test the 32-bit addition
     let a: GarbledInt32 = 17034322_i32.into();
     let b: GarbledInt32 = 84928323_i32.into();
 
     let result: i32 = (a + b).into(); // Perform addition on the 32-bit values
     assert_eq!(result, 17034322_i32 + 84928323_i32);
-}
 
-#[test]
-fn test_from_i64_add() {
     // use larger values to test the 64-bit addition
     let a: GarbledInt64 = 170343221234_i64.into();
     let b: GarbledInt64 = 849283231234_i64.into();
 
     let result: i64 = (a + b).into(); // Perform addition on the 64-bit values
     assert_eq!(result, 170343221234_i64 + 849283231234_i64);
-}
 
-#[test]
-fn test_from_i128_add() {
     // use larger values to test the 128-bit addition
     let a: GarbledInt128 = 170343221234567890_i128.into();
     let b: GarbledInt128 = 849283231234567890_i128.into();
@@ -99,49 +162,161 @@ fn test_from_i128_add() {
 }
 
 #[test]
-fn test_from_u8_sub() {
+fn test_int_subtract() {
+    let a: GarbledInt8 = 3_i8.into();
+    let b: GarbledInt8 = (-2_i8).into();
+
+    let result: i8 = (a + b).into(); // Perform addition on the 8-bit values
+    assert_eq!(result, 3_i8 - 2_i8); // Expected result of addition between 3 and -2
+
+    // use larger values to test the 16-bit addition
+    let a: GarbledInt16 = 1340_i16.into();
+    let b: GarbledInt16 = 8543_i16.into();
+
+    let result: i16 = (a + b).into(); // Perform addition on the 16-bit values
+    assert_eq!(result, 1340_i16 + 8543_i16);
+
+    // use larger values to test the 32-bit addition
+    let a: GarbledInt32 = 17034322_i32.into();
+    let b: GarbledInt32 = 84928323_i32.into();
+
+    let result: i32 = (a + b).into(); // Perform addition on the 32-bit values
+    assert_eq!(result, 17034322_i32 + 84928323_i32);
+
+    // use larger values to test the 64-bit addition
+    let a: GarbledInt64 = 170343221234_i64.into();
+    let b: GarbledInt64 = 849283231234_i64.into();
+
+    let result: i64 = (a + b).into(); // Perform addition on the 64-bit values
+    assert_eq!(result, 170343221234_i64 + 849283231234_i64);
+
+    // use larger values to test the 128-bit addition
+    let a: GarbledInt128 = 170343221234567890_i128.into();
+    let b: GarbledInt128 = 849283231234567890_i128.into();
+
+    let result: i128 = (a + b).into(); // Perform addition on the 128-bit values
+    assert_eq!(result, 170343221234567890_i128 + 849283231234567890_i128);
+}
+
+#[test]
+fn test_uint_subtract() {
     let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
     let b: GarbledUint8 = 100_u8.into(); // Binary 01100100
 
     let result: u8 = (a - b).into();
     assert_eq!(result, 170_u8 - 100_u8); // Expected result of subtraction between 10101010 and 01010101
-}
 
-#[test]
-fn test_from_u16_sub() {
     let a: GarbledUint16 = 43707_u16.into(); // Binary 1010101010101011
     let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
 
     let result: u16 = (a - b).into();
     assert_eq!(result, 43707_u16 - 21845_u16); // Expected result of subtraction between 1010101010101011 and 0101010101010101
-}
 
-#[test]
-fn test_from_u32_sub() {
     let a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
     let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
 
     let result: u32 = (a - b).into();
     assert_eq!(result, 2863311530_u32 - 1431655765_u32); // Expected result of subtraction between 10101010101010101010101010101010 and 01010101010101010101010101010101
-}
 
-#[test]
-fn test_from_u64_sub() {
     let a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
     let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
 
     let result: u64 = (a - b).into();
     assert_eq!(result, 12297829382473034410_u64 - 6148914691236517205_u64);
     // Expected result of subtraction between 1010101010101010101010101010101010101010101010101010101010101010 and 0101010101010101010101010101010101010101010101010101010101010101
-}
 
-#[test]
-fn test_from_u128_sub() {
     let a: GarbledUint128 = 12297829382473034410_u128.into(); // Binary 10101010
     let b: GarbledUint128 = 6148914691236517205_u128.into(); // Binary 01010101
 
     let result: u128 = (a - b).into();
     assert_eq!(result, 12297829382473034410_u128 - 6148914691236517205_u128);
+}
+
+#[test]
+fn test_uint_sub_assign() {
+    let mut a: GarbledUint8 = 170_u8.into(); // Binary 10101010
+    let b: GarbledUint8 = 100_u8.into(); // Binary 01100100
+
+    a -= b; // Perform subtraction on the 4-bit values
+    assert_eq!(<GarbledUint<8> as Into<u8>>::into(a), 170_u8 - 100_u8); // Expected result of subtraction between 10101010 and 01010101
+
+    let mut a: GarbledUint16 = 43707_u16.into(); // Binary 1010101010101011
+    let b: GarbledUint16 = 21845_u16.into(); // Binary 0101010101010101
+
+    a -= b; // Perform subtraction on the 4-bit values
+    assert_eq!(
+        <GarbledUint<16> as Into<u16>>::into(a),
+        43707_u16 - 21845_u16
+    ); // Expected result of subtraction between 1010101010101011 and 0101010101010101
+
+    let mut a: GarbledUint32 = 2863311530_u32.into(); // Binary 10101010101010101010101010101010
+    let b: GarbledUint32 = 1431655765_u32.into(); // Binary 01010101010101010101010101010101
+
+    a -= b; // Perform subtraction on the 4-bit values
+    assert_eq!(
+        <GarbledUint<32> as Into<u32>>::into(a),
+        2863311530_u32 - 1431655765_u32
+    ); // Expected result of subtraction between 10101010101010101010101010101010 and 01010101010101010101010101010101
+
+    let mut a: GarbledUint64 = 12297829382473034410_u64.into(); // Binary 1010101010101010101010101010101010101010101010101010101010101010
+    let b: GarbledUint64 = 6148914691236517205_u64.into(); // Binary 0101010101010101010101010101010101010101010101010101010101010101
+
+    a -= b; // Perform subtraction on the 4-bit values
+    assert_eq!(
+        <GarbledUint<64> as Into<u64>>::into(a),
+        12297829382473034410_u64 - 6148914691236517205_u64
+    );
+
+    let mut a: GarbledUint128 = 12297829382473034410_u128.into(); // Binary 10101010
+    let b: GarbledUint128 = 6148914691236517205_u128.into(); // Binary 01010101
+
+    a -= b; // Perform subtraction on the 4-bit values
+    assert_eq!(
+        <GarbledUint<128> as Into<u128>>::into(a),
+        12297829382473034410_u128 - 6148914691236517205_u128
+    );
+}
+
+#[test]
+fn test_int_sub_assign() {
+    let mut a: GarbledInt8 = 3_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    a -= b; // Perform subtraction on the 8-bit values
+    assert_eq!(<GarbledInt<8> as Into<i8>>::into(a), 3_i8 - 2_i8); // Expected result of subtraction between 3 and 2
+
+    let mut a: GarbledInt16 = 1340_i16.into();
+    let b: GarbledInt16 = 8543_i16.into();
+
+    a -= b; // Perform subtraction on the 16-bit values
+    assert_eq!(<GarbledInt<16> as Into<i16>>::into(a), 1340_i16 - 8543_i16);
+
+    let mut a: GarbledInt32 = 17034322_i32.into();
+    let b: GarbledInt32 = 84928323_i32.into();
+
+    a -= b; // Perform subtraction on the 32-bit values
+    assert_eq!(
+        <GarbledInt<32> as Into<i32>>::into(a),
+        17034322_i32 - 84928323_i32
+    );
+
+    let mut a: GarbledInt64 = 170343221234_i64.into();
+    let b: GarbledInt64 = 849283231234_i64.into();
+
+    a -= b; // Perform subtraction on the 64-bit values
+    assert_eq!(
+        <GarbledInt<64> as Into<i64>>::into(a),
+        170343221234_i64 - 849283231234_i64
+    );
+
+    let mut a: GarbledInt128 = 170343221234567890_i128.into();
+    let b: GarbledInt128 = 849283231234567890_i128.into();
+
+    a -= b; // Perform subtraction on the 128-bit values
+    assert_eq!(
+        <GarbledInt<128> as Into<i128>>::into(a),
+        170343221234567890_i128 - 849283231234567890_i128
+    );
 }
 
 #[test]
@@ -151,19 +326,13 @@ fn test_uint_mul() {
 
     let result: u8 = (a * b).into();
     assert_eq!(result, 6); // 0011 * 0010 = 0110
-}
 
-#[test]
-fn test_from_u8_mul() {
     let a: GarbledUint8 = 7_u8.into(); // Binary 0000 0111
     let b: GarbledUint8 = 5_u8.into(); // Binary 0000 0101
 
     let result: u8 = (a * b).into();
     assert_eq!(result, 35); // Binary 0010 0011
-}
 
-#[test]
-fn test_from_u16_mul() {
     let a: GarbledUint16 = 300_u16.into(); // Binary 1010101010101011
     let b: GarbledUint16 = 7_u16.into(); // Binary 0101010101010101
 
@@ -172,61 +341,54 @@ fn test_from_u16_mul() {
 }
 
 #[test]
-fn test_int_sub() {
-    let a: GarbledInt4 = 3_i8.into();
-    let b: GarbledInt4 = 2_i8.into();
-
-    let result: i8 = (a - b).into();
-    assert_eq!(result, 3_i8 - 2_i8);
-}
-
-#[test]
-fn test_from_i8_sub() {
+fn test_int_mul() {
     let a: GarbledInt8 = 3_i8.into();
-    let b: GarbledInt8 = (-2_i8).into();
+    let b: GarbledInt8 = 2_i8.into();
 
-    let result: i8 = (a - b).into(); // Perform subtraction on the 8-bit values
-    assert_eq!(result, 3_i8 - (-2_i8)); // Expected result of subtraction between 3 and -2
+    let result: i8 = (a * b).into();
+    assert_eq!(result, 3_i8 * 2_i8);
+
+    let a: GarbledInt16 = 134_i16.into();
+    let b: GarbledInt16 = 85_i16.into();
+
+    let result: i16 = (a * b).into();
+    assert_eq!(result, 134_i16 * 85_i16);
 }
 
 #[test]
-fn test_from_i16_sub() {
-    // use larger values to test the 16-bit subtraction
-    let a: GarbledInt16 = 1340_i16.into();
-    let b: GarbledInt16 = 8543_i16.into();
+fn test_uint_mul_assign() {
+    let mut a: GarbledUint8 = 3_u8.into(); // Binary 0011
+    let b: GarbledUint8 = 2_u8.into(); // Binary 0010
 
-    let result: i16 = (a - b).into(); // Perform subtraction on the 16-bit values
-    assert_eq!(result, 1340_i16 - 8543_i16);
+    a *= b;
+    assert_eq!(<GarbledUint<8> as Into<u8>>::into(a), 6); // 0011 * 0010 = 0110
+
+    let mut a: GarbledUint8 = 7_u8.into(); // Binary 0000 0111
+    let b: GarbledUint8 = 5_u8.into(); // Binary 0000 0101
+
+    a *= b;
+    assert_eq!(<GarbledUint<8> as Into<u8>>::into(a), 35); // Binary 0010 0011
+
+    let mut a: GarbledUint16 = 300_u16.into(); // Binary 1010101010101011
+    let b: GarbledUint16 = 7_u16.into(); // Binary 0101010101010101
+
+    a *= b;
+    assert_eq!(<GarbledUint<16> as Into<u16>>::into(a), 300_u16 * 7_u16); // Expected result of multiplication between 1010101010101011 and 0101010101010101
 }
 
 #[test]
-fn test_from_i32_sub() {
-    // use larger values to test the 32-bit subtraction
-    let a: GarbledInt32 = 17034322_i32.into();
-    let b: GarbledInt32 = 84928323_i32.into();
+fn test_int_mul_assign() {
+    let mut a: GarbledInt8 = 3_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
 
-    let result: i32 = (a - b).into(); // Perform subtraction on the 32-bit values
-    assert_eq!(result, 17034322_i32 - 84928323_i32);
-}
+    a *= b;
+    assert_eq!(<GarbledInt<8> as Into<i8>>::into(a), 3_i8 * 2_i8);
 
-#[test]
-fn test_from_i64_sub() {
-    // use larger values to test the 64-bit subtraction
-    let a: GarbledInt64 = 170343221234_i64.into();
-    let b: GarbledInt64 = 849283231234_i64.into();
+    let mut a: GarbledInt16 = 134_i16.into();
+    let b: GarbledInt16 = 85_i16.into();
 
-    let result: i64 = (a - b).into(); // Perform subtraction on the 64-bit values
-    assert_eq!(result, 170343221234_i64 - 849283231234_i64);
-}
-
-#[test]
-fn test_from_i128_sub() {
-    // use larger values to test the 128-bit subtraction
-    let a: GarbledInt128 = 170343221234567890_i128.into();
-    let b: GarbledInt128 = 849283231234567890_i128.into();
-
-    let result: i128 = (a - b).into(); // Perform subtraction on the 128-bit values
-    assert_eq!(result, 170343221234567890_i128 - 849283231234567890_i128);
+    a *= b;
+    assert_eq!(<GarbledInt<16> as Into<i16>>::into(a), 134_i16 * 85_i16);
 }
 
 #[test]
