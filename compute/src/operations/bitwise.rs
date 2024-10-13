@@ -4,7 +4,10 @@ use crate::operations::circuits::{
     build_and_execute_or, build_and_execute_xnor, build_and_execute_xor,
 };
 use crate::uint::GarbledUint;
-use std::ops::{BitAnd, BitOr, BitXor, Not, Shl, Shr};
+use std::ops::{
+    BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Not, Shl, ShlAssign, Shr,
+    ShrAssign,
+};
 
 // Implement the XOR operation for Uint<N>
 impl<const N: usize> BitXor for GarbledUint<N> {
@@ -21,6 +24,20 @@ impl<const N: usize> BitXor for &GarbledUint<N> {
 
     fn bitxor(self, rhs: Self) -> Self::Output {
         build_and_execute_xor(self, rhs)
+    }
+}
+
+// Implement the XorAssign operation for Uint<N>
+impl<const N: usize> BitXorAssign for GarbledUint<N> {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        *self = build_and_execute_xor(&self, &rhs);
+    }
+}
+
+// Implement the XorAssign operation for &GarbledUint<N>
+impl<const N: usize> BitXorAssign<&GarbledUint<N>> for GarbledUint<N> {
+    fn bitxor_assign(&mut self, rhs: &Self) {
+        *self = build_and_execute_xor(&self, rhs);
     }
 }
 
@@ -42,6 +59,20 @@ impl<const N: usize> BitXor for &GarbledInt<N> {
     }
 }
 
+// Implement the XorAssign operation for GarbledInt<N>
+impl<const N: usize> BitXorAssign for GarbledInt<N> {
+    fn bitxor_assign(&mut self, rhs: Self) {
+        *self = build_and_execute_xor(&self.clone().into(), &rhs.into()).into();
+    }
+}
+
+// Implement the XorAssign operation for &GarbledInt<N>
+impl<const N: usize> BitXorAssign<&GarbledInt<N>> for GarbledInt<N> {
+    fn bitxor_assign(&mut self, rhs: &Self) {
+        *self = build_and_execute_xor(&self.clone().into(), &rhs.into()).into();
+    }
+}
+
 // Implement the AND operation for Uint<N>
 impl<const N: usize> BitAnd for GarbledUint<N> {
     type Output = Self;
@@ -60,6 +91,20 @@ impl<const N: usize> BitAnd for &GarbledUint<N> {
     }
 }
 
+// Implement the BitAndAssign operation for Uint<N>
+impl<const N: usize> BitAndAssign for GarbledUint<N> {
+    fn bitand_assign(&mut self, rhs: Self) {
+        *self = build_and_execute_and(&self, &rhs);
+    }
+}
+
+// Implement the BitAndAssign operation for &GarbledUint<N>
+impl<const N: usize> BitAndAssign<&GarbledUint<N>> for GarbledUint<N> {
+    fn bitand_assign(&mut self, rhs: &Self) {
+        *self = build_and_execute_and(&self, rhs);
+    }
+}
+
 // Implement the AND operation for GarbledInt<N>
 impl<const N: usize> BitAnd for GarbledInt<N> {
     type Output = Self;
@@ -75,6 +120,20 @@ impl<const N: usize> BitAnd for &GarbledInt<N> {
 
     fn bitand(self, rhs: Self) -> Self::Output {
         build_and_execute_and(&self.into(), &rhs.into()).into()
+    }
+}
+
+// Implement the BitAndAssign operation for GarbledInt<N>
+impl<const N: usize> BitAndAssign for GarbledInt<N> {
+    fn bitand_assign(&mut self, rhs: Self) {
+        *self = build_and_execute_and(&self.clone().into(), &rhs.into()).into();
+    }
+}
+
+// Implement the BitAndAssign operation for &GarbledInt<N>
+impl<const N: usize> BitAndAssign<&GarbledInt<N>> for GarbledInt<N> {
+    fn bitand_assign(&mut self, rhs: &Self) {
+        *self = build_and_execute_and(&self.clone().into(), &rhs.into()).into();
     }
 }
 
@@ -114,6 +173,20 @@ impl<const N: usize> BitOr for &GarbledUint<N> {
     }
 }
 
+// Implement the BitOrAssign operation for Uint<N>
+impl<const N: usize> BitOrAssign for GarbledUint<N> {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = build_and_execute_or(&self, &rhs);
+    }
+}
+
+// Implement the BitOrAssign operation for &GarbledUint<N>
+impl<const N: usize> BitOrAssign<&GarbledUint<N>> for GarbledUint<N> {
+    fn bitor_assign(&mut self, rhs: &Self) {
+        *self = build_and_execute_or(&self, rhs);
+    }
+}
+
 // Implement the OR operation for GarbledInt<N>
 impl<const N: usize> BitOr for GarbledInt<N> {
     type Output = Self;
@@ -129,6 +202,20 @@ impl<const N: usize> BitOr for &GarbledInt<N> {
 
     fn bitor(self, rhs: Self) -> Self::Output {
         build_and_execute_or(&self.into(), &rhs.into()).into()
+    }
+}
+
+// Implement the BitOrAssign operation for GarbledInt<N>
+impl<const N: usize> BitOrAssign for GarbledInt<N> {
+    fn bitor_assign(&mut self, rhs: Self) {
+        *self = build_and_execute_or(&self.clone().into(), &rhs.into()).into();
+    }
+}
+
+// Implement the BitOrAssign operation for &GarbledInt<N>
+impl<const N: usize> BitOrAssign<&GarbledInt<N>> for GarbledInt<N> {
+    fn bitor_assign(&mut self, rhs: &Self) {
+        *self = build_and_execute_or(&self.clone().into(), &rhs.into()).into();
     }
 }
 
@@ -186,6 +273,21 @@ impl<const N: usize> Shl<usize> for &GarbledUint<N> {
     }
 }
 
+// Implement ShlAssign for GarbledUint<N>
+impl<const N: usize> ShlAssign<usize> for GarbledUint<N> {
+    fn shl_assign(&mut self, shift: usize) {
+        shift_bits_left::<N>(&mut self.bits, shift);
+    }
+}
+
+// Implement ShlAssign for &GarbledUint<N>
+impl<const N: usize> ShlAssign<usize> for &GarbledUint<N> {
+    fn shl_assign(&mut self, shift: usize) {
+        let mut bits: Vec<bool> = self.bits.clone();
+        shift_bits_left::<N>(&mut bits, shift);
+    }
+}
+
 // Implement Shift Left operation for GarbledInt<N>
 impl<const N: usize> Shl<usize> for GarbledInt<N> {
     type Output = Self;
@@ -205,6 +307,21 @@ impl<const N: usize> Shl<usize> for &GarbledInt<N> {
         let mut bits = self.bits.clone();
         shift_bits_left::<N>(&mut bits, shift);
         GarbledInt::new(bits)
+    }
+}
+
+// Implement ShlAssign for GarbledInt<N>
+impl<const N: usize> ShlAssign<usize> for GarbledInt<N> {
+    fn shl_assign(&mut self, shift: usize) {
+        shift_bits_left::<N>(&mut self.bits, shift);
+    }
+}
+
+// Implement ShlAssign for &GarbledInt<N>
+impl<const N: usize> ShlAssign<usize> for &GarbledInt<N> {
+    fn shl_assign(&mut self, shift: usize) {
+        let mut bits: Vec<bool> = self.bits.clone();
+        shift_bits_left::<N>(&mut bits, shift);
     }
 }
 
@@ -229,6 +346,21 @@ impl<const N: usize> Shr<usize> for &GarbledUint<N> {
     }
 }
 
+// Implement ShrAssign for GarbledUint<N>
+impl<const N: usize> ShrAssign<usize> for GarbledUint<N> {
+    fn shr_assign(&mut self, shift: usize) {
+        shift_bits_right::<N>(&mut self.bits, shift);
+    }
+}
+
+// Implement ShrAssign for &GarbledUint<N>
+impl<const N: usize> ShrAssign<usize> for &GarbledUint<N> {
+    fn shr_assign(&mut self, shift: usize) {
+        let mut bits: Vec<bool> = self.bits.clone();
+        shift_bits_right::<N>(&mut bits, shift);
+    }
+}
+
 // Implement Shift Right operation for GarbledInt<N>
 impl<const N: usize> Shr<usize> for GarbledInt<N> {
     type Output = Self;
@@ -248,6 +380,21 @@ impl<const N: usize> Shr<usize> for &GarbledInt<N> {
         let mut bits = self.bits.clone();
         shift_bits_right::<N>(&mut bits, shift);
         GarbledInt::new(bits)
+    }
+}
+
+// Implement ShrAssign for GarbledInt<N>
+impl<const N: usize> ShrAssign<usize> for GarbledInt<N> {
+    fn shr_assign(&mut self, shift: usize) {
+        shift_bits_right::<N>(&mut self.bits, shift);
+    }
+}
+
+// Implement ShrAssign for &GarbledInt<N>
+impl<const N: usize> ShrAssign<usize> for &GarbledInt<N> {
+    fn shr_assign(&mut self, shift: usize) {
+        let mut bits: Vec<bool> = self.bits.clone();
+        shift_bits_right::<N>(&mut bits, shift);
     }
 }
 

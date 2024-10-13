@@ -75,6 +75,3 @@ impl<const N: usize> Ord for GarbledInt<N> {
         build_and_execute_comparator(&self.into(), &other.into())
     }
 }
-
-#[cfg(test)]
-mod tests {}
