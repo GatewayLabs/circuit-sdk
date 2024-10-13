@@ -25,13 +25,13 @@ impl<const N: usize> Add for &GarbledUint<N> {
 // Implement the AddAssign operation for Uint<N> and &GarbledUint<N>
 impl<const N: usize> AddAssign for GarbledUint<N> {
     fn add_assign(&mut self, rhs: Self) {
-        *self = build_and_execute_addition(&self, &rhs);
+        *self = build_and_execute_addition(self, &rhs);
     }
 }
 
 impl<const N: usize> AddAssign<&GarbledUint<N>> for GarbledUint<N> {
     fn add_assign(&mut self, rhs: &Self) {
-        *self = build_and_execute_addition(&self, rhs);
+        *self = build_and_execute_addition(self, rhs);
     }
 }
 
@@ -55,13 +55,13 @@ impl<const N: usize> Sub for &GarbledUint<N> {
 // Implement the SubAssign operation for GarbledUint<N> and &GarbledUint<N>
 impl<const N: usize> SubAssign for GarbledUint<N> {
     fn sub_assign(&mut self, rhs: Self) {
-        *self = build_and_execute_subtraction(&self, &rhs);
+        *self = build_and_execute_subtraction(self, &rhs);
     }
 }
 
 impl<const N: usize> SubAssign<&GarbledUint<N>> for GarbledUint<N> {
     fn sub_assign(&mut self, rhs: &Self) {
-        *self = build_and_execute_subtraction(&self, rhs);
+        *self = build_and_execute_subtraction(self, rhs);
     }
 }
 
@@ -84,13 +84,13 @@ impl<const N: usize> Mul for &GarbledUint<N> {
 // Implement the MulAssign operation for GarbledUint<N> and &GarbledUint<N>
 impl<const N: usize> MulAssign for GarbledUint<N> {
     fn mul_assign(&mut self, rhs: Self) {
-        *self = build_and_execute_multiplication(&self, &rhs);
+        *self = build_and_execute_multiplication(self, &rhs);
     }
 }
 
 impl<const N: usize> MulAssign<&GarbledUint<N>> for GarbledUint<N> {
     fn mul_assign(&mut self, rhs: &Self) {
-        *self = build_and_execute_multiplication(&self, rhs);
+        *self = build_and_execute_multiplication(self, rhs);
     }
 }
 

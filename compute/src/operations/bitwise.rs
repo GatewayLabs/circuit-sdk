@@ -30,14 +30,14 @@ impl<const N: usize> BitXor for &GarbledUint<N> {
 // Implement the XorAssign operation for Uint<N>
 impl<const N: usize> BitXorAssign for GarbledUint<N> {
     fn bitxor_assign(&mut self, rhs: Self) {
-        *self = build_and_execute_xor(&self, &rhs);
+        *self = build_and_execute_xor(self, &rhs);
     }
 }
 
 // Implement the XorAssign operation for &GarbledUint<N>
 impl<const N: usize> BitXorAssign<&GarbledUint<N>> for GarbledUint<N> {
     fn bitxor_assign(&mut self, rhs: &Self) {
-        *self = build_and_execute_xor(&self, rhs);
+        *self = build_and_execute_xor(self, rhs);
     }
 }
 
@@ -94,14 +94,14 @@ impl<const N: usize> BitAnd for &GarbledUint<N> {
 // Implement the BitAndAssign operation for Uint<N>
 impl<const N: usize> BitAndAssign for GarbledUint<N> {
     fn bitand_assign(&mut self, rhs: Self) {
-        *self = build_and_execute_and(&self, &rhs);
+        *self = build_and_execute_and(self, &rhs);
     }
 }
 
 // Implement the BitAndAssign operation for &GarbledUint<N>
 impl<const N: usize> BitAndAssign<&GarbledUint<N>> for GarbledUint<N> {
     fn bitand_assign(&mut self, rhs: &Self) {
-        *self = build_and_execute_and(&self, rhs);
+        *self = build_and_execute_and(self, rhs);
     }
 }
 
@@ -176,14 +176,14 @@ impl<const N: usize> BitOr for &GarbledUint<N> {
 // Implement the BitOrAssign operation for Uint<N>
 impl<const N: usize> BitOrAssign for GarbledUint<N> {
     fn bitor_assign(&mut self, rhs: Self) {
-        *self = build_and_execute_or(&self, &rhs);
+        *self = build_and_execute_or(self, &rhs);
     }
 }
 
 // Implement the BitOrAssign operation for &GarbledUint<N>
 impl<const N: usize> BitOrAssign<&GarbledUint<N>> for GarbledUint<N> {
     fn bitor_assign(&mut self, rhs: &Self) {
-        *self = build_and_execute_or(&self, rhs);
+        *self = build_and_execute_or(self, rhs);
     }
 }
 

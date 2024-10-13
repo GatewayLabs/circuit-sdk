@@ -5,7 +5,7 @@ use crate::uint::GarbledUint;
 impl<const N: usize> GarbledUint<N> {
     // implementation of the MUX operation
     pub fn mux(&self, if_true: &GarbledUint<N>, if_false: &GarbledUint<N>) -> GarbledUint<N> {
-        build_and_execute_mux(&self, &if_true, &if_false)
+        build_and_execute_mux(self, if_true, if_false)
     }
 
     // implementation of the MUX operation
