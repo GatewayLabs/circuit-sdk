@@ -1,5 +1,5 @@
 use crate::int::GarbledInt;
-use crate::operations::circuits::build_and_execute_mux;
+use crate::operations::circuits::builder::build_and_execute_mux;
 use crate::uint::GarbledUint;
 
 impl<const N: usize> GarbledUint<N> {

@@ -1,8 +1,8 @@
-use crate::simulator::simulate;
 use crate::uint::GarbledUint;
 use std::cmp::Ordering;
 use tandem::GateIndex;
 use tandem::{Circuit, Gate};
+use crate::executor::get_executor;
 
 pub struct CircuitBuilder<const N: usize> {
     gates: Vec<Gate>,
@@ -154,12 +154,12 @@ impl<const N: usize> CircuitBuilder<N> {
         output_indices: Vec<u32>,
     ) -> anyhow::Result<GarbledUint<N>> {
         let program = Circuit::new(self.gates.clone(), output_indices);
-        let result = simulate(&program, input, &[])?;
+        let result = get_executor().execute(&program, input, &[])?;
         Ok(GarbledUint::new(result))
     }
 }
 
-pub(super) fn build_and_execute_xor<const N: usize>(
+pub(crate) fn build_and_execute_xor<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -180,7 +180,7 @@ pub(super) fn build_and_execute_xor<const N: usize>(
         .expect("Failed to execute XOR circuit")
 }
 
-pub(super) fn build_and_execute_and<const N: usize>(
+pub(crate) fn build_and_execute_and<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -201,7 +201,7 @@ pub(super) fn build_and_execute_and<const N: usize>(
         .expect("Failed to execute AND circuit")
 }
 
-pub(super) fn build_and_execute_or<const N: usize>(
+pub(crate) fn build_and_execute_or<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -222,7 +222,7 @@ pub(super) fn build_and_execute_or<const N: usize>(
         .expect("Failed to execute OR circuit")
 }
 
-pub(super) fn build_and_execute_addition<const N: usize>(
+pub(crate) fn build_and_execute_addition<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -246,7 +246,7 @@ pub(super) fn build_and_execute_addition<const N: usize>(
         .expect("Failed to execute addition circuit")
 }
 
-pub(super) fn build_and_execute_subtraction<const N: usize>(
+pub(crate) fn build_and_execute_subtraction<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -305,7 +305,7 @@ fn full_subtractor<const N: usize>(
     (diff, Some(new_borrow))
 }
 
-pub(super) fn build_and_execute_multiplication<const N: usize>(
+pub(crate) fn build_and_execute_multiplication<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -359,7 +359,7 @@ fn generate_partial_product<const N: usize>(
     partial_product
 }
 
-pub(super) fn build_and_execute_nand<const N: usize>(
+pub(crate) fn build_and_execute_nand<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -379,7 +379,7 @@ pub(super) fn build_and_execute_nand<const N: usize>(
         .expect("Failed to execute NAND circuit")
 }
 
-pub(super) fn build_and_execute_nor<const N: usize>(
+pub(crate) fn build_and_execute_nor<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -399,7 +399,7 @@ pub(super) fn build_and_execute_nor<const N: usize>(
         .expect("Failed to execute NOR circuit")
 }
 
-pub(super) fn build_and_execute_xnor<const N: usize>(
+pub(crate) fn build_and_execute_xnor<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -419,7 +419,7 @@ pub(super) fn build_and_execute_xnor<const N: usize>(
         .expect("Failed to execute XNOR circuit")
 }
 
-pub(super) fn build_and_execute_equality<const N: usize>(
+pub(crate) fn build_and_execute_equality<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> bool {
@@ -437,7 +437,7 @@ pub(super) fn build_and_execute_equality<const N: usize>(
     result.bits[0]
 }
 
-pub(super) fn build_and_execute_comparator<const N: usize>(
+pub(crate) fn build_and_execute_comparator<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> Ordering {
@@ -449,7 +449,7 @@ pub(super) fn build_and_execute_comparator<const N: usize>(
 
     let program = builder.build(vec![lt_output, eq_output]);
     let input = [lhs.bits.clone(), rhs.bits.clone()].concat();
-    let result = simulate(&program, &input, &[]).unwrap();
+    let result = get_executor().execute(&program, &input, &[]).unwrap();
 
     let lt = result[0];
     let eq = result[1];
@@ -489,7 +489,7 @@ fn comparator_circuit<const N: usize>(builder: &mut CircuitBuilder<N>) -> (u32, 
     (lt_list[0], eq_list[0])
 }
 
-pub(super) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> GarbledUint<N> {
+pub(crate) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> GarbledUint<N> {
     let mut builder = CircuitBuilder::default();
     builder.push_input(input);
 
@@ -506,7 +506,7 @@ pub(super) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> G
 }
 
 #[allow(dead_code)]
-pub(super) fn build_and_execute_mux<const N: usize, const S: usize>(
+pub(crate) fn build_and_execute_mux<const N: usize, const S: usize>(
     condition: &GarbledUint<S>,
     if_true: &GarbledUint<N>,
     if_false: &GarbledUint<N>,
