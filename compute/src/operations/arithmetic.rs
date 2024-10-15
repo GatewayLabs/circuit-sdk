@@ -1,6 +1,7 @@
 use crate::int::GarbledInt;
 use crate::operations::circuits::{
-    build_and_execute_addition, build_and_execute_multiplication, build_and_execute_subtraction,
+    build_and_execute_addition, build_and_execute_exponentiation, build_and_execute_multiplication,
+    build_and_execute_subtraction,
 };
 use crate::uint::GarbledUint;
 use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
@@ -91,6 +92,13 @@ impl<const N: usize> MulAssign for GarbledUint<N> {
 impl<const N: usize> MulAssign<&GarbledUint<N>> for GarbledUint<N> {
     fn mul_assign(&mut self, rhs: &Self) {
         *self = build_and_execute_multiplication(self, rhs);
+    }
+}
+
+// Implement the Pow operation for GarbledUint<N> and &GarbledUint<N>
+impl<const N: usize> GarbledUint<N> {
+    pub fn pow(self, rhs: &Self) -> GarbledUint<N> {
+        build_and_execute_exponentiation(&self, rhs)
     }
 }
 

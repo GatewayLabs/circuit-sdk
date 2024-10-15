@@ -86,6 +86,34 @@ impl<const N: usize> CircuitBuilder<N> {
         Circuit::new(self.gates, output_indices)
     }
 
+    pub fn push_multiplication(
+        &mut self,
+        lhs_indices: &[GateIndex],
+        rhs_indices: &[GateIndex],
+    ) -> Vec<GateIndex> {
+        let n = lhs_indices.len();
+        let mut partial_products = Vec::with_capacity(n);
+
+        // Generate partial products
+        for i in 0..n {
+            let mut partial_product = vec![self.push_constant(false); i]; // Shifted zeros
+            for &lhs_bit in lhs_indices {
+                let and_gate = self.push_and(lhs_bit, rhs_indices[i]);
+                partial_product.push(and_gate);
+            }
+            partial_products.push(partial_product);
+        }
+
+        // Sum up all partial products
+        let mut result = partial_products[0].clone();
+        for partial_product in partial_products.iter().skip(1) {
+            result = self.add_bit_vectors(&result, partial_product);
+        }
+
+        result.truncate(n); // Ensure the result is n bits
+        result
+    }
+
     fn push_garbled_uints(
         &mut self,
         a: &[GateIndex],
@@ -135,6 +163,62 @@ impl<const N: usize> CircuitBuilder<N> {
         };
 
         (sum, new_carry)
+    }
+
+    pub fn clone_input(&self, start: GateIndex, count: GateIndex) -> Vec<GateIndex> {
+        (start..start + count).collect()
+    }
+
+    pub fn push_constant(&mut self, value: bool) -> GateIndex {
+        let zero = self.push_xor(0, 0); // x XOR x = 0
+        if value {
+            self.push_not(zero) // NOT 0 = 1
+        } else {
+            zero
+        }
+    }
+
+    pub fn add_bit_vectors(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
+        let max_len = std::cmp::max(a.len(), b.len());
+        let mut result = Vec::with_capacity(max_len + 1);
+        let mut carry = None;
+
+        for i in 0..max_len {
+            let bit_a = a
+                .get(i)
+                .copied()
+                .unwrap_or_else(|| self.push_constant(false));
+            let bit_b = b
+                .get(i)
+                .copied()
+                .unwrap_or_else(|| self.push_constant(false));
+            let (sum, new_carry) = self.full_adder(bit_a, bit_b, carry);
+            result.push(sum);
+            carry = new_carry;
+        }
+
+        if let Some(carry_bit) = carry {
+            result.push(carry_bit);
+        }
+
+        result
+    }
+
+    pub fn push_conditional_multiplication(
+        &mut self,
+        result_indices: &[GateIndex],
+        power_indices: &[GateIndex],
+        exponent_bit: GateIndex,
+    ) -> Vec<GateIndex> {
+        let mut new_result = Vec::with_capacity(result_indices.len());
+        // Multiply result * power
+        let multiplied = self.push_multiplication(result_indices, power_indices);
+        for i in 0..result_indices.len() {
+            // Use MUX to select between result[i] and multiplied[i] based on exponent_bit
+            let mux_gate = self.push_mux(result_indices[i], multiplied[i], exponent_bit);
+            new_result.push(mux_gate);
+        }
+        new_result
     }
 
     // Simulate the circuit using the provided input values
@@ -537,6 +621,43 @@ pub(super) fn build_and_execute_mux<const N: usize, const S: usize>(
         .expect("Failed to execute MUX circuit")
 }
 
+pub(super) fn build_and_execute_exponentiation<const N: usize>(
+    base: &GarbledUint<N>,
+    exponent: &GarbledUint<N>,
+) -> GarbledUint<N> {
+    let mut builder = CircuitBuilder::default();
+    builder.push_input(base);
+    builder.push_input(exponent);
+
+    // Initialize result to 1
+    let mut result = vec![builder.push_constant(true)];
+    for _ in 1..N {
+        result.push(builder.push_constant(false));
+    }
+
+    // Precompute powers of base
+    let mut current_power = builder.clone_input(0, N as GateIndex);
+
+    // For each bit in exponent
+    for i in 0..N {
+        let exponent_bit = (N + i) as GateIndex;
+
+        // If exponent bit is 1, multiply result by current_power
+        let new_result =
+            builder.push_conditional_multiplication(&result, &current_power, exponent_bit);
+
+        result = new_result;
+
+        // Square current_power for next bit
+        current_power = builder.push_multiplication(&current_power, &current_power);
+    }
+
+    // Build and execute the circuit
+    builder
+        .execute_with_input(&[base.bits.clone(), exponent.bits.clone()].concat(), result)
+        .expect("Failed to execute exponentiation circuit")
+}
+
 // tests
 #[cfg(test)]
 mod tests {
@@ -645,5 +766,16 @@ mod tests {
         let s: GarbledUint64 = 0_u64.into();
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, b);
+    }
+
+    #[test]
+    fn test_exponentiation() {
+        let base: GarbledUint8 = 3_u8.into();
+        let exponent: GarbledUint8 = 5_u8.into(); // 3^5 = 243
+
+        let result = build_and_execute_exponentiation(&base, &exponent);
+        let expected: GarbledUint8 = 243_u8.into();
+
+        assert_eq!(u8::from(result), u8::from(expected));
     }
 }
