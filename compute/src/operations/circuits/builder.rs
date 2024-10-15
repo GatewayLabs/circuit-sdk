@@ -26,6 +26,10 @@ impl<const N: usize> CircuitBuilder<N> {
         self.gates.len() as u32
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.gates.is_empty()
+    }
+
     // Add a XOR gate between two inputs and return the index
     pub fn push_xor(&mut self, a: GateIndex, b: GateIndex) -> GateIndex {
         let xor_index = self.gates.len() as u32;
