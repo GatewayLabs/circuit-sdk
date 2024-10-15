@@ -1,4 +1,7 @@
 use criterion::{criterion_group, criterion_main, Criterion};
+use helpers::{decrypt_bits_to_u32, encrypt_u32_to_bits, fhe_exponentiation};
+
+pub mod helpers;
 
 // Function to benchmark (example function)
 fn tfhe_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
@@ -294,6 +297,44 @@ fn gateway_encrypted_multiplication() -> Result<(), Box<dyn ::std::error::Error>
 
     let result: u128 = (&a * &b).into();
     assert_eq!(result, clear_a * clear_b);
+    Ok(())
+}
+
+// NOTE: this test is not 100% accurate, as one of the values is decrypted
+// This is because TFHE-rs, as of now, does not support encrypted exponentiation
+fn tfhe_encrypted_pow() -> Result<(), Box<dyn ::std::error::Error>> {
+    use tfhe::boolean::gen_keys;
+
+    // Key generation
+    let (client_key, server_keys) = gen_keys();
+
+    let base_plain: u32 = 3;
+    let exponent_plain: u32 = 5;
+
+    let base_bits = encrypt_u32_to_bits(base_plain, &client_key);
+    let exponent_bits = encrypt_u32_to_bits(exponent_plain, &client_key);
+
+    // Perform exponentiation
+    let result_bits = fhe_exponentiation(&base_bits, &exponent_bits, &server_keys);
+
+    // Decrypt result
+    let result_plain = decrypt_bits_to_u32(&result_bits, &client_key);
+
+    assert_eq!(result_plain, base_plain.pow(exponent_plain));
+    Ok(())
+}
+
+fn gateway_encrypted_pow() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint32;
+
+    let clear_a = 3u32;
+    let clear_b = 5u32;
+
+    let a: GarbledUint32 = clear_a.into();
+    let b: GarbledUint32 = clear_b.into();
+
+    let result: u32 = a.pow(&b).into();
+    assert_eq!(result, clear_a.pow(clear_b));
     Ok(())
 }
 
@@ -800,116 +841,126 @@ fn benchmark_tfhe_encrypted_multiplication(c: &mut Criterion) {
     });
 }
 
-// Benchmark 13: Benchmarking benchmark_gateway_encrypted_nand
+// Benchmark 13: Benchmarking benchmark_gateway_encrypted_pow
+fn benchmark_gateway_encrypted_pow(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_pow", |b| b.iter(gateway_encrypted_pow));
+}
+
+// Benchmark 14: Benchmarking benchmark_tfhe_encrypted_pow
+fn benchmark_tfhe_encrypted_pow(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_pow", |b| b.iter(tfhe_encrypted_pow));
+}
+
+// Benchmark 15: Benchmarking benchmark_gateway_encrypted_nand
 fn benchmark_gateway_encrypted_nand(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_nand", |b| b.iter(gateway_encrypted_nand));
 }
 
-// Benchmark 14: Benchmarking benchmark_tfhe_encrypted_nand
+// Benchmark 156: Benchmarking benchmark_tfhe_encrypted_nand
 fn benchmark_tfhe_encrypted_nand(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_nand", |b| b.iter(tfhe_encrypted_nand));
 }
 
-// Benchmark 15: Benchmarking benchmark_gateway_encrypted_nor
+// Benchmark 17: Benchmarking benchmark_gateway_encrypted_nor
 fn benchmark_gateway_encrypted_nor(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_nor", |b| b.iter(gateway_encrypted_nor));
 }
 
-// Benchmark 16: Benchmarking benchmark_tfhe_encrypted_nor
+// Benchmark 18: Benchmarking benchmark_tfhe_encrypted_nor
 fn benchmark_tfhe_encrypted_nor(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_nor", |b| b.iter(tfhe_encrypted_nor));
 }
 
-// Benchmark 17: Benchmarking benchmark_gateway_encrypted_xnor
+// Benchmark 19: Benchmarking benchmark_gateway_encrypted_xnor
 fn benchmark_gateway_encrypted_xnor(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_xnor", |b| b.iter(gateway_encrypted_xnor));
 }
 
-// Benchmark 18: Benchmarking benchmark_tfhe_encrypted_xnor
+// Benchmark 20: Benchmarking benchmark_tfhe_encrypted_xnor
 fn benchmark_tfhe_encrypted_xnor(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_xnor", |b| b.iter(tfhe_encrypted_xnor));
 }
 
-// Benchmark 19: Benchmarking benchmark_gateway_encrypted_bitwise_or
+// Benchmark 21: Benchmarking benchmark_gateway_encrypted_bitwise_or
 fn benchmark_gateway_encrypted_bitwise_or(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_bitwise_or", |b| {
         b.iter(gateway_encrypted_bitwise_or)
     });
 }
 
-// Benchmark 20: Benchmarking benchmark_tfhe_encrypted_bitwise_or
+// Benchmark 22: Benchmarking benchmark_tfhe_encrypted_bitwise_or
 fn benchmark_tfhe_encrypted_bitwise_or(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_bitwise_or", |b| {
         b.iter(tfhe_encrypted_bitwise_or)
     });
 }
 
-// Benchmark 21: Benchmarking benchmark_gateway_encrypted_eq
+// Benchmark 23: Benchmarking benchmark_gateway_encrypted_eq
 fn benchmark_gateway_encrypted_eq(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_eq", |b| b.iter(gateway_encrypted_eq));
 }
 
-// Benchmark 22: Benchmarking benchmark_tfhe_encrypted_eq
+// Benchmark 24: Benchmarking benchmark_tfhe_encrypted_eq
 fn benchmark_tfhe_encrypted_eq(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_eq", |b| b.iter(tfhe_encrypted_eq));
 }
 
-// Benchmark 23: Benchmarking benchmark_gateway_encrypted_neq
+// Benchmark 25: Benchmarking benchmark_gateway_encrypted_neq
 fn benchmark_gateway_encrypted_neq(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_neq", |b| b.iter(gateway_encrypted_neq));
 }
 
-// Benchmark 24: Benchmarking benchmark_tfhe_encrypted_neq
+// Benchmark 26: Benchmarking benchmark_tfhe_encrypted_neq
 fn benchmark_tfhe_encrypted_neq(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_neq", |b| b.iter(tfhe_encrypted_neq));
 }
 
-// Benchmark 25: Benchmarking benchmark_gateway_encrypted_gt
+// Benchmark 27: Benchmarking benchmark_gateway_encrypted_gt
 fn benchmark_gateway_encrypted_gt(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_gt", |b| b.iter(gateway_encrypted_gt));
 }
 
-// Benchmark 26: Benchmarking benchmark_tfhe_encrypted_gt
+// Benchmark 28: Benchmarking benchmark_tfhe_encrypted_gt
 fn benchmark_tfhe_encrypted_gt(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_gt", |b| b.iter(tfhe_encrypted_gt));
 }
 
-// Benchmark 27: Benchmarking benchmark_gateway_encrypted_lt
+// Benchmark 29: Benchmarking benchmark_gateway_encrypted_lt
 fn benchmark_gateway_encrypted_lt(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_lt", |b| b.iter(gateway_encrypted_lt));
 }
 
-// Benchmark 28: Benchmarking benchmark_tfhe_encrypted_lt
+// Benchmark 30: Benchmarking benchmark_tfhe_encrypted_lt
 fn benchmark_tfhe_encrypted_lt(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_lt", |b| b.iter(tfhe_encrypted_lt));
 }
 
-// Benchmark 29: Benchmarking benchmark_gateway_encrypted_ge
+// Benchmark 31: Benchmarking benchmark_gateway_encrypted_ge
 fn benchmark_gateway_encrypted_ge(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_ge", |b| b.iter(gateway_encrypted_ge));
 }
 
-// Benchmark 30: Benchmarking benchmark_tfhe_encrypted_ge
+// Benchmark 32: Benchmarking benchmark_tfhe_encrypted_ge
 fn benchmark_tfhe_encrypted_ge(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_ge", |b| b.iter(tfhe_encrypted_ge));
 }
 
-// Benchmark 31: Benchmarking benchmark_gateway_encrypted_le
+// Benchmark 33: Benchmarking benchmark_gateway_encrypted_le
 fn benchmark_gateway_encrypted_le(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_le", |b| b.iter(gateway_encrypted_le));
 }
 
-// Benchmark 32: Benchmarking benchmark_tfhe_encrypted_le
+// Benchmark 34: Benchmarking benchmark_tfhe_encrypted_le
 fn benchmark_tfhe_encrypted_le(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_le", |b| b.iter(tfhe_encrypted_le));
 }
 
-// Benchmark 33: Benchmarking benchmark_gateway_encrypted_mux
+// Benchmark 35: Benchmarking benchmark_gateway_encrypted_mux
 fn benchmark_gateway_encrypted_mux(c: &mut Criterion) {
     c.bench_function("gateway_encrypted_mux", |b| b.iter(gateway_encrypted_mux));
 }
 
-// Benchmark 34: Benchmarking benchmark_tfhe_encrypted_mux
+// Benchmark 36: Benchmarking benchmark_tfhe_encrypted_mux
 fn benchmark_tfhe_encrypted_mux(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_mux", |b| b.iter(tfhe_encrypted_mux));
 }
@@ -924,8 +975,8 @@ criterion_group!(
     name = benches;
     config = custom_criterion();
     targets =
-            benchmark_gateway_encrypted_mux,
-            benchmark_tfhe_encrypted_mux,
+            benchmark_gateway_encrypted_pow,
+            benchmark_tfhe_encrypted_pow,
 
             benchmark_gateway_encrypted_addition,
             benchmark_tfhe_encrypted_addition,
@@ -933,6 +984,7 @@ criterion_group!(
             benchmark_tfhe_encrypted_subtraction,
             benchmark_gateway_encrypted_multiplication,
             benchmark_tfhe_encrypted_multiplication,
+
             benchmark_gateway_encrypted_bitwise_and,
             benchmark_tfhe_encrypted_bitwise_and,
             benchmark_gateway_encrypted_bitwise_xor,
@@ -958,6 +1010,8 @@ criterion_group!(
             benchmark_gateway_encrypted_ge,
             benchmark_tfhe_encrypted_ge,
             benchmark_gateway_encrypted_le,
-            benchmark_tfhe_encrypted_le
+            benchmark_tfhe_encrypted_le,
+            benchmark_gateway_encrypted_mux,
+            benchmark_tfhe_encrypted_mux,
 );
 criterion_main!(benches);
