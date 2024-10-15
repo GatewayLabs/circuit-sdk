@@ -1,5 +1,7 @@
 use crate::int::GarbledInt;
-use crate::operations::circuits::builder::{build_and_execute_comparator, build_and_execute_equality};
+use crate::operations::circuits::builder::{
+    build_and_execute_comparator, build_and_execute_equality,
+};
 use crate::uint::GarbledUint;
 use std::cmp::Ordering;
 

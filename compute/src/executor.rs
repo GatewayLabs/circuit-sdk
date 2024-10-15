@@ -1,10 +1,10 @@
-use rand_chacha::rand_core::SeedableRng;
-use rand_chacha::ChaCha20Rng;
-use tandem::states::{Contributor, Evaluator};
-use tandem::Circuit;
 use anyhow::Result;
 use once_cell::sync::Lazy;
+use rand_chacha::rand_core::SeedableRng;
+use rand_chacha::ChaCha20Rng;
 use std::sync::Arc;
+use tandem::states::{Contributor, Evaluator};
+use tandem::Circuit;
 
 pub trait Executor {
     /// Executes the 2 Party MPC protocol.
@@ -23,7 +23,6 @@ pub trait Executor {
         input_evaluator: &[bool],
     ) -> Result<Vec<bool>>;
 }
-
 
 pub struct LocalSimulator;
 
@@ -65,9 +64,8 @@ impl Executor for LocalSimulator {
 }
 
 /// A static Lazy instance for holding the singleton LocalSimulator.
-static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> = Lazy::new(|| {
-    Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>
-});
+static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> =
+    Lazy::new(|| Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>);
 
 /// Provides access to the singleton Executor instance.
 pub(crate) fn get_executor() -> Arc<dyn Executor + Send + Sync> {

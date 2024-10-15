@@ -1,8 +1,8 @@
+use crate::executor::get_executor;
 use crate::uint::GarbledUint;
 use std::cmp::Ordering;
 use tandem::GateIndex;
 use tandem::{Circuit, Gate};
-use crate::executor::get_executor;
 
 pub struct CircuitBuilder<const N: usize> {
     gates: Vec<Gate>,
