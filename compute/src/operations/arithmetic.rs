@@ -1,5 +1,5 @@
 use crate::int::GarbledInt;
-use crate::operations::circuits::{
+use crate::operations::circuits::builder::{
     build_and_execute_addition, build_and_execute_multiplication, build_and_execute_subtraction,
 };
 use crate::uint::GarbledUint;
