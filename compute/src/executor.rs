@@ -1,10 +1,10 @@
 use anyhow::Result;
 use once_cell::sync::Lazy;
-use rand_chacha::rand_core::SeedableRng;
-use rand_chacha::ChaCha20Rng;
 use std::sync::Arc;
-use tandem::states::{Contributor, Evaluator};
 use tandem::Circuit;
+
+use crate::evaluator::{Evaluator, GatewayEvaluator};
+use crate::garbler::{Garbler, GatewayGarbler};
 
 pub trait Executor {
     /// Executes the 2 Party MPC protocol.
@@ -34,32 +34,28 @@ impl Executor for LocalSimulator {
     fn execute(
         &self,
         circuit: &Circuit,
-        input_contributor: &[bool],
+        input_garbler: &[bool],
         input_evaluator: &[bool],
     ) -> Result<Vec<bool>> {
-        let (mut contrib, mut msg_for_eval) =
-            Contributor::new(circuit, input_contributor, ChaCha20Rng::from_entropy())?;
+        let (mut garbler, mut msg_for_evaluator) = GatewayGarbler::start(circuit, input_garbler)?;
 
-        let mut eval = Evaluator::new(
-            circuit.clone(),
-            input_evaluator,
-            ChaCha20Rng::from_entropy(),
-        )?;
+        let mut evaluator = GatewayEvaluator::new(circuit, input_evaluator)?;
 
-        tracing::debug!("contributor ciphertext: {:?}", hex::encode(&msg_for_eval));
+        assert_eq!(garbler.steps(), evaluator.steps());
+        let total_steps = garbler.steps();
 
-        assert_eq!(contrib.steps(), eval.steps());
+        for _ in 0..total_steps {
+            let (next_evaluator, msg_for_garbler) = evaluator.next(&msg_for_evaluator)?;
+            evaluator = next_evaluator;
 
-        for _ in 0..eval.steps() {
-            let (next_state, msg_for_contrib) = eval.run(&msg_for_eval)?;
-            eval = next_state;
+            let (next_garbler, reply) = garbler.next(&msg_for_garbler)?;
+            garbler = next_garbler;
 
-            let (next_state, reply) = contrib.run(&msg_for_contrib)?;
-            contrib = next_state;
-
-            msg_for_eval = reply;
+            msg_for_evaluator = reply;
         }
-        Ok(eval.output(&msg_for_eval)?)
+
+        let output = evaluator.output(&msg_for_evaluator)?;
+        Ok(output)
     }
 }
 

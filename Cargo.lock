@@ -219,6 +219,7 @@ dependencies = [
  "curve25519-dalek",
  "garble_lang",
  "hex",
+ "once_cell",
  "rand",
  "rand_chacha",
  "serde",
