@@ -53,8 +53,6 @@ impl Evaluator for GatewayEvaluator {
     }
 
     fn output(self, message: &[u8]) -> Result<Vec<bool>> {
-        self.evaluator
-            .output(message)
-            .map_err(|e| anyhow::Error::new(e))
+        self.evaluator.output(message).map_err(anyhow::Error::new)
     }
 }
