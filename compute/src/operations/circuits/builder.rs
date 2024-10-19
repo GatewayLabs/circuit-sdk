@@ -337,6 +337,34 @@ pub(crate) fn build_and_execute_multiplication<const N: usize>(
         .expect("Failed to execute multiplication circuit")
 }
 
+pub(crate) fn build_and_execute_division<const N: usize>(
+    lhs: &GarbledUint<N>,
+    rhs: &GarbledUint<N>,
+) -> GarbledUint<N> {
+    let mut builder = CircuitBuilder::default();
+    builder.push_input(lhs);
+    builder.push_input(rhs);
+
+    let mut partial_products = Vec::with_capacity(N);
+
+    // Generate partial products
+    for i in 0..N {
+        let shifted_product = generate_partial_product(&mut builder, 0, N as GateIndex, i);
+        partial_products.push(shifted_product);
+    }
+
+    // Sum up all partial products
+    let mut result = partial_products[0].clone();
+    for partial_product in partial_products.iter().take(N).skip(1) {
+        (result, _) = builder.push_garbled_uints(&result, partial_product);
+    }
+
+    // Simulate the circuit
+    builder
+        .execute(lhs, rhs, result.to_vec())
+        .expect("Failed to execute division circuit")
+}
+
 fn generate_partial_product<const N: usize>(
     builder: &mut CircuitBuilder<N>,
     lhs_start: GateIndex,

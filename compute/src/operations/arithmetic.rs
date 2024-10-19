@@ -1,9 +1,9 @@
 use crate::int::GarbledInt;
 use crate::operations::circuits::builder::{
-    build_and_execute_addition, build_and_execute_multiplication, build_and_execute_subtraction,
+    build_and_execute_addition, build_and_execute_multiplication, build_and_execute_subtraction, build_and_execute_division
 };
 use crate::uint::GarbledUint;
-use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign, Div};
 
 // Implement the Add operation for Uint<N> and &GarbledUint<N>
 impl<const N: usize> Add for GarbledUint<N> {
@@ -168,6 +168,24 @@ impl<const N: usize> Mul for &GarbledInt<N> {
 
     fn mul(self, rhs: Self) -> Self::Output {
         build_and_execute_multiplication(&self.into(), &rhs.into()).into()
+    }
+}
+
+
+// Implement the Div operation for GarbledInt<N> and &GarbledInt<N>
+impl<const N: usize> Div for GarbledInt<N> {
+    type Output = Self;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        build_and_execute_division(&self.into(), &rhs.into()).into()
+    }
+}
+
+impl<const N: usize> Div for &GarbledInt<N> {
+    type Output = GarbledInt<N>;
+
+    fn div(self, rhs: Self) -> Self::Output {
+        build_and_execute_division(&self.into(), &rhs.into()).into()
     }
 }
 
