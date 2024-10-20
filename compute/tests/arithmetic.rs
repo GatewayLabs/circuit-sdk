@@ -10,6 +10,7 @@ fn test_uint_add() {
     let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
     let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
 
+    // println!("Test : {:?}", a); 
     let result: u8 = (a + b).into(); // Perform addition on the 4-bit values
     assert_eq!(result, 170_u8 + 85_u8); // Expected result of addition between 10101010 and 01010101
 
@@ -38,6 +39,23 @@ fn test_uint_add() {
     let result: u128 = (a + b).into(); // Perform addition on the 4-bit values
     assert_eq!(result, 12297829382473034410_u128 + 6148914691236517205_u128);
 }
+
+
+#[test]
+fn test_int_div() {
+    let a: GarbledInt8 = 3_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    let result: i8 = (a / b).into();
+    assert_eq!(result, 3_i8 / 2_i8);
+
+    let a: GarbledInt16 = 134_i16.into();
+    let b: GarbledInt16 = 85_i16.into();
+
+    let result: i16 = (a / b).into();
+    assert_eq!(result, 134_i16 / 85_i16);
+}
+
 
 #[test]
 fn test_uint_add_assign() {
@@ -402,3 +420,4 @@ fn test_multiple_additions() {
     let result: u32 = (a + b + c + d + e).into();
     assert_eq!(result, 170_u32 + 85_u32 + 42_u32 + 21_u32 + 10_u32);
 }
+

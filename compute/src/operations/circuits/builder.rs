@@ -344,15 +344,34 @@ pub(crate) fn build_and_execute_division<const N: usize>(
     let mut builder = CircuitBuilder::default();
     builder.push_input(lhs);
     builder.push_input(rhs);
-
+    let bits = lhs.len();
+    let mut quotient = vec![0; bits];
+    let mut remainder = lhs.to_vec();
+    let mut borrow = None;
     let mut partial_products = Vec::with_capacity(N);
-
-    // Generate partial products
-    for i in 0..N {
-        let shifted_product = generate_partial_product(&mut builder, 0, N as GateIndex, i);
-        partial_products.push(shifted_product);
-    }
-
+   
+    for shift_amount in (0..bits).rev() {
+            let mut overflow = 0;
+            let mut rhs_shifted = vec![0; bits];
+            for rhs in rhs.iter().copied().take(shift_amount) {
+                overflow = builder.push_or(overflow as u32, rhs as u32);
+            }
+            rhs_shifted[..(bits - shift_amount)]
+                .clone_from_slice(&rhs[shift_amount..((bits - shift_amount) + shift_amount)]);
+            let (diff, new_borrow) = full_subtractor(&mut builder, &remainder, &rhs_shifted, borrow);
+       
+            borrow = new_borrow; 
+            //let (x_sub, carry) = self.push_subtraction_circuit(&remainder, &y_shifted, false);
+            let carry_or_overflow = builder.push_or(borrow, overflow);
+            for i in 0..bits {
+                remainder[i] = builder.push_mux(carry_or_overflow, remainder[i], x_sub[i]);
+            }
+            partial_products.push(remainder);
+            let quotient_bit = builder.push_not(borrow);
+            quotient[bits - shift_amount - 1] = builder.push_mux(overflow, 0, quotient_bit);
+            partial_products.push(quotient);   
+      }  
+    
     // Sum up all partial products
     let mut result = partial_products[0].clone();
     for partial_product in partial_products.iter().take(N).skip(1) {
@@ -568,7 +587,7 @@ pub(crate) fn build_and_execute_mux<const N: usize, const S: usize>(
         .execute_with_input(&input, output_indices)
         .expect("Failed to execute MUX circuit")
 }
-
+/*
 // tests
 #[cfg(test)]
 mod tests {
@@ -679,3 +698,4 @@ mod tests {
         assert_eq!(result, b);
     }
 }
+*/

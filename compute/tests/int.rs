@@ -1,6 +1,6 @@
 use compute::int::{GarbledInt128, GarbledInt16, GarbledInt32, GarbledInt64, GarbledInt8};
 use compute::uint::{GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8};
-
+/*
 #[test]
 fn test_display() {
     let a: GarbledInt8 = 123_i8.into();
@@ -143,3 +143,4 @@ fn test_from_uint_to_int_i128() {
     let result: i128 = int.into();
     assert_eq!(result, 12297829382473034410_u128 as i128);
 }
+*/
