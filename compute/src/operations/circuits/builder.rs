@@ -353,7 +353,7 @@ pub(crate) fn build_and_execute_division<const N: usize>(
    
     for shift_amount in (0..bits).rev() {
             let mut overflow = 0;
-            let mut rhs_shifted = vec![0; bits];
+            let mut rhs_shifted: Vec<bool> = vec![false; bits];
             for rhs_obj in rhs.bits.iter().copied().take(shift_amount) {
                 overflow = builder.push_or(overflow as u32, rhs_obj as u32);
             }
@@ -374,10 +374,10 @@ pub(crate) fn build_and_execute_division<const N: usize>(
             for i in 0..bits {
                 remainder[i] = builder.push_mux(carry_or_overflow, remainder[i] as u32, output_indices[i] as u32) as u32;
             }
-            partial_products.push(remainder);
+            partial_products.push(remainder.clone());
             let quotient_bit = builder.push_not(borrow.expect("none"));
             quotient[bits - shift_amount - 1] = builder.push_mux(overflow, 0, quotient_bit);
-            partial_products.push(quotient);   
+            partial_products.push(quotient.clone());   
       }  
     
     // Sum up all partial products
