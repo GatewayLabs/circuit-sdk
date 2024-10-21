@@ -308,6 +308,7 @@ fn full_subtractor<const N: usize>(
 
     (diff, Some(new_borrow))
 }
+    
 
 pub(crate) fn build_and_execute_multiplication<const N: usize>(
     lhs: &GarbledUint<N>,
@@ -346,25 +347,32 @@ pub(crate) fn build_and_execute_division<const N: usize>(
     builder.push_input(rhs);
     let bits = lhs.bits.len();
     let mut quotient = vec![0; bits];
-    let mut remainder = lhs.bits.to_vec();
+    let mut remainder = vec![0; bits];
     let mut borrow = None;
     let mut partial_products = Vec::with_capacity(N);
    
     for shift_amount in (0..bits).rev() {
             let mut overflow = 0;
             let mut rhs_shifted = vec![0; bits];
-            for rhs in rhs.bits.iter().copied().take(shift_amount) {
-                overflow = builder.push_or(overflow as u32, rhs as u32);
+            for rhs_obj in rhs.bits.iter().copied().take(shift_amount) {
+                overflow = builder.push_or(overflow as u32, rhs_obj as u32);
             }
-            rhs_shifted[..(bits - shift_amount)]
-                .clone_from_slice(&rhs[shift_amount..((bits - shift_amount) + shift_amount)]);
-            let (x_sub, new_borrow) = full_subtractor(&mut builder, &remainder, &rhs_shifted, borrow);
+            println!("Value : {:?}", shift_amount..((bits - shift_amount) + shift_amount));
+            rhs_shifted[..(bits - shift_amount)].clone_from_slice(&rhs.bits[shift_amount..((bits - shift_amount) + shift_amount)]);
+        
+           let mut output_indices = Vec::with_capacity(N);
+           for i in 0..bits {
+               let (x_sub, new_borrow) = full_subtractor(&mut builder, remainder[i] as u32, rhs_shifted[i] as u32, borrow);
+               output_indices.push(x_sub);
+               borrow = new_borrow;
+           }
+           //let (x_sub, new_borrow) = full_subtractor_1(&mut builder, &remainder, &rhs_shifted, borrow);
        
-            borrow = new_borrow; 
+           // borrow = new_borrow; 
             //let (x_sub, carry) = self.push_subtraction_circuit(&remainder, &y_shifted, false);
             let carry_or_overflow = builder.push_or(borrow.expect("none"), overflow);
             for i in 0..bits {
-                remainder[i] = builder.push_mux(carry_or_overflow, remainder[i], x_sub[i]);
+                remainder[i] = builder.push_mux(carry_or_overflow, remainder[i] as u32, output_indices[i] as u32) as u32;
             }
             partial_products.push(remainder);
             let quotient_bit = builder.push_not(borrow.expect("none"));
