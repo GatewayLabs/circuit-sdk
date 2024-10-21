@@ -14,5 +14,5 @@ edition = "2021"
 license = "MIT"
 
 [workspace.dependencies]
-anyhow = "1.0.89"
+anyhow = "1.0.90"
 tracing = { version = "0.1.40", features = ["log"] }
