@@ -157,8 +157,12 @@ impl<const N: usize> CircuitBuilder<N> {
         input: &[bool],
         output_indices: Vec<u32>,
     ) -> anyhow::Result<GarbledUint<N>> {
+        println!("indices : {:?}", output_indices);
         let program = Circuit::new(self.gates.clone(), output_indices);
+        
         let result = get_executor().execute(&program, input, &[])?;
+    
+        println!("result : {:?}", result); 
         Ok(GarbledUint::new(result))
     }
 }
@@ -359,10 +363,11 @@ pub(crate) fn build_and_execute_division<const N: usize>(
             }
             println!("Value : {:?}", shift_amount..((bits - shift_amount) + shift_amount));
             rhs_shifted[..(bits - shift_amount)].clone_from_slice(&rhs.bits[shift_amount..((bits - shift_amount) + shift_amount)]);
-        
+            println!("Rhs :{:?}", rhs_shifted);        
            let mut output_indices = Vec::with_capacity(N);
            for i in 0..bits {
                let (x_sub, new_borrow) = full_subtractor(&mut builder, remainder[i] as u32, rhs_shifted[i] as u32, borrow);
+               println!("sub :{:?}", x_sub);
                output_indices.push(x_sub);
                borrow = new_borrow;
            }
@@ -370,12 +375,15 @@ pub(crate) fn build_and_execute_division<const N: usize>(
        
            // borrow = new_borrow; 
             //let (x_sub, carry) = self.push_subtraction_circuit(&remainder, &y_shifted, false);
+            println!("Overflow : {:?}", overflow); 
             let carry_or_overflow = builder.push_or(borrow.expect("none"), overflow);
+            println!("Carry Overflow: {:?}", carry_or_overflow);
             for i in 0..bits {
                 remainder[i] = builder.push_mux(carry_or_overflow, remainder[i] as u32, output_indices[i] as u32) as u32;
             }
             partial_products.push(remainder.clone());
             let quotient_bit = builder.push_not(borrow.expect("none"));
+            println!("Quotient : {:?}", quotient_bit);
             quotient[bits - shift_amount - 1] = builder.push_mux(overflow, 0, quotient_bit);
             partial_products.push(quotient.clone());   
       }  
@@ -385,6 +393,7 @@ pub(crate) fn build_and_execute_division<const N: usize>(
     for partial_product in partial_products.iter().take(N).skip(1) {
         (result, _) = builder.push_garbled_uints(&result, partial_product);
     }
+    println!("Result :{:?}", result);
 
     // Simulate the circuit
     builder
