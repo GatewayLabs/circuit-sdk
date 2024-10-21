@@ -68,6 +68,6 @@ static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> =
     Lazy::new(|| Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>);
 
 /// Provides access to the singleton Executor instance.
-pub(crate) fn get_executor() -> Arc<dyn Executor + Send + Sync> {
+pub fn get_executor() -> Arc<dyn Executor + Send + Sync> {
     SINGLETON_EXECUTOR.clone()
 }

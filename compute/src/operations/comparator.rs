@@ -1,5 +1,5 @@
 use crate::int::GarbledInt;
-use crate::operations::circuits::builder::{
+use crate::operations::circuits::builder_orig::{
     build_and_execute_comparator, build_and_execute_equality,
 };
 use crate::uint::GarbledUint;

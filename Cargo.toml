@@ -5,6 +5,7 @@ members = [
     "benchmark",
     "compute",
     "vm", 
+    "circuit_macro",
 ]
 
 [workspace.package]

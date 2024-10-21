@@ -12,6 +12,16 @@ pub type GarbledUint32 = GarbledUint<32>;
 pub type GarbledUint64 = GarbledUint<64>;
 pub type GarbledUint128 = GarbledUint<128>;
 
+pub trait GarbledUintBits {
+    fn bits(&self) -> &[bool]; // Method to get the bits regardless of size
+}
+
+impl<const N: usize> GarbledUintBits for GarbledUint<N> {
+    fn bits(&self) -> &[bool] {
+        &self.bits
+    }
+}
+
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
 pub struct GarbledUint<const N: usize> {

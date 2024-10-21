@@ -1,5 +1,6 @@
 use crate::int::GarbledInt;
-use crate::operations::circuits::builder::{
+use crate::operations::circuits::builder_orig::get_circuit_builder_8;
+use crate::operations::circuits::builder_orig::{
     build_and_execute_and, build_and_execute_nand, build_and_execute_nor, build_and_execute_not,
     build_and_execute_or, build_and_execute_xnor, build_and_execute_xor,
 };
@@ -9,12 +10,31 @@ use std::ops::{
     ShrAssign,
 };
 
+// jcl hack
+pub(crate) fn accumulate_xor<const N: usize>(input: &GarbledUint<N>) {
+    //let mut builder = CircuitBuilder::new(vec![lhs, rhs]);
+
+    //let builder = CIRCUIT_BUILDER_8.borrow_mut();
+    let builder = get_circuit_builder_8();
+    //let builder = Arc::clone(&builder);
+    let mut builder = builder.write().unwrap();
+
+    //builder.add_input(input);
+    builder.and_op();
+
+    // Simulate the circuit
+    //builder
+    //    .execute(vec![lhs, rhs], output_indices)
+    //    .expect("Failed to execute XOR circuit")
+}
+
 // Implement the XOR operation for Uint<N>
 impl<const N: usize> BitXor for GarbledUint<N> {
     type Output = Self;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_execute_xor(&self, &rhs)
+        accumulate_xor::<N>(&rhs);
+        self
     }
 }
 
@@ -23,7 +43,8 @@ impl<const N: usize> BitXor for &GarbledUint<N> {
     type Output = GarbledUint<N>;
 
     fn bitxor(self, rhs: Self) -> Self::Output {
-        build_and_execute_xor(self, rhs)
+        accumulate_xor::<N>(&rhs);
+        self.clone()
     }
 }
 
