@@ -49,7 +49,7 @@ impl<const N: usize> CircuitBuilder<N> {
         xor_index
     }
 
-    pub fn push_xor_full(&mut self, a: &Vec<GateIndex>, b: &Vec<GateIndex>) -> Vec<GateIndex> {
+    pub fn push_xor_full(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
         // repeat with output_indices
         let mut output = Vec::with_capacity(N);
         for i in 0..N {
@@ -66,7 +66,7 @@ impl<const N: usize> CircuitBuilder<N> {
         and_index
     }
 
-    pub fn push_and_full(&mut self, a: &Vec<GateIndex>, b: &Vec<GateIndex>) -> Vec<GateIndex> {
+    pub fn push_and_full(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
         // repeat with output_indices
         let mut output = Vec::with_capacity(N);
         for i in 0..N {
@@ -85,12 +85,7 @@ impl<const N: usize> CircuitBuilder<N> {
 
     pub fn push_not_full(&mut self, a: Vec<GateIndex>) -> Vec<GateIndex> {
         // repeat with output_indices
-        let mut output = Vec::with_capacity(N);
-        for i in 0..N {
-            let not = self.push_not(&a[i]);
-            output.push(not);
-        }
-        output
+        (0..N).map(|i| self.push_not(&a[i])).collect()
     }
 
     // Add a gate for OR operation: OR(a, b) = (a ⊕ b) ⊕ (a & b)
@@ -100,7 +95,7 @@ impl<const N: usize> CircuitBuilder<N> {
         self.push_xor(&xor_gate, &and_gate)
     }
 
-    pub fn push_or_full(&mut self, a: &Vec<GateIndex>, b: &Vec<GateIndex>) -> Vec<GateIndex> {
+    pub fn push_or_full(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
         // repeat with output_indices
         let mut output = Vec::with_capacity(N);
         for i in 0..N {
@@ -116,7 +111,7 @@ impl<const N: usize> CircuitBuilder<N> {
         self.push_not(&and_gate)
     }
 
-    pub fn push_nand_full(&mut self, a: &Vec<GateIndex>, b: &Vec<GateIndex>) -> Vec<GateIndex> {
+    pub fn push_nand_full(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
         // repeat with output_indices
         let mut output = Vec::with_capacity(N);
         for i in 0..N {
@@ -132,7 +127,7 @@ impl<const N: usize> CircuitBuilder<N> {
         self.push_not(&or_gate)
     }
 
-    pub fn push_nor_full(&mut self, a: &Vec<GateIndex>, b: &Vec<GateIndex>) -> Vec<GateIndex> {
+    pub fn push_nor_full(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
         // repeat with output_indices
         let mut output = Vec::with_capacity(N);
         for i in 0..N {
@@ -148,7 +143,7 @@ impl<const N: usize> CircuitBuilder<N> {
         self.push_not(&xor_gate)
     }
 
-    pub fn push_xnor_full(&mut self, a: &Vec<GateIndex>, b: &Vec<GateIndex>) -> Vec<GateIndex> {
+    pub fn push_xnor_full(&mut self, a: &[GateIndex], b: &[GateIndex]) -> Vec<GateIndex> {
         // repeat with output_indices
         let mut output = Vec::with_capacity(N);
         for i in 0..N {
@@ -169,8 +164,8 @@ impl<const N: usize> CircuitBuilder<N> {
 
     pub fn push_addition_full(
         &mut self,
-        a: &Vec<GateIndex>,
-        b: &Vec<GateIndex>,
+        a: &[GateIndex],
+        b: &[GateIndex],
     ) -> (Vec<GateIndex>, Option<GateIndex>) {
         let mut carry = None;
         let mut output_indices = Vec::with_capacity(N);
@@ -184,8 +179,8 @@ impl<const N: usize> CircuitBuilder<N> {
 
     pub fn push_subtraction_full(
         &mut self,
-        a: &Vec<GateIndex>,
-        b: &Vec<GateIndex>,
+        a: &[GateIndex],
+        b: &[GateIndex],
     ) -> (Vec<GateIndex>, Option<GateIndex>) {
         let mut borrow = None;
         let mut output_indices = Vec::with_capacity(N);
@@ -351,29 +346,6 @@ pub(crate) fn build_and_execute_addition<const N: usize>(
         .expect("Failed to execute addition circuit")
 }
 
-pub(crate) fn build_and_execute_mixed<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: &GarbledUint<N>,
-) -> GarbledUint<N> {
-    let mut builder = CircuitBuilder::default();
-    builder.push_input(lhs);
-    builder.push_input(rhs);
-
-    // initial input labels
-    let a = [0, 1, 2, 3, 4, 5, 6, 7].to_vec();
-    let b = [8, 9, 10, 11, 12, 13, 14, 15].to_vec();
-
-    // Create a full adder for each bit
-    let output = builder.push_addition_full(&a, &b).0;
-    let output = builder.push_subtraction_full(&output, &b).0;
-    let output = builder.push_or_full(&output, &a);
-
-    // Simulate the circuit
-    builder
-        .execute(output)
-        .expect("Failed to execute addition circuit")
-}
-
 pub(crate) fn build_and_execute_subtraction<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
@@ -410,7 +382,7 @@ fn full_subtractor<const N: usize>(
 
     // If borrow exists, XOR the result of the previous XOR with the borrow
     let diff = if let Some(borrow) = borrow {
-        builder.push_xor(&xor_ab, &borrow)
+        builder.push_xor(&xor_ab, borrow)
     } else {
         xor_ab
     };
@@ -420,9 +392,9 @@ fn full_subtractor<const N: usize>(
     let and_not_a_b = builder.push_and(&not_a, b);
 
     let new_borrow = if let Some(borrow) = borrow {
-        let and_a_borrow = builder.push_and(a, &borrow);
+        let and_a_borrow = builder.push_and(a, borrow);
         let not_b = builder.push_not(b);
-        let and_not_b_borrow = builder.push_and(&not_b, &borrow);
+        let and_not_b_borrow = builder.push_and(&not_b, borrow);
 
         // Combine borrow parts using XOR and AND to simulate OR
         let xor_borrow_parts = builder.push_xor(&and_not_a_b, &and_a_borrow);
@@ -482,7 +454,7 @@ fn generate_partial_product<const N: usize>(
         } else {
             let lhs_bit = lhs_start + i - shift;
             let and_gate = builder.len();
-            builder.push_and(&lhs_bit, &(rhs_start + shift as u32));
+            builder.push_and(&lhs_bit, &(rhs_start + shift));
             partial_product.push(and_gate);
         }
     }
@@ -792,14 +764,36 @@ mod tests {
         assert_eq!(result, b);
     }
 
-    #[ignore = "reason"]
     #[test]
     fn test_build_and_execute_mixed() {
+        fn build_and_execute_mixed<const N: usize>(
+            lhs: &GarbledUint<N>,
+            rhs: &GarbledUint<N>,
+        ) -> GarbledUint<N> {
+            let mut builder = CircuitBuilder::default();
+            builder.push_input(lhs);
+            builder.push_input(rhs);
+
+            // initial input labels
+            let a = [0, 1, 2, 3, 4, 5, 6, 7].to_vec();
+            let b = [8, 9, 10, 11, 12, 13, 14, 15].to_vec();
+
+            // Create a full adder for each bit
+            let output = builder.push_addition_full(&a, &b).0;
+            let output = builder.push_subtraction_full(&output, &b).0;
+            let output = builder.push_or_full(&output, &a);
+
+            // Simulate the circuit
+            builder
+                .execute(output)
+                .expect("Failed to execute addition circuit")
+        }
+
         let a: GarbledUint8 = 93_u8.into();
         let b: GarbledUint8 = 7_u8.into();
 
         let result = build_and_execute_mixed(&a, &b);
         let result_value: u8 = result.into();
-        assert_eq!(result_value, 93 + 7 - 7 | 93);
+        assert_eq!(result_value, (93 + 7 - 7) | 93);
     }
 }
