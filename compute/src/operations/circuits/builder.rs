@@ -192,6 +192,30 @@ impl<const N: usize> CircuitBuilder<N> {
         (output_indices, borrow)
     }
 
+    pub fn push_multiplication_full(
+        &mut self,
+        a: &[GateIndex],
+        b: &[GateIndex],
+    ) -> (Vec<GateIndex>, Option<GateIndex>) {
+        let mut partial_products = Vec::with_capacity(N);
+
+        // Generate partial products
+        for i in 0..N {
+            //let shifted_product = generate_partial_product(self, &0, &(N as u32), i);
+            //let shifted_product = generate_partial_product(self, &a[0], &b[0], (a[i] as usize));
+            let shifted_product = generate_partial_product(self, &a[0], &b[0], i);
+            partial_products.push(shifted_product);
+        }
+
+        // Sum up all partial products
+        let mut result = partial_products[0].clone();
+        for partial_product in partial_products.iter().take(N).skip(1) {
+            (result, _) = self.push_garbled_uints(&result, partial_product);
+        }
+
+        (result, None)
+    }
+
     // Build and return a Circuit from the current gates with given output indices
     pub fn build(self, output_indices: Vec<GateIndex>) -> Circuit {
         Circuit::new(self.gates, output_indices)
@@ -417,9 +441,8 @@ pub(crate) fn build_and_execute_multiplication<const N: usize>(
     let mut partial_products = Vec::with_capacity(N);
 
     // Generate partial products
-    let n = N as u32;
-    for i in 0..n {
-        let shifted_product = generate_partial_product(&mut builder, &0, &n, i);
+    for i in 0..N {
+        let shifted_product = generate_partial_product(&mut builder, &0, &(N as u32), i);
         partial_products.push(shifted_product);
     }
 
@@ -439,9 +462,10 @@ fn generate_partial_product<const N: usize>(
     builder: &mut CircuitBuilder<N>,
     lhs_start: &GateIndex,
     rhs_start: &GateIndex,
-    shift: u32,
+    shift: usize,
 ) -> Vec<GateIndex> {
     let mut partial_product = Vec::with_capacity(N);
+    let shift = shift as u32;
 
     let n = N as u32;
     for i in 0..n {
@@ -765,6 +789,16 @@ mod tests {
     }
 
     #[test]
+    fn test_build_and_execute_multiplication() {
+        let a: GarbledUint8 = 9_u8.into();
+        let b: GarbledUint8 = 3_u8.into();
+
+        let result = build_and_execute_multiplication(&a, &b);
+        let result_value: u8 = result.into();
+        assert_eq!(result_value, 9 * 3);
+    }
+
+    #[test]
     fn test_build_and_execute_mixed() {
         fn build_and_execute_mixed<const N: usize>(
             lhs: &GarbledUint<N>,
@@ -780,8 +814,9 @@ mod tests {
 
             // Create a full adder for each bit
             let output = builder.push_addition_full(&a, &b).0;
-            let output = builder.push_subtraction_full(&output, &b).0;
-            let output = builder.push_or_full(&output, &a);
+            //let output = builder.push_subtraction_full(&output, &b).0;
+            //let output = builder.push_or_full(&output, &a);
+            let output = builder.push_multiplication_full(&output, &b).0;
 
             // Simulate the circuit
             builder
@@ -789,11 +824,12 @@ mod tests {
                 .expect("Failed to execute addition circuit")
         }
 
-        let a: GarbledUint8 = 93_u8.into();
-        let b: GarbledUint8 = 7_u8.into();
+        let a: GarbledUint8 = 9_u8.into();
+        let b: GarbledUint8 = 3_u8.into();
 
         let result = build_and_execute_mixed(&a, &b);
         let result_value: u8 = result.into();
-        assert_eq!(result_value, (93 + 7 - 7) | 93);
+        // assert_eq!(result_value, ((9 + 3 - 3) | 9) * 3);
+        assert_eq!(result_value, (9 + 3) * 3);
     }
 }
