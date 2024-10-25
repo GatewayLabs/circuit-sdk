@@ -372,6 +372,7 @@ build_and_execute!(build_and_execute_nor, nor);
 build_and_execute!(build_and_execute_xnor, xnor);
 build_and_execute!(build_and_execute_addition, add);
 build_and_execute!(build_and_execute_subtraction, sub);
+build_and_execute!(build_and_execute_multiplication, mul);
 
 fn full_adder(
     builder: &mut CircuitBuilder,
@@ -440,22 +441,6 @@ fn full_subtractor(
     };
 
     (diff, Some(new_borrow))
-}
-
-pub(crate) fn build_and_execute_multiplication<const N: usize>(
-    lhs: &GarbledUint<N>,
-    rhs: &GarbledUint<N>,
-) -> GarbledUint<N> {
-    let mut builder = CircuitBuilder::default();
-    let a = builder.input(lhs);
-    let b = builder.input(rhs);
-
-    let output = builder.mul(a, b);
-
-    // Simulate the circuit
-    builder
-        .compile_and_execute(output)
-        .expect("Failed to execute multiplication circuit")
 }
 
 fn partial_product_shift(
