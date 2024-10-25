@@ -95,7 +95,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 let result = context
                     .execute::<N>(&compiled_circuit)
                     .expect("Failed to execute the circuit");
-                result.clone().into()
+                result.into()
             }
 
             #match_arms
