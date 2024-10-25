@@ -18,7 +18,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
             if let Pat::Ident(pat_ident) = &**pat {
                 let var_name = &pat_ident.ident;
                 quote! {
-                    let #var_name = context.input(&#var_name.into().into());
+                    let #var_name = context.input(&#var_name.into());
                 }
             } else {
                 quote! {}

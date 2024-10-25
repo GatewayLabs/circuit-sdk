@@ -826,10 +826,10 @@ mod tests {
             T: Into<GarbledUint<N>> + From<GarbledUint<N>>,
         {
             let mut context = CircuitBuilder::default();
-            let a = context.input(&a.into().into());
-            let b = context.input(&b.into().into());
-            let c = context.input(&c.into().into());
-            let d = context.input(&d.into().into());
+            let a = context.input(&a.into());
+            let b = context.input(&b.into());
+            let c = context.input(&c.into());
+            let d = context.input(&d.into());
             let output = {
                 {
                     let res = context.mul(a, b);
