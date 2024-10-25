@@ -88,11 +88,8 @@ impl CircuitBuilder {
         // get the cumulative size of all inputs in input_labels
         let input_offset = self.input_labels.iter().map(|x| x.len()).sum::<usize>();
 
-        let mut input_label = GateIndexVec::default(); //Vec::with_capacity(R);
+        let mut input_label = GateIndexVec::default();
         for (i, bool_value) in input.bits.iter().enumerate() {
-            //self.gates.push(Gate::InContrib);
-
-            // push Gate::InContrib to the beginning of the gates
             self.gates.insert(0, Gate::InContrib);
 
             self.inputs.push(*bool_value);
@@ -108,6 +105,10 @@ impl CircuitBuilder {
 
     pub fn is_empty(&self) -> bool {
         self.gates.is_empty()
+    }
+
+    pub fn inputs(&self) -> &Vec<bool> {
+        &self.inputs
     }
 
     // Add a XOR gate between two inputs and return the index
@@ -314,11 +315,6 @@ impl CircuitBuilder {
         (lt_list[0], eq_list[0])
     }
 
-    // Build and return a Circuit from the current gates with given output indices
-    pub fn build(self, output_indices: &GateIndexVec) -> Circuit {
-        Circuit::new(self.gates, output_indices.clone().into())
-    }
-
     pub fn compile(&self, output_indices: &GateIndexVec) -> Circuit {
         Circuit::new(self.gates.clone(), output_indices.clone().into())
     }
@@ -499,7 +495,7 @@ pub(crate) fn build_and_execute_comparator<const N: usize>(
 
     let (lt_output, eq_output) = builder.compare::<N>();
 
-    let program = builder.build(&vec![lt_output, eq_output].into());
+    let program = builder.compile(&vec![lt_output, eq_output].into());
     let input = [lhs.bits.clone(), rhs.bits.clone()].concat();
     let result = get_executor().execute(&program, &input, &[]).unwrap();
 
@@ -763,7 +759,7 @@ mod tests {
         assert_eq!(result, a * b + c - d);
     }
 
-    #[circuit]
+    #[circuit(execute)]
     fn my_circuit_from_macro(a: &T, b: &T, c: &T, d: &T) -> T {
         let res = a * b;
         let res = res + c;

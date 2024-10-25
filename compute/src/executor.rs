@@ -6,6 +6,15 @@ use tandem::Circuit;
 use crate::evaluator::{Evaluator, GatewayEvaluator};
 use crate::garbler::{Garbler, GatewayGarbler};
 
+/// A static Lazy instance for holding the singleton LocalSimulator.
+static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> =
+    Lazy::new(|| Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>);
+
+/// Provides access to the singleton Executor instance.
+pub fn get_executor() -> Arc<dyn Executor + Send + Sync> {
+    SINGLETON_EXECUTOR.clone()
+}
+
 pub trait Executor {
     /// Executes the 2 Party MPC protocol.
     ///
@@ -22,6 +31,13 @@ pub trait Executor {
         input_contributor: &[bool],
         input_evaluator: &[bool],
     ) -> Result<Vec<bool>>;
+
+    fn instance() -> &'static Arc<dyn Executor + Send + Sync>
+    where
+        Self: Sized,
+    {
+        &SINGLETON_EXECUTOR
+    }
 }
 
 pub struct LocalSimulator;
@@ -57,13 +73,4 @@ impl Executor for LocalSimulator {
         let output = evaluator.output(&msg_for_evaluator)?;
         Ok(output)
     }
-}
-
-/// A static Lazy instance for holding the singleton LocalSimulator.
-static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> =
-    Lazy::new(|| Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>);
-
-/// Provides access to the singleton Executor instance.
-pub(crate) fn get_executor() -> Arc<dyn Executor + Send + Sync> {
-    SINGLETON_EXECUTOR.clone()
 }

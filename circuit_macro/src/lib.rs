@@ -5,9 +5,14 @@ use syn::{
     parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprUnary, FnArg, ItemFn, Pat, PatType,
 };
 
-/// Macro to decorate functions and transform operators and if/else into circuit context operations
 #[proc_macro_attribute]
-pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn circuit(attr: TokenStream, item: TokenStream) -> TokenStream {
+    let mode = parse_macro_input!(attr as syn::Ident).to_string(); // Retrieve the mode (e.g., "compile" or "execute")
+    generate_macro(item, &mode)
+}
+
+/// Generates the macro code based on the mode (either "compile" or "execute")
+fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     let input_fn = parse_macro_input!(item as ItemFn);
     let fn_name = &input_fn.sig.ident; // Function name
     let inputs = &input_fn.sig.inputs; // Function input parameters
@@ -59,43 +64,48 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     };
 
+    // Set the output type and operation logic based on mode
+    let output_type = if mode == "compile" {
+        quote! {(Circuit, Vec<bool>)}
+    } else {
+        quote! {T}
+    };
+
+    let operation = if mode == "compile" {
+        quote! {
+            (context.compile(&output), context.inputs().to_vec())
+        }
+    } else {
+        quote! {
+            let compiled_circuit = context.compile(&output);
+            let result = context.execute::<N>(&compiled_circuit).expect("Execution failed");
+            result.into()
+        }
+    };
+
     // Build the function body with circuit context, compile, and execute
+    // Expanded macro code
     let expanded = quote! {
-        fn #fn_name<T>(#inputs) -> T
+        fn #fn_name<T>(#inputs) -> #output_type
         where
-            T: Into<GarbledUint<8>>
-                + From<GarbledUint<8>>
-                + Into<GarbledUint<16>>
-                + From<GarbledUint<16>>
-                + Into<GarbledUint<32>>
-                + From<GarbledUint<32>>
-                + Into<GarbledUint<64>>
-                + From<GarbledUint<64>>
-                + Into<GarbledUint<128>>
-                + From<GarbledUint<128>>
+            T: Into<GarbledUint<8>> + From<GarbledUint<8>>
+                + Into<GarbledUint<16>> + From<GarbledUint<16>>
+                + Into<GarbledUint<32>> + From<GarbledUint<32>>
+                + Into<GarbledUint<64>> + From<GarbledUint<64>>
+                + Into<GarbledUint<128>> + From<GarbledUint<128>>
                 + Clone,
         {
-            fn generate<const N: usize, T>(#inputs) -> T
+            fn generate<const N: usize, T>(#inputs) -> #output_type
             where
                 T: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
             {
                 let mut context = CircuitBuilder::default();
-                // Map each input to the circuit context's input function
                 #(#mapped_inputs)*
 
                 // Use the transformed function block (with context.add and if/else replacements)
-                let output = {
-                    #transformed_block
-                };
+                let output = { #transformed_block };
 
-                // Compile the circuit
-                let compiled_circuit = context.compile(&output);
-
-                // Execute the circuit and get the result
-                let result = context
-                    .execute::<N>(&compiled_circuit)
-                    .expect("Failed to execute the circuit");
-                result.into()
+                #operation
             }
 
             #match_arms

@@ -1,11 +1,35 @@
 use circuit_macro::circuit;
+use compute::executor::get_executor;
 use compute::operations::circuits::builder::CircuitBuilder;
 use compute::uint::GarbledUint;
 
+use tandem::Circuit;
+
+#[test]
+fn test_macro_arithmetic_compiler() {
+    #[circuit(compile)]
+    fn multi_arithmetic(a: &T, b: &T, c: &T, d: &T) -> (Circuit, Vec<bool>) {
+        let res = a * b;
+        let res = res + c;
+        res - d
+    }
+
+    let a = 2_u8;
+    let b = 5_u8;
+    let c = 3_u8;
+    let d = 4_u8;
+
+    let (circuit, inputs) = multi_arithmetic(&a, &b, &c, &d);
+    let result = get_executor().execute(&circuit, &inputs, &[]).unwrap();
+    let result: GarbledUint<8> = GarbledUint::new(result);
+    let result: u8 = result.into();
+    assert_eq!(result, a * b + c - d);
+}
+
 #[test]
 fn test_macro_arithmetic() {
-    #[circuit]
-    fn multi_arithmetic(a: &T, b: &T, c: &T, d: &T) -> T {
+    #[circuit(execute)]
+    fn multi_arithmetic(a: &T, b: &T, c: &T, d: &T) -> (Circuit, Vec<bool>) {
         let res = a * b;
         let res = res + c;
         res - d
@@ -22,7 +46,7 @@ fn test_macro_arithmetic() {
 
 #[test]
 fn test_macro_arithmetic_u128() {
-    #[circuit]
+    #[circuit(execute)]
     fn multi_arithmetic_u128(a: &T, b: &T, c: &T, d: &T) -> T {
         let res = a + b;
         let res = &res + c;
@@ -40,7 +64,7 @@ fn test_macro_arithmetic_u128() {
 
 #[test]
 fn test_macro_mixed_arithmetic() {
-    #[circuit]
+    #[circuit(execute)]
     fn mixed_arithmetic(a: &T, b: &T, c: &T, d: &T) -> T {
         let res = a * b;
         let res = context.add(res, c);
@@ -59,7 +83,7 @@ fn test_macro_mixed_arithmetic() {
 
 #[test]
 fn test_macro_addition() {
-    #[circuit]
+    #[circuit(execute)]
     fn addition(a: &T, b: &T) -> T {
         a + b
     }
@@ -73,7 +97,7 @@ fn test_macro_addition() {
 
 #[test]
 fn test_macro_subtraction() {
-    #[circuit]
+    #[circuit(execute)]
     fn subtraction(a: &T, b: &T) -> T {
         a - b
     }
@@ -87,7 +111,7 @@ fn test_macro_subtraction() {
 
 #[test]
 fn test_macro_multiplication() {
-    #[circuit]
+    #[circuit(execute)]
     fn multiplication(a: &T, b: &T) -> T {
         a * b
     }
@@ -101,7 +125,7 @@ fn test_macro_multiplication() {
 
 #[test]
 fn test_macro_mux() {
-    #[circuit]
+    #[circuit(execute)]
     fn mux_circuit(s: &T, a: &T, b: &T) -> T {
         &context.mux(s, a, b)
     }
@@ -116,7 +140,7 @@ fn test_macro_mux() {
 
 #[test]
 fn test_macro_mux3() {
-    #[circuit]
+    #[circuit(execute)]
     fn mux_circuit(s: &T, a: &T, b: &T) -> T {
         let true_branch = a * b;
         let false_branch = a + b;
@@ -132,14 +156,14 @@ fn test_macro_mux3() {
     assert_eq!(result, a + b);
 
     // true case
-    let s = 0b11111111_u8;
+    let s = 1_u8;
     let result = mux_circuit(&s, &a, &b);
     assert_eq!(result, a * b);
 }
 
 #[test]
 fn test_macro_if_else() {
-    #[circuit]
+    #[circuit(execute)]
     fn mux_circuit(s: &T, a: &T, b: &T) -> T {
         if s {
             a * b
@@ -155,14 +179,14 @@ fn test_macro_if_else() {
     let result = mux_circuit(&s, &a, &b);
     assert_eq!(result, a + b);
 
-    let s = 0b11111111_u8;
+    let s = 1_u8;
     let result = mux_circuit(&s, &a, &b);
     assert_eq!(result, a * b);
 }
 
 #[test]
 fn test_macro_if_else2() {
-    #[circuit]
+    #[circuit(execute)]
     fn mux_circuit(s: &T, a: &T, b: &T) -> T {
         let true_branch = a * b;
         let false_branch = a + b;
@@ -180,14 +204,14 @@ fn test_macro_if_else2() {
     let result = mux_circuit(&s, &a, &b);
     assert_eq!(result, a + b);
 
-    let s = 0b11111111_u8;
+    let s = 1_u8;
     let result = mux_circuit(&s, &a, &b);
     assert_eq!(result, a * b);
 }
 
 #[test]
 fn test_macro_if_else3() {
-    #[circuit]
+    #[circuit(execute)]
     fn mux_circuit(a: &T, b: &T) -> T {
         let first_two = a - b;
         if first_two {
@@ -211,7 +235,7 @@ fn test_macro_if_else3() {
 #[ignore = "division not yet supported"]
 #[test]
 fn test_macro_division() {
-    #[circuit]
+    #[circuit(execute)]
     fn division(a: &T, b: &T) -> T {
         a / b
     }
@@ -226,7 +250,7 @@ fn test_macro_division() {
 #[ignore = "modulo not yet supported"]
 #[test]
 fn test_macro_remainder() {
-    #[circuit]
+    #[circuit(execute)]
     fn remainder(a: &T, b: &T) -> T {
         a % b
     }
@@ -240,7 +264,7 @@ fn test_macro_remainder() {
 
 #[test]
 fn test_macro_nested_arithmetic() {
-    #[circuit]
+    #[circuit(execute)]
     fn nested_arithmetic(a: &T, b: &T, c: &T, d: &T) -> T {
         let res = a * b;
         let res = res + c;
@@ -259,7 +283,7 @@ fn test_macro_nested_arithmetic() {
 // test bitwise operations
 #[test]
 fn test_macro_bitwise_and() {
-    #[circuit]
+    #[circuit(execute)]
     fn bitwise_and(a: &T, b: &T) -> T {
         a & b
     }
@@ -273,7 +297,7 @@ fn test_macro_bitwise_and() {
 
 #[test]
 fn test_macro_bitwise_or() {
-    #[circuit]
+    #[circuit(execute)]
     fn bitwise_or(a: &T, b: &T) -> T {
         a | b
     }
@@ -287,7 +311,7 @@ fn test_macro_bitwise_or() {
 
 #[test]
 fn test_macro_bitwise_xor() {
-    #[circuit]
+    #[circuit(execute)]
     fn bitwise_xor(a: &T, b: &T) -> T {
         a ^ b
     }
@@ -301,7 +325,7 @@ fn test_macro_bitwise_xor() {
 
 #[test]
 fn test_macro_bitwise_not() {
-    #[circuit]
+    #[circuit(execute)]
     fn bitwise_not(a: &T) -> T {
         !a
     }
@@ -314,7 +338,7 @@ fn test_macro_bitwise_not() {
 
 #[test]
 fn test_macro_bitwise_nand() {
-    #[circuit]
+    #[circuit(execute)]
     fn bitwise_nand(a: &T, b: &T) -> T {
         let and = a & b;
         !&and
@@ -329,7 +353,7 @@ fn test_macro_bitwise_nand() {
 
 #[test]
 fn test_macro_bitwise_nor() {
-    #[circuit]
+    #[circuit(execute)]
     fn bitwise_nor(a: &T, b: &T) -> T {
         let or = a | b;
         !&or
@@ -344,7 +368,7 @@ fn test_macro_bitwise_nor() {
 
 #[test]
 fn test_macro_bitwise_xnor() {
-    #[circuit]
+    #[circuit(execute)]
     fn bitwise_xnor(a: &T, b: &T) -> T {
         let xor = a ^ b;
         !&xor
