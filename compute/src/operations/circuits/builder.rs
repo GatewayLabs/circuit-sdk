@@ -756,21 +756,20 @@ mod tests {
         let result: u8 = my_circuit(&a, &b, &c, &d);
         assert_eq!(result, a * b + c - d);
 
-        //let result = my_circuit_from_macro(&a, &b, &c, &d);
-        //assert_eq!(result, a * b + c - d);
+        let result = my_circuit_from_macro(&a, &b, &c, &d);
+        assert_eq!(result, a * b + c - d);
 
         let result = my_circuit_from_macro2(&a, &b, &c, &d);
         assert_eq!(result, a * b + c - d);
     }
-    /*
-        #[circuit]
-        fn my_circuit_from_macro(a: &T, b: &T, c: &T, d: &T) -> T {
-            let res = a * b;
-            let res = res + c;
-            let res = res - d;
-            res
-        }
-    */
+
+    #[circuit]
+    fn my_circuit_from_macro(a: &T, b: &T, c: &T, d: &T) -> T {
+        let res = a * b;
+        let res = res + c;
+        res - d
+    }
+
     fn my_circuit_from_macro2<T>(a: &T, b: &T, c: &T, d: &T) -> T
     where
         T: Into<GarbledUint<8>>
@@ -844,8 +843,8 @@ mod tests {
 
             let output = {
                 let res = &context.mul(a, b);
-                let res = &context.add(&res, c);
-                &context.sub(&res, d)
+                let res = &context.add(res, c);
+                &context.sub(res, d)
             };
 
             let output = &output.clone();

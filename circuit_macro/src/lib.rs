@@ -103,7 +103,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     // Print the expanded code to stderr
-    println!("Generated code:\n{}", expanded);
+    // println!("Generated code:\n{}", expanded);
 
     TokenStream::from(expanded)
 }
