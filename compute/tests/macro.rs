@@ -102,7 +102,7 @@ fn test_macro_multiplication() {
 #[test]
 fn test_macro_mux() {
     #[circuit]
-    fn mux(s: T, a: T, b: T) -> T {
+    fn mux_circuit(s: T, a: T, b: T) -> T {
         context.mux(s, a, b)
     }
 
@@ -110,29 +110,79 @@ fn test_macro_mux() {
     let a = 5_u8;
     let b = 10_u8;
 
-    let result = mux(s, a, b);
+    let result = mux_circuit(s, a, b);
     assert_eq!(result, b);
 }
 
-// if s == 0, return a * b, else return a + b
 #[test]
-fn test_macro_mux_arithmetic() {
+fn test_macro_mux3() {
     #[circuit]
-    fn mux_arithmetic(s: T, a: T, b: T) -> T {
-        let if_true = a.clone() + b.clone();
-        let if_false = a * b;
-        context.mux(s.clone(), if_true, if_false)
+    fn mux_circuit(s: T, a: T, b: T) -> T {
+        let true_branch = a.clone() * b.clone();
+        let false_branch = a + b;
+        context.mux(s, true_branch, false_branch)
     }
 
-    //let s = 0_u8;
-    let a = 2_u8;
+    let s = 0_u8;
+    let a = 10_u8;
+    let b = 7_u8;
+
+    // false case
+    let result = mux_circuit(s, a, b);
+    assert_eq!(result, a + b);
+
+    // true case
+    let s = 0b11111111_u8;
+    let result = mux_circuit(s, a, b);
+    assert_eq!(result, a * b);
+}
+
+#[test]
+fn test_macro_if_else() {
+    #[circuit]
+    fn mux_circuit(s: T, a: T, b: T) -> T {
+        if s {
+            a.clone() * b.clone()
+        } else {
+            a + b
+        }
+    }
+
+    let s = 0_u8;
+    let a = 10_u8;
     let b = 5_u8;
 
-    let result = mux_arithmetic(0_u8, a, b);
-    assert_eq!(result, a * b);
-
-    let result = mux_arithmetic(0b11111111, a, b);
+    let result = mux_circuit(s, a, b);
     assert_eq!(result, a + b);
+
+    let s = 0b11111111_u8;
+    let result = mux_circuit(s, a, b);
+    assert_eq!(result, a * b);
+}
+
+#[test]
+fn test_macro_if_else2() {
+    #[circuit]
+    fn mux_circuit(s: T, a: T, b: T) -> T {
+        let true_branch = a.clone() * b.clone();
+        let false_branch = a + b;
+        if s {
+            true_branch
+        } else {
+            false_branch
+        }
+    }
+
+    let s = 0_u8;
+    let a = 10_u8;
+    let b = 5_u8;
+
+    let result = mux_circuit(s, a, b);
+    assert_eq!(result, a + b);
+
+    let s = 0b11111111_u8;
+    let result = mux_circuit(s, a, b);
+    assert_eq!(result, a * b);
 }
 
 #[ignore = "division not yet supported"]

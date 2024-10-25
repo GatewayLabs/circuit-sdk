@@ -225,7 +225,7 @@ impl CircuitBuilder {
         // repeat with output_indices
         let mut output = GateIndexVec::default();
         for i in 0..a.len() {
-            let mux = self.push_mux(&s[i], &a[i], &b[i]);
+            let mux = self.push_mux(&s[i], &b[i], &a[i]);
             output.push(mux);
         }
         output
@@ -233,7 +233,7 @@ impl CircuitBuilder {
 
     #[allow(dead_code)]
     // Add a MUX gate: MUX(a, b, s) = (a & !s) | (b & s)
-    pub fn push_mux(&mut self, s: &GateIndex, b: &GateIndex, a: &GateIndex) -> GateIndex {
+    pub fn push_mux(&mut self, s: &GateIndex, a: &GateIndex, b: &GateIndex) -> GateIndex {
         let not_s = self.push_not(s);
         let and_a_not_s = self.push_and(a, &not_s);
         let and_b_s = self.push_and(b, s);
@@ -719,7 +719,7 @@ mod tests {
 
     #[test]
     fn test_add_three() {
-        let mut builder = CircuitBuilder::instance().lock().unwrap();
+        let mut builder = CircuitBuilder::default();
         let a: GarbledUint8 = 2_u8.into();
         let a = builder.input(&a);
 
@@ -747,6 +747,38 @@ mod tests {
 
         let result_value: u8 = result.into();
         assert_eq!(result_value, 2 + 5 + 3);
+    }
+
+    #[test]
+    fn test_embedded_if_else() {
+        let mut builder = CircuitBuilder::default();
+        let a: GarbledUint8 = 2_u8.into();
+        let a = builder.input(&a);
+
+        let b: GarbledUint8 = 5_u8.into();
+        let b = builder.input(&b);
+
+        let s: GarbledUint8 = 0_u8.into();
+        let s: GateIndexVec = builder.input(&s);
+
+        // fails with 'cannot borrow `builder` as mutable more than once at a time'
+        // let output = builder.mux(s, builder.mul(a.clone(), b.clone()), builder.add(a.clone(), b.clone()));
+
+        let if_true = builder.mul(a.clone(), b.clone());
+        let if_false = builder.add(a.clone(), b.clone());
+        let output = builder.mux(s, if_true, if_false);
+
+        println!("output: {:?}", output);
+
+        let circuit = builder.compile(output);
+
+        // Execute the circuit
+        let result = builder
+            .execute::<8>(&circuit)
+            .expect("Failed to execute addition circuit");
+
+        let result_value: u8 = result.into();
+        assert_eq!(result_value, 2 + 5);
     }
 
     use circuit_macro::circuit;

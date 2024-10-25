@@ -1,15 +1,15 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::ExprUnary;
-use syn::{parse_macro_input, BinOp, Expr, ExprBinary, FnArg, ItemFn, Pat, PatType};
+use syn::{
+    parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprUnary, FnArg, ItemFn, Pat, PatType,
+};
 
-/// Macro to decorate functions and transform operators into circuit context operations
+/// Macro to decorate functions and transform operators and if/else into circuit context operations
 #[proc_macro_attribute]
 pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let input_fn = parse_macro_input!(item as ItemFn);
     let fn_name = &input_fn.sig.ident; // Function name
-                                       //let fn_block = &input_fn.block; // Function block (body)
     let inputs = &input_fn.sig.inputs; // Function input parameters
 
     // We need to extract each input's identifier
@@ -28,7 +28,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     });
 
-    // Replace "+" with context.add in the function body
+    // Replace "+" with context.add and handle if/else in the function body
     let transformed_block = modify_body(*input_fn.block);
 
     // Collect parameter names dynamically
@@ -82,7 +82,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 // Map each input to the circuit context's input function
                 #(#mapped_inputs)*
 
-                // Use the transformed function block (with context.add replacements)
+                // Use the transformed function block (with context.add and if/else replacements)
                 let output = {
                     #transformed_block
                 };
@@ -99,7 +99,6 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
             #match_arms
         }
-
     };
 
     // Print the expanded code to stderr
@@ -108,6 +107,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
+/// Traverse and transform the function body, replacing binary operators and if/else expressions.
 fn modify_body(block: syn::Block) -> syn::Block {
     let stmts = block
         .stmts
@@ -115,12 +115,12 @@ fn modify_body(block: syn::Block) -> syn::Block {
         .map(|stmt| {
             match stmt {
                 syn::Stmt::Expr(expr, semi_opt) => {
-                    syn::Stmt::Expr(replace_add_operator(expr), semi_opt)
+                    syn::Stmt::Expr(replace_expressions(expr), semi_opt)
                 }
                 syn::Stmt::Local(mut local) => {
                     if let Some(local_init) = &mut local.init {
                         // Replace the initializer expression
-                        local_init.expr = Box::new(replace_add_operator(*local_init.expr.clone()));
+                        local_init.expr = Box::new(replace_expressions(*local_init.expr.clone()));
                     }
                     syn::Stmt::Local(local)
                 }
@@ -135,7 +135,8 @@ fn modify_body(block: syn::Block) -> syn::Block {
     }
 }
 
-fn replace_add_operator(expr: Expr) -> Expr {
+/// Replaces binary operators and if/else expressions with appropriate context calls.
+fn replace_expressions(expr: Expr) -> Expr {
     match expr {
         Expr::Binary(ExprBinary {
             left,
@@ -260,6 +261,50 @@ fn replace_add_operator(expr: Expr) -> Expr {
                 paren_token: syn::token::Paren::default(),
                 args: vec![*expr].into_iter().collect(),
             })
+        }
+        // Handle if/else by translating to context.mux
+        Expr::If(ExprIf {
+            cond,
+            then_branch,
+            else_branch,
+            ..
+        }) => {
+            if let Some((_, else_branch)) = else_branch {
+                let then_expr = {
+                    if then_branch.stmts.len() == 1 {
+                        if let syn::Stmt::Expr(expr, _) = &then_branch.stmts[0] {
+                            replace_expressions(expr.clone())
+                        } else {
+                            panic!("Expected a single expression in then branch");
+                        }
+                    } else {
+                        panic!("Expected a single statement in then branch");
+                    }
+                };
+
+                let else_expr = match *else_branch {
+                    syn::Expr::Block(syn::ExprBlock { block, .. }) => {
+                        if block.stmts.len() == 1 {
+                            if let syn::Stmt::Expr(expr, _) = &block.stmts[0] {
+                                replace_expressions(expr.clone())
+                            } else {
+                                panic!("Expected a single expression in else branch");
+                            }
+                        } else {
+                            panic!("Expected a single statement in else branch");
+                        }
+                    }
+                    _ => panic!("Expected a block in else branch"),
+                };
+
+                syn::parse_quote! {{
+                    let if_true = #then_expr;
+                    let if_false = #else_expr;
+                    context.mux(#cond, if_true, if_false)
+                }}
+            } else {
+                panic!("Expected else branch for if expression");
+            }
         }
         other => other,
     }
