@@ -89,13 +89,13 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 };
 
                 // Compile the circuit
-                let compiled_circuit = context.compile(output);
+                let compiled_circuit = context.compile(&output);
 
                 // Execute the circuit and get the result
                 let result = context
                     .execute::<N>(&compiled_circuit)
                     .expect("Failed to execute the circuit");
-                result.into()
+                result.clone().into()
             }
 
             #match_arms
@@ -145,12 +145,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Add(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.add)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.add(&#left, &#right)
+            }}
         }
         // subtraction
         Expr::Binary(ExprBinary {
@@ -159,12 +156,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Sub(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.sub)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.sub(&#left, &#right)
+            }}
         }
         // multiplication
         Expr::Binary(ExprBinary {
@@ -173,12 +167,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Mul(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.mul)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.mul(&#left, &#right)
+            }}
         }
         // division - TODO: Implement division
         Expr::Binary(ExprBinary {
@@ -187,12 +178,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Div(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.div)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.div(&#left, &#right)
+            }}
         }
         // modulo - TODO: Implement modulo
         Expr::Binary(ExprBinary {
@@ -201,12 +189,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Rem(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.rem)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.rem(&#left, &#right)
+            }}
         }
         // bitwise AND
         Expr::Binary(ExprBinary {
@@ -215,12 +200,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitAnd(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.and)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.and(&#left, &#right)
+            }}
         }
         // bitwise OR
         Expr::Binary(ExprBinary {
@@ -229,12 +211,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitOr(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.or)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.or(&#left, &#right)
+            }}
         }
         // bitwise XOR
         Expr::Binary(ExprBinary {
@@ -243,12 +222,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitXor(_),
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.xor)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*left, *right].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.xor(&#left, &#right)
+            }}
         }
         // bitwise NOT
         Expr::Unary(ExprUnary {
@@ -256,12 +232,9 @@ fn replace_expressions(expr: Expr) -> Expr {
             expr,
             ..
         }) => {
-            Expr::Call(syn::ExprCall {
-                attrs: vec![], // No attributes on the call
-                func: Box::new(syn::parse_quote!(context.not)),
-                paren_token: syn::token::Paren::default(),
-                args: vec![*expr].into_iter().collect(),
-            })
+            syn::parse_quote! {{
+                &context.not(&#expr)
+            }}
         }
         // Handle if/else by translating to context.mux
         Expr::If(ExprIf {
@@ -301,7 +274,7 @@ fn replace_expressions(expr: Expr) -> Expr {
                 syn::parse_quote! {{
                     let if_true = &#then_expr;
                     let if_false = &#else_expr;
-                    context.mux(#cond, if_true, if_false)
+                    &context.mux(#cond, if_true, if_false)
                 }}
             } else {
                 panic!("Expected else branch for if expression");
