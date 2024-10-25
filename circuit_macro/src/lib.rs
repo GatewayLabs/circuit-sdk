@@ -18,8 +18,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
             if let Pat::Ident(pat_ident) = &**pat {
                 let var_name = &pat_ident.ident;
                 quote! {
-                    let #var_name: GarbledUint8 = #var_name.into();
-                    let #var_name = context.input(&#var_name);
+                    let #var_name = context.input(&#var_name.into().into());
                 }
             } else {
                 quote! {}
@@ -32,34 +31,79 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
     // Replace "+" with context.add in the function body
     let transformed_block = modify_body(*input_fn.block);
 
-    // Build the function body with circuit context, compile, and execute
-    let expanded = quote! {
-        fn #fn_name(#inputs) -> u8 {
-            let mut context = CircuitBuilder::default();
+    // Collect parameter names dynamically
+    let param_names: Vec<_> = inputs
+        .iter()
+        .map(|input| {
+            if let FnArg::Typed(PatType { pat, .. }) = input {
+                if let Pat::Ident(pat_ident) = &**pat {
+                    pat_ident.ident.clone()
+                } else {
+                    panic!("Expected identifier pattern");
+                }
+            } else {
+                panic!("Expected typed argument");
+            }
+        })
+        .collect();
 
-            // Map each input to the circuit context's input function
-            #(#mapped_inputs)*
-
-            // Use the transformed function block (with context.add replacements)
-            let output = {
-                #transformed_block
-            };
-
-            // Compile the circuit
-            let compiled_circuit = context.compile(output);
-
-            // Execute the circuit and get the result
-            let result = context
-                .execute::<8>(&compiled_circuit)
-                .expect("Failed to execute the circuit");
-
-            let result: u8 = result.into();
-            result
+    // Dynamically generate the `generate` function calls using the parameter names
+    let match_arms = quote! {
+        match std::any::type_name::<T>() {
+            "u8" => generate::<8, T>(#(#param_names),*),
+            "u16" => generate::<16, T>(#(#param_names),*),
+            "u32" => generate::<32, T>(#(#param_names),*),
+            "u64" => generate::<64, T>(#(#param_names),*),
+            "u128" => generate::<128, T>(#(#param_names),*),
+            _ => panic!("Unsupported type"),
         }
     };
 
+    // Build the function body with circuit context, compile, and execute
+    let expanded = quote! {
+        fn #fn_name<T>(#inputs) -> T
+        where
+            T: Into<GarbledUint<8>>
+                + From<GarbledUint<8>>
+                + Into<GarbledUint<16>>
+                + From<GarbledUint<16>>
+                + Into<GarbledUint<32>>
+                + From<GarbledUint<32>>
+                + Into<GarbledUint<64>>
+                + From<GarbledUint<64>>
+                + Into<GarbledUint<128>>
+                + From<GarbledUint<128>>,
+        {
+            fn generate<const N: usize, T>(#inputs) -> T
+            where
+                T: Into<GarbledUint<N>> + From<GarbledUint<N>>,
+            {
+                let mut context = CircuitBuilder::default();
+                // Map each input to the circuit context's input function
+                #(#mapped_inputs)*
+
+                // Use the transformed function block (with context.add replacements)
+                let output = {
+                    #transformed_block
+                };
+
+                // Compile the circuit
+                let compiled_circuit = context.compile(output);
+
+                // Execute the circuit and get the result
+                let result = context
+                    .execute::<N>(&compiled_circuit)
+                    .expect("Failed to execute the circuit");
+                result.into()
+            }
+
+            #match_arms
+        }
+
+    };
+
     // Print the expanded code to stderr
-    // println!("Generated code:\n{}", expanded);
+    println!("Generated code:\n{}", expanded);
 
     TokenStream::from(expanded)
 }
