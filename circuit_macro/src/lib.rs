@@ -18,7 +18,7 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
             if let Pat::Ident(pat_ident) = &**pat {
                 let var_name = &pat_ident.ident;
                 quote! {
-                    let #var_name = context.input(&#var_name.into());
+                    let #var_name = &context.input(&#var_name.clone().into());
                 }
             } else {
                 quote! {}
@@ -72,11 +72,12 @@ pub fn circuit(_attr: TokenStream, item: TokenStream) -> TokenStream {
                 + Into<GarbledUint<64>>
                 + From<GarbledUint<64>>
                 + Into<GarbledUint<128>>
-                + From<GarbledUint<128>>,
+                + From<GarbledUint<128>>
+                + Clone,
         {
             fn generate<const N: usize, T>(#inputs) -> T
             where
-                T: Into<GarbledUint<N>> + From<GarbledUint<N>>,
+                T: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
             {
                 let mut context = CircuitBuilder::default();
                 // Map each input to the circuit context's input function
@@ -298,8 +299,8 @@ fn replace_expressions(expr: Expr) -> Expr {
                 };
 
                 syn::parse_quote! {{
-                    let if_true = #then_expr;
-                    let if_false = #else_expr;
+                    let if_true = &#then_expr;
+                    let if_false = &#else_expr;
                     context.mux(#cond, if_true, if_false)
                 }}
             } else {

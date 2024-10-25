@@ -6,9 +6,9 @@ use compute::uint::GarbledUint;
 fn test_macro_arithmetic() {
     #[circuit]
     fn multi_arithmetic(a: T, b: T, c: T, d: T) -> T {
-        let res = a * b;
-        let res = res + c;
-        res - d
+        let res = &a * &b;
+        let res = &res + &c;
+        &res - &d
     }
 
     let a = 2_u8;
@@ -24,9 +24,9 @@ fn test_macro_arithmetic() {
 fn test_macro_arithmetic_u128() {
     #[circuit]
     fn multi_arithmetic_u128(a: T, b: T, c: T, d: T) -> T {
-        let res = a + b;
-        let res = res + c;
-        res - d
+        let res = &a + &b;
+        let res = &res + &c;
+        &res - &d
     }
 
     let a = 2_u128;
@@ -42,10 +42,10 @@ fn test_macro_arithmetic_u128() {
 fn test_macro_mixed_arithmetic() {
     #[circuit]
     fn mixed_arithmetic(a: T, b: T, c: T, d: T) -> T {
-        let res = a.clone() * b;
-        let res = context.add(res, c);
-        let res = res - d;
-        context.mul(res, a)
+        let res = &a * &b;
+        let res = context.add(&res, &c);
+        let res = &res - &d;
+        context.mul(&res, &a)
     }
 
     let a = 2_u8;
@@ -61,7 +61,7 @@ fn test_macro_mixed_arithmetic() {
 fn test_macro_addition() {
     #[circuit]
     fn addition(a: T, b: T) -> T {
-        a + b
+        &a + &b
     }
 
     let a = 2_u8;
@@ -75,7 +75,7 @@ fn test_macro_addition() {
 fn test_macro_subtraction() {
     #[circuit]
     fn subtraction(a: T, b: T) -> T {
-        a - b
+        &a - &b
     }
 
     let a = 20_u8;
@@ -89,7 +89,7 @@ fn test_macro_subtraction() {
 fn test_macro_multiplication() {
     #[circuit]
     fn multiplication(a: T, b: T) -> T {
-        a * b
+        &a * &b
     }
 
     let a = 20_u8;
@@ -103,7 +103,7 @@ fn test_macro_multiplication() {
 fn test_macro_mux() {
     #[circuit]
     fn mux_circuit(s: T, a: T, b: T) -> T {
-        context.mux(s, a, b)
+        context.mux(&s, &a, &b)
     }
 
     let s = 0_u8;
@@ -118,9 +118,9 @@ fn test_macro_mux() {
 fn test_macro_mux3() {
     #[circuit]
     fn mux_circuit(s: T, a: T, b: T) -> T {
-        let true_branch = a.clone() * b.clone();
-        let false_branch = a + b;
-        context.mux(s, true_branch, false_branch)
+        let true_branch = &a * &b;
+        let false_branch = &a + &b;
+        context.mux(&s, &true_branch, &false_branch)
     }
 
     let s = 0_u8;
@@ -141,10 +141,10 @@ fn test_macro_mux3() {
 fn test_macro_if_else() {
     #[circuit]
     fn mux_circuit(s: T, a: T, b: T) -> T {
-        if s {
-            a.clone() * b.clone()
+        if &s {
+            &a * &b
         } else {
-            a + b
+            &a + &b
         }
     }
 
@@ -164,12 +164,12 @@ fn test_macro_if_else() {
 fn test_macro_if_else2() {
     #[circuit]
     fn mux_circuit(s: T, a: T, b: T) -> T {
-        let true_branch = a.clone() * b.clone();
-        let false_branch = a + b;
-        if s {
-            true_branch
+        let true_branch = &a * &b;
+        let false_branch = &a + &b;
+        if &s {
+            &true_branch
         } else {
-            false_branch
+            &false_branch
         }
     }
 
@@ -190,7 +190,7 @@ fn test_macro_if_else2() {
 fn test_macro_division() {
     #[circuit]
     fn division(a: T, b: T) -> T {
-        a / b
+        &a / &b
     }
 
     let a = 20_u8;
@@ -205,7 +205,7 @@ fn test_macro_division() {
 fn test_macro_remainder() {
     #[circuit]
     fn remainder(a: T, b: T) -> T {
-        a % b
+        &a % &b
     }
 
     let a = 20_u8;
@@ -219,9 +219,9 @@ fn test_macro_remainder() {
 fn test_macro_nested_arithmetic() {
     #[circuit]
     fn nested_arithmetic(a: T, b: T, c: T, d: T) -> T {
-        let res = a * b;
-        let res = res + c;
-        let res = res - d;
+        let res = &a * &b;
+        let res = &res + &c;
+        let res = &res - &d;
         res
     }
 
@@ -239,7 +239,7 @@ fn test_macro_nested_arithmetic() {
 fn test_macro_bitwise_and() {
     #[circuit]
     fn bitwise_and(a: T, b: T) -> T {
-        a & b
+        &a & &b
     }
 
     let a = 2_u8;
@@ -253,7 +253,7 @@ fn test_macro_bitwise_and() {
 fn test_macro_bitwise_or() {
     #[circuit]
     fn bitwise_or(a: T, b: T) -> T {
-        a | b
+        &a | &b
     }
 
     let a = 2_u8;
@@ -267,7 +267,7 @@ fn test_macro_bitwise_or() {
 fn test_macro_bitwise_xor() {
     #[circuit]
     fn bitwise_xor(a: T, b: T) -> T {
-        a ^ b
+        &a ^ &b
     }
 
     let a = 2_u8;
@@ -281,7 +281,7 @@ fn test_macro_bitwise_xor() {
 fn test_macro_bitwise_not() {
     #[circuit]
     fn bitwise_not(a: T) -> T {
-        !a
+        !&a
     }
 
     let a = 2_u8;
@@ -294,8 +294,8 @@ fn test_macro_bitwise_not() {
 fn test_macro_bitwise_nand() {
     #[circuit]
     fn bitwise_nand(a: T, b: T) -> T {
-        let and = a & b;
-        !and
+        let and = &a & &b;
+        !&and
     }
 
     let a = 2_u8;
@@ -309,8 +309,8 @@ fn test_macro_bitwise_nand() {
 fn test_macro_bitwise_nor() {
     #[circuit]
     fn bitwise_nor(a: T, b: T) -> T {
-        let or = a | b;
-        !or
+        let or = &a | &b;
+        !&or
     }
 
     let a = 2_u8;
@@ -324,8 +324,8 @@ fn test_macro_bitwise_nor() {
 fn test_macro_bitwise_xnor() {
     #[circuit]
     fn bitwise_xnor(a: T, b: T) -> T {
-        let xor = a ^ b;
-        !xor
+        let xor = &a ^ &b;
+        !&xor
     }
 
     let a = 2_u8;
