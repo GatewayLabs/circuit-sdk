@@ -185,6 +185,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "circuit_macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "clap"
 version = "4.5.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -216,6 +225,7 @@ dependencies = [
  "anyhow",
  "bincode",
  "blake3",
+ "circuit_macro",
  "curve25519-dalek",
  "garble_lang",
  "hex",

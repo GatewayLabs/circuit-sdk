@@ -28,6 +28,7 @@ impl<const N: usize> Display for GarbledInt<N> {
             32 => write!(f, "{}", i32::from(self.clone())),
             64 => write!(f, "{}", i64::from(self.clone())),
             128 => write!(f, "{}", i128::from(self.clone())),
+            160..=1024 => write!(f, "GarbledInt<{}>", N),
             _ => panic!("Unsupported bit size for GarbledInt"),
         }
     }

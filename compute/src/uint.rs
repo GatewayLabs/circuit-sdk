@@ -11,6 +11,10 @@ pub type GarbledUint16 = GarbledUint<16>;
 pub type GarbledUint32 = GarbledUint<32>;
 pub type GarbledUint64 = GarbledUint<64>;
 pub type GarbledUint128 = GarbledUint<128>;
+pub type GarbledUint160 = GarbledUint<160>;
+pub type GarbledUint256 = GarbledUint<256>;
+pub type GarbledUint512 = GarbledUint<512>;
+pub type GarbledUint1024 = GarbledUint<1024>;
 
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
@@ -26,6 +30,14 @@ impl<const N: usize> GarbledUint<N> {
 
     pub fn one() -> Self {
         GarbledUint::new(vec![true])
+    }
+
+    pub fn len(&self) -> usize {
+        self.bits.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.bits.is_empty()
     }
 }
 
