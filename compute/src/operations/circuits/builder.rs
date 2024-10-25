@@ -340,28 +340,7 @@ impl CircuitBuilder {
     }
 }
 
-macro_rules! build_and_execute_boolean {
-    ($fn_name:ident, $op:ident) => {
-        pub(crate) fn $fn_name<const N: usize>(
-            lhs: &GarbledUint<N>,
-            rhs: &GarbledUint<N>,
-        ) -> GarbledUint<N> {
-            let mut builder = CircuitBuilder::default();
-            let a = builder.input(lhs);
-            let b = builder.input(rhs);
-
-            let output = builder.$op(a, b);
-            let circuit = builder.compile(output);
-
-            // Execute the circuit
-            builder
-                .execute(&circuit)
-                .expect("Failed to execute circuit")
-        }
-    };
-}
-
-macro_rules! build_and_execute_arithmetic {
+macro_rules! build_and_execute {
     ($fn_name:ident, $op:ident) => {
         pub(crate) fn $fn_name<const N: usize>(
             lhs: &GarbledUint<N>,
@@ -385,14 +364,14 @@ macro_rules! build_and_execute_arithmetic {
     };
 }
 
-build_and_execute_boolean!(build_and_execute_xor, xor);
-build_and_execute_boolean!(build_and_execute_and, and);
-build_and_execute_boolean!(build_and_execute_or, or);
-build_and_execute_boolean!(build_and_execute_nand, nand);
-build_and_execute_boolean!(build_and_execute_nor, nor);
-build_and_execute_boolean!(build_and_execute_xnor, xnor);
-build_and_execute_arithmetic!(build_and_execute_addition, add);
-build_and_execute_arithmetic!(build_and_execute_subtraction, sub);
+build_and_execute!(build_and_execute_xor, xor);
+build_and_execute!(build_and_execute_and, and);
+build_and_execute!(build_and_execute_or, or);
+build_and_execute!(build_and_execute_nand, nand);
+build_and_execute!(build_and_execute_nor, nor);
+build_and_execute!(build_and_execute_xnor, xnor);
+build_and_execute!(build_and_execute_addition, add);
+build_and_execute!(build_and_execute_subtraction, sub);
 
 fn full_adder(
     builder: &mut CircuitBuilder,
