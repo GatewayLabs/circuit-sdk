@@ -185,6 +185,29 @@ fn test_macro_if_else2() {
     assert_eq!(result, a * b);
 }
 
+#[test]
+fn test_macro_if_else3() {
+    #[circuit]
+    fn mux_circuit(a: &T, b: &T) -> T {
+        let first_two = a - b;
+        if first_two {
+            a * b
+        } else {
+            a + b
+        }
+    }
+
+    let a = 4_u8;
+    let b = 4_u8;
+
+    let result = mux_circuit(&a, &b);
+    assert_eq!(result, a + b);
+
+    let a = 5_u8;
+    let result = mux_circuit(&a, &b);
+    assert_eq!(result, a * b);
+}
+
 #[ignore = "division not yet supported"]
 #[test]
 fn test_macro_division() {

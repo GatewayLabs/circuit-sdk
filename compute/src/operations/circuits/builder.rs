@@ -189,7 +189,6 @@ impl CircuitBuilder {
         output
     }
 
-    // Add a a.len()OR gate: a.len()OR(a, b) = a.len()OT(OR(a, b))
     pub fn push_nor(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
         let or_gate = self.push_or(a, b);
         self.push_not(&or_gate)
@@ -225,7 +224,7 @@ impl CircuitBuilder {
         // repeat with output_indices
         let mut output = GateIndexVec::default();
         for i in 0..a.len() {
-            let mux = self.push_mux(&s[i], &b[i], &a[i]);
+            let mux = self.push_mux(&s[0], &b[i], &a[i]);
             output.push(mux);
         }
         output
@@ -602,7 +601,7 @@ mod tests {
 
     #[test]
     fn test_build_and_execute_mux32() {
-        let s: GarbledUint32 = 0b11111111_11111111_11111111_11111111_u32.into();
+        let s: GarbledUint32 = 1_u32.into();
         let a: GarbledUint32 = 28347823_u32.into();
         let b: GarbledUint32 = 8932849_u32.into();
 
@@ -616,8 +615,7 @@ mod tests {
 
     #[test]
     fn test_build_and_execute_mux64() {
-        let s: GarbledUint64 =
-            0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111_u64.into();
+        let s: GarbledUint64 = 1_u64.into();
         let a: GarbledUint64 = 23948323290804923_u64.into();
         let b: GarbledUint64 = 834289823983634323_u64.into();
 
@@ -676,8 +674,6 @@ mod tests {
 
         let result = build_and_execute_mixed(&a, &b);
         let result_value: u8 = result.into();
-        //assert_eq!(result_value, (9 + 3 - 3) | 9);
-        //assert_eq!(result_value, (9 + 3) * 3);
         assert_eq!(result_value, 2 * 5 * 2);
     }
 
