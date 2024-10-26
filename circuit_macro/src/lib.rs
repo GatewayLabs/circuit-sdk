@@ -17,6 +17,15 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     let fn_name = &input_fn.sig.ident; // Function name
     let inputs = &input_fn.sig.inputs; // Function input parameters
 
+    // get the type of the first input parameter
+    let type_name = if let FnArg::Typed(PatType { ty, .. }) = &inputs[0] {
+        quote! {#ty}
+    } else {
+        panic!("Expected typed argument");
+    };
+
+    //let type_name = quote! {T};
+
     // We need to extract each input's identifier
     let mapped_inputs = inputs.iter().map(|input| {
         if let FnArg::Typed(PatType { pat, .. }) = input {
@@ -54,12 +63,12 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
 
     // Dynamically generate the `generate` function calls using the parameter names
     let match_arms = quote! {
-        match std::any::type_name::<T>() {
-            "u8" => generate::<8, T>(#(#param_names),*),
-            "u16" => generate::<16, T>(#(#param_names),*),
-            "u32" => generate::<32, T>(#(#param_names),*),
-            "u64" => generate::<64, T>(#(#param_names),*),
-            "u128" => generate::<128, T>(#(#param_names),*),
+        match std::any::type_name::<#type_name>() {
+            "u8" => generate::<8, #type_name>(#(#param_names),*),
+            "u16" => generate::<16, #type_name>(#(#param_names),*),
+            "u32" => generate::<32, #type_name>(#(#param_names),*),
+            "u64" => generate::<64, #type_name>(#(#param_names),*),
+            "u128" => generate::<128, #type_name>(#(#param_names),*),
             _ => panic!("Unsupported type"),
         }
     };
@@ -68,7 +77,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     let output_type = if mode == "compile" {
         quote! {(Circuit, Vec<bool>)}
     } else {
-        quote! {T}
+        quote! {#type_name}
     };
 
     let operation = if mode == "compile" {
@@ -84,20 +93,20 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     };
 
     // Build the function body with circuit context, compile, and execute
-    // Expanded macro code
     let expanded = quote! {
-        fn #fn_name<T>(#inputs) -> #output_type
+        #[allow(non_camel_case_types)]
+        fn #fn_name<#type_name>(#inputs) -> #output_type
         where
-            T: Into<GarbledUint<8>> + From<GarbledUint<8>>
+        #type_name: Into<GarbledUint<8>> + From<GarbledUint<8>>
                 + Into<GarbledUint<16>> + From<GarbledUint<16>>
                 + Into<GarbledUint<32>> + From<GarbledUint<32>>
                 + Into<GarbledUint<64>> + From<GarbledUint<64>>
                 + Into<GarbledUint<128>> + From<GarbledUint<128>>
                 + Clone,
         {
-            fn generate<const N: usize, T>(#inputs) -> #output_type
+            fn generate<const N: usize, #type_name>(#inputs) -> #output_type
             where
-                T: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
+                #type_name: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
             {
                 let mut context = CircuitBuilder::default();
                 #(#mapped_inputs)*
@@ -113,7 +122,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     };
 
     // Print the expanded code to stderr
-    // println!("Generated code:\n{}", expanded);
+    println!("Generated code:\n{}", expanded);
 
     TokenStream::from(expanded)
 }
@@ -149,6 +158,78 @@ fn modify_body(block: syn::Block) -> syn::Block {
 /// Replaces binary operators and if/else expressions with appropriate context calls.
 fn replace_expressions(expr: Expr) -> Expr {
     match expr {
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::Eq(_),
+            ..
+        }) => {
+            let left = replace_expressions(*left);
+            let right = replace_expressions(*right);
+            syn::parse_quote! {{
+                &context.eq(&#left, &#right)
+            }}
+        }
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::Ne(_),
+            ..
+        }) => {
+            let left = replace_expressions(*left);
+            let right = replace_expressions(*right);
+            syn::parse_quote! {{
+                &context.ne(&#left, &#right)
+            }}
+        }
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::Gt(_),
+            ..
+        }) => {
+            let left = replace_expressions(*left);
+            let right = replace_expressions(*right);
+            syn::parse_quote! {{
+                &context.gt(&#left, &#right)
+            }}
+        }
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::Ge(_),
+            ..
+        }) => {
+            let left = replace_expressions(*left);
+            let right = replace_expressions(*right);
+            syn::parse_quote! {{
+                &context.ge(&#left, &#right)
+            }}
+        }
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::Lt(_),
+            ..
+        }) => {
+            let left = replace_expressions(*left);
+            let right = replace_expressions(*right);
+            syn::parse_quote! {{
+                &context.lt(&#left, &#right)
+            }}
+        }
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::Le(_),
+            ..
+        }) => {
+            let left = replace_expressions(*left);
+            let right = replace_expressions(*right);
+            syn::parse_quote! {{
+                &context.le(&#left, &#right)
+            }}
+        }
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -247,6 +328,7 @@ fn replace_expressions(expr: Expr) -> Expr {
             }}
         }
         // Handle if/else by translating to context.mux
+        // Handle if/else by translating to context.mux
         Expr::If(ExprIf {
             cond,
             then_branch,
@@ -254,42 +336,26 @@ fn replace_expressions(expr: Expr) -> Expr {
             ..
         }) => {
             if let Some((_, else_branch)) = else_branch {
-                let then_expr = {
-                    if then_branch.stmts.len() == 1 {
-                        if let syn::Stmt::Expr(expr, _) = &then_branch.stmts[0] {
-                            replace_expressions(expr.clone())
-                        } else {
-                            panic!("Expected a single expression in then branch");
-                        }
-                    } else {
-                        panic!("Expected a single statement in then branch");
-                    }
-                };
+                let then_expr = modify_body(then_branch.clone());
 
                 let else_expr = match *else_branch {
-                    syn::Expr::Block(syn::ExprBlock { block, .. }) => {
-                        if block.stmts.len() == 1 {
-                            if let syn::Stmt::Expr(expr, _) = &block.stmts[0] {
-                                replace_expressions(expr.clone())
-                            } else {
-                                panic!("Expected a single expression in else branch");
-                            }
-                        } else {
-                            panic!("Expected a single statement in else branch");
-                        }
-                    }
+                    syn::Expr::Block(syn::ExprBlock { block, .. }) => modify_body(block.clone()),
                     _ => panic!("Expected a block in else branch"),
                 };
 
+                let cond = replace_expressions(*cond.clone());
+
                 syn::parse_quote! {{
-                    let if_true = &#then_expr;
-                    let if_false = &#else_expr;
-                    &context.mux(#cond, if_true, if_false)
+                    let if_true = #then_expr;
+                    let if_false = #else_expr;
+                    let cond = #cond;
+                    &context.mux(cond, if_true, if_false)
                 }}
             } else {
                 panic!("Expected else branch for if expression");
             }
         }
+
         other => other,
     }
 }

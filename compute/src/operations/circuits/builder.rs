@@ -1,93 +1,40 @@
-use crate::executor::get_executor;
+use crate::operations::circuits::types::GateIndexVec;
 use crate::uint::GarbledUint;
-use once_cell::sync::Lazy;
+use crate::{executor::get_executor, uint::GarbledBoolean};
+use std::cell::RefCell;
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
-use std::sync::Mutex;
-use tandem::GateIndex;
 use tandem::{Circuit, Gate};
 
-#[derive(Default, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct GateIndexVec(pub Vec<GateIndex>);
-
-impl GateIndexVec {
-    pub fn push(&mut self, value: GateIndex) {
-        self.0.push(value);
-    }
-
-    pub fn push_all(&mut self, values: &GateIndexVec) {
-        self.0.extend_from_slice(&values.0);
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn iter(&self) -> std::slice::Iter<GateIndex> {
-        self.0.iter()
-    }
-}
-
-impl From<GateIndexVec> for Vec<u32> {
-    fn from(vec: GateIndexVec) -> Self {
-        vec.0.to_vec()
-    }
-}
-
-// implement indexing for GateVector
-impl std::ops::Index<usize> for GateIndexVec {
-    type Output = GateIndex;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index]
-    }
-}
-
-impl FromIterator<u32> for GateIndexVec {
-    fn from_iter<I: IntoIterator<Item = u32>>(iter: I) -> Self {
-        let mut vec = Vec::new();
-        for i in iter {
-            vec.push(i as GateIndex);
-        }
-        GateIndexVec(vec)
-    }
-}
-
-impl From<Vec<u32>> for GateIndexVec {
-    fn from(vec: Vec<u32>) -> Self {
-        vec.into_iter().map(|x| x as GateIndex).collect()
-    }
-}
+pub type GateIndex = u32;
 
 // Global instance of CircuitBuilder
-static CIRCUIT_BUILDER: Lazy<Mutex<CircuitBuilder>> =
-    Lazy::new(|| Mutex::new(CircuitBuilder::default()));
+thread_local! {
+    static CIRCUIT_BUILDER: RefCell<CircuitBuilder> = RefCell::new(CircuitBuilder::default());
+}
 
 #[derive(Default)]
 pub struct CircuitBuilder {
-    input_labels: BTreeSet<GateIndexVec>,
     inputs: Vec<bool>,
     gates: Vec<Gate>,
 }
 
 impl CircuitBuilder {
-    pub fn instance() -> &'static Mutex<CircuitBuilder> {
-        &CIRCUIT_BUILDER
-    }
-
-    pub fn reset() {
-        let mut builder = CIRCUIT_BUILDER.lock().unwrap();
-        *builder = CircuitBuilder::default();
+    // Static `global` function to access `CIRCUIT_BUILDER`
+    pub(super) fn global<F, R>(f: F) -> R
+    where
+        F: FnOnce(&mut CircuitBuilder) -> R,
+    {
+        CIRCUIT_BUILDER.with(|builder| {
+            // Borrow mutably and pass to the closure `f`
+            f(&mut builder.borrow_mut())
+        })
     }
 
     pub fn input<const R: usize>(&mut self, input: &GarbledUint<R>) -> GateIndexVec {
         // get the cumulative size of all inputs in input_labels
-        let input_offset = self.input_labels.iter().map(|x| x.len()).sum::<usize>();
+        //let input_offset = self.input_labels.iter().map(|x| x.len()).sum::<usize>();
 
+        let input_offset = self.inputs.len();
         let mut input_label = GateIndexVec::default();
         for (i, bool_value) in input.bits.iter().enumerate() {
             self.gates.insert(0, Gate::InContrib);
@@ -95,7 +42,6 @@ impl CircuitBuilder {
             self.inputs.push(*bool_value);
             input_label.push((input_offset + i) as GateIndex);
         }
-        self.input_labels.insert(input_label.clone());
         input_label
     }
 
@@ -153,8 +99,12 @@ impl CircuitBuilder {
     }
 
     pub fn not(&mut self, a: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        (0..a.len()).map(|i| self.push_not(&a[i])).collect()
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let not_gate = self.push_not(&a[i]);
+            output.push(not_gate);
+        }
+        output
     }
 
     // Add a gate for OR operation: OR(a, b) = (a ⊕ b) ⊕ (a & b)
@@ -221,11 +171,11 @@ impl CircuitBuilder {
         output
     }
 
-    pub fn mux(&mut self, s: &GateIndexVec, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+    pub fn mux(&mut self, s: &GateIndex, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
         // repeat with output_indices
         let mut output = GateIndexVec::default();
         for i in 0..a.len() {
-            let mux = self.push_mux(&s[0], &b[i], &a[i]);
+            let mux = self.push_mux(&s, &b[i], &a[i]);
             output.push(mux);
         }
         output
@@ -288,28 +238,69 @@ impl CircuitBuilder {
         unimplemented!()
     }
 
-    pub fn compare<const N: usize>(&mut self) -> (u32, u32) {
-        let mut eq_list = vec![0; N];
-        let mut lt_list = vec![0; N];
+    pub fn eq(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let mut eq_list = vec![0; a.len()];
 
-        let n = N as u32;
-        let i = n - 1;
-        let eq_i = self.push_xnor(&i, &(n + i));
-        eq_list[i as usize] = eq_i;
-
-        let nt = self.push_not(&i);
-        let lt_i = self.push_and(&nt, &(n + i));
-        lt_list[i as usize] = lt_i;
+        let i = a.len() - 1;
+        let eq_i = self.push_xnor(&a[i], &b[i]);
+        eq_list[i] = eq_i;
 
         for idx in (0..i).rev() {
-            let xn = self.push_xnor(&idx, &(n + idx));
-            let eq_i = self.push_and(&eq_list[(idx + 1) as usize], &xn);
-            eq_list[idx as usize] = eq_i;
+            let xn = self.push_xnor(&a[idx], &b[idx]);
+            let eq_i = self.push_and(&eq_list[idx + 1], &xn);
+            eq_list[idx] = eq_i;
+        }
 
-            let nt = self.push_not(&idx);
-            let aa = self.push_and(&nt, &(n + idx));
-            let temp_lt = self.push_and(&eq_list[(idx + 1) as usize], &aa);
-            lt_list[idx as usize] = self.push_or(&lt_list[(idx + 1) as usize], &temp_lt);
+        eq_list[0]
+    }
+
+    pub fn ne(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let eq = self.eq(a, b);
+        self.push_not(&eq)
+    }
+
+    pub fn gt(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let (lt, eq) = self.compare(a, b);
+        let or_gate = self.push_or(&lt, &eq);
+        self.push_not(&or_gate)
+    }
+
+    pub fn ge(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let lt = self.lt(a, b);
+        self.push_not(&lt)
+    }
+
+    pub fn lt(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let (lt, _eq) = self.compare(a, b);
+        lt
+    }
+
+    pub fn le(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let gt = self.gt(a, b);
+        self.push_not(&gt)
+    }
+
+    pub fn compare(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> (GateIndex, GateIndex) {
+        let mut eq_list = vec![0; a.len()];
+        let mut lt_list = vec![0; a.len()];
+
+        let i = a.len() - 1;
+        let eq_i = self.push_xnor(&a[i], &b[i]);
+        eq_list[i] = eq_i;
+
+        let nt = self.push_not(&a[i]);
+        let lt_i = self.push_and(&nt, &b[i]);
+        lt_list[i] = lt_i;
+
+        for idx in (0..i).rev() {
+            let xn = self.push_xnor(&a[idx], &b[idx]);
+            let eq_i = self.push_and(&eq_list[idx + 1], &xn);
+            eq_list[idx] = eq_i;
+
+            let nt = self.push_not(&a[idx]);
+            let aa = self.push_and(&nt, &b[idx]);
+            let temp_lt = self.push_and(&eq_list[idx + 1], &aa);
+            lt_list[idx] = self.push_or(&lt_list[idx + 1], &temp_lt);
         }
 
         (lt_list[0], eq_list[0])
@@ -469,20 +460,14 @@ pub(crate) fn build_and_execute_equality<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> bool {
     let mut builder = CircuitBuilder::default();
-    builder.input(lhs);
-    builder.input(rhs);
+    let a = builder.input(lhs);
+    let b = builder.input(rhs);
 
-    let n = lhs.len() as u32;
-    let mut result = builder.push_xnor(&0, &n);
-
-    for i in 1..n {
-        let current_comparison = builder.push_xnor(&i, &(n + i));
-        result = builder.push_and(&result, &current_comparison);
-    }
+    let result = builder.eq(&a, &b);
     let result = builder
-        .compile_and_execute::<N>(&vec![result].into())
-        .unwrap();
-    result.bits[0]
+        .compile_and_execute::<1>(&vec![result].into())
+        .expect("Failed to execute equality circuit");
+    result.into()
 }
 
 pub(crate) fn build_and_execute_comparator<const N: usize>(
@@ -490,17 +475,17 @@ pub(crate) fn build_and_execute_comparator<const N: usize>(
     rhs: &GarbledUint<N>,
 ) -> Ordering {
     let mut builder = CircuitBuilder::default();
-    builder.input(lhs);
-    builder.input(rhs);
+    let a = builder.input(lhs);
+    let b = builder.input(rhs);
 
-    let (lt_output, eq_output) = builder.compare::<N>();
+    let (lt_output, eq_output) = builder.compare(&a, &b);
 
-    let program = builder.compile(&vec![lt_output, eq_output].into());
-    let input = [lhs.bits.clone(), rhs.bits.clone()].concat();
-    let result = get_executor().execute(&program, &input, &[]).unwrap();
+    let result = builder
+        .compile_and_execute::<2>(&vec![lt_output, eq_output].into())
+        .expect("Failed to execute equality circuit");
 
-    let lt = result[0];
-    let eq = result[1];
+    let lt = result.bits[0];
+    let eq = result.bits[1];
 
     if lt {
         Ordering::Less
@@ -529,8 +514,8 @@ pub(crate) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> G
 }
 
 #[allow(dead_code)]
-pub(crate) fn build_and_execute_mux<const N: usize, const S: usize>(
-    condition: &GarbledUint<S>,
+pub(crate) fn build_and_execute_mux<const N: usize>(
+    condition: &GarbledBoolean,
     if_true: &GarbledUint<N>,
     if_false: &GarbledUint<N>,
 ) -> GarbledUint<N> {
@@ -549,7 +534,7 @@ pub(crate) fn build_and_execute_mux<const N: usize, const S: usize>(
     }
     */
 
-    let output = builder.mux(&s, &a, &b);
+    let output = builder.mux(&s[0], &a, &b);
 
     // Simulate the circuit
     builder
@@ -597,29 +582,27 @@ mod tests {
 
     #[test]
     fn test_build_and_execute_mux32() {
-        let s: GarbledUint32 = 1_u32.into();
+        let s: GarbledBoolean = true.into();
         let a: GarbledUint32 = 28347823_u32.into();
         let b: GarbledUint32 = 8932849_u32.into();
 
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, a);
 
-        let s: GarbledUint32 = 0_u32.into();
-        let result = build_and_execute_mux(&s, &a, &b);
+        let result = build_and_execute_mux(&false.into(), &a, &b);
         assert_eq!(result, b);
     }
 
     #[test]
     fn test_build_and_execute_mux64() {
-        let s: GarbledUint64 = 1_u64.into();
+        let s: GarbledBoolean = true.into();
         let a: GarbledUint64 = 23948323290804923_u64.into();
         let b: GarbledUint64 = 834289823983634323_u64.into();
 
         let result = build_and_execute_mux(&s, &a, &b);
         assert_eq!(result, a);
 
-        let s: GarbledUint64 = 0_u64.into();
-        let result = build_and_execute_mux(&s, &a, &b);
+        let result = build_and_execute_mux(&false.into(), &a, &b);
         assert_eq!(result, b);
     }
 
@@ -634,12 +617,126 @@ mod tests {
     }
 
     #[test]
+    fn test_eq_true() {
+        let a: GarbledUint8 = 42_u8.into();
+        let b: GarbledUint8 = 42_u8.into();
+
+        let mut builder = CircuitBuilder::default();
+        let a = builder.input(&a);
+        let b = builder.input(&b);
+
+        let output = builder.eq(&a, &b);
+
+        let circuit = builder.compile(&vec![output].into());
+        let result = builder
+            .execute::<1>(&circuit)
+            .expect("Failed to execute equality circuit");
+        let result_value: bool = result.into();
+        assert_eq!(result_value, true);
+    }
+
+    #[test]
+    fn test_eq_false() {
+        let a: GarbledUint8 = 123_u8.into();
+        let b: GarbledUint8 = 124_u8.into();
+
+        let mut builder = CircuitBuilder::default();
+        let a = builder.input(&a);
+        let b = builder.input(&b);
+
+        let output = builder.eq(&a, &b);
+
+        let circuit = builder.compile(&vec![output].into());
+        let result = builder
+            .execute::<1>(&circuit)
+            .expect("Failed to execute equality circuit");
+        let result_value: bool = result.into();
+        assert_eq!(result_value, false);
+    }
+
+    #[test]
+    fn test_ne_true() {
+        let a: GarbledUint8 = 123_u8.into();
+        let b: GarbledUint8 = 124_u8.into();
+
+        let mut builder = CircuitBuilder::default();
+        let a = builder.input(&a);
+        let b = builder.input(&b);
+
+        let output = builder.ne(&a, &b);
+
+        let circuit = builder.compile(&vec![output].into());
+        let result = builder
+            .execute::<1>(&circuit)
+            .expect("Failed to execute inequality circuit");
+        let result_value: bool = result.into();
+        assert_eq!(result_value, true);
+    }
+
+    #[test]
+    fn test_ne_false() {
+        let a: GarbledUint8 = 42_u8.into();
+        let b: GarbledUint8 = 42_u8.into();
+
+        let mut builder = CircuitBuilder::default();
+        let a = builder.input(&a);
+        let b = builder.input(&b);
+
+        let output = builder.ne(&a, &b);
+
+        let circuit = builder.compile(&vec![output].into());
+        let result = builder
+            .execute::<1>(&circuit)
+            .expect("Failed to execute inequality circuit");
+        let result_value: bool = result.into();
+        assert_eq!(result_value, false);
+    }
+
+    #[test]
+    fn test_lt_true() {
+        let a: GarbledUint8 = 42_u8.into();
+        let b: GarbledUint8 = 43_u8.into();
+
+        let mut builder = CircuitBuilder::default();
+        let a = builder.input(&a);
+        let b = builder.input(&b);
+
+        let output = builder.lt(&a, &b);
+
+        let circuit = builder.compile(&vec![output].into());
+        let result = builder
+            .execute::<1>(&circuit)
+            .expect("Failed to execute less than circuit");
+        let result_value: bool = result.into();
+        assert_eq!(result_value, true);
+    }
+
+    #[test]
+    fn test_lt_false() {
+        let a: GarbledUint8 = 43_u8.into();
+        let b: GarbledUint8 = 42_u8.into();
+
+        let mut builder = CircuitBuilder::default();
+        let a = builder.input(&a);
+        let b = builder.input(&b);
+
+        let output = builder.lt(&a, &b);
+
+        let circuit = builder.compile(&vec![output].into());
+        let result = builder
+            .execute::<1>(&circuit)
+            .expect("Failed to execute less than circuit");
+        let result_value: bool = result.into();
+        assert_eq!(result_value, false);
+    }
+
+    #[test]
     fn test_build_and_execute_mixed() {
         fn build_and_execute_mixed<const N: usize>(
             lhs: &GarbledUint<N>,
             rhs: &GarbledUint<N>,
         ) -> GarbledUint<N> {
-            let mut builder = CircuitBuilder::instance().lock().unwrap();
+            let mut builder = CircuitBuilder::default();
             let a = builder.input(lhs);
             let b = builder.input(rhs);
 
@@ -714,7 +811,7 @@ mod tests {
         let b: GarbledUint8 = 5_u8.into();
         let b = builder.input(&b);
 
-        let s: GarbledUint8 = 0_u8.into();
+        let s: GarbledBoolean = false.into();
         let s: GateIndexVec = builder.input(&s);
 
         // fails with 'cannot borrow `builder` as mutable more than once at a time'
@@ -722,7 +819,7 @@ mod tests {
 
         let if_true = builder.mul(&a, &b);
         let if_false = builder.add(&a, &b);
-        let output = builder.mux(&s, &if_true, &if_false);
+        let output = builder.mux(&s[0], &if_true, &if_false);
 
         println!("output: {:?}", output);
 
@@ -752,7 +849,7 @@ mod tests {
         let result: u8 = my_circuit(&a, &b, &c, &d);
         assert_eq!(result, a * b + c - d);
 
-        let result = my_circuit_from_macro(&a, &b, &c, &d);
+        let result = my_circuit_from_macro(a, b, c, d);
         assert_eq!(result, a * b + c - d);
 
         let result = my_circuit_from_macro2(&a, &b, &c, &d);
@@ -760,15 +857,15 @@ mod tests {
     }
 
     #[circuit(execute)]
-    fn my_circuit_from_macro(a: &T, b: &T, c: &T, d: &T) -> T {
+    fn my_circuit_from_macro(a: U8, b: U8, c: U8, d: U8) -> U8 {
         let res = a * b;
         let res = res + c;
         res - d
     }
 
-    fn my_circuit_from_macro2<T>(a: &T, b: &T, c: &T, d: &T) -> T
+    fn my_circuit_from_macro2<U8>(a: &U8, b: &U8, c: &U8, d: &U8) -> U8
     where
-        T: Into<GarbledUint<8>>
+        U8: Into<GarbledUint<8>>
             + From<GarbledUint<8>>
             + Into<GarbledUint<16>>
             + From<GarbledUint<16>>
@@ -780,9 +877,9 @@ mod tests {
             + From<GarbledUint<128>>
             + Clone,
     {
-        fn generate<const N: usize, T>(a: &T, b: &T, c: &T, d: &T) -> T
+        fn generate<const N: usize, U8>(a: &U8, b: &U8, c: &U8, d: &U8) -> U8
         where
-            T: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
+            U8: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
         {
             let mut context = CircuitBuilder::default();
             let a = &context.input(&a.clone().into());
@@ -802,12 +899,12 @@ mod tests {
                 .expect("Failed to execute the circuit");
             result.into()
         }
-        match std::any::type_name::<T>() {
-            "u8" => generate::<8, T>(a, b, c, d),
-            "u16" => generate::<16, T>(a, b, c, d),
-            "u32" => generate::<32, T>(a, b, c, d),
-            "u64" => generate::<64, T>(a, b, c, d),
-            "u128" => generate::<128, T>(a, b, c, d),
+        match std::any::type_name::<U8>() {
+            "u8" => generate::<8, U8>(a, b, c, d),
+            "u16" => generate::<16, U8>(a, b, c, d),
+            "u32" => generate::<32, U8>(a, b, c, d),
+            "u64" => generate::<64, U8>(a, b, c, d),
+            "u128" => generate::<128, U8>(a, b, c, d),
             _ => panic!("Unsupported type"),
         }
     }
