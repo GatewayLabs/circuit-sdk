@@ -1,4 +1,5 @@
 use crate::operations::circuits::builder::GateIndex;
+use crate::uint::GarbledBoolean;
 
 #[derive(Default, Debug, Eq, Hash, PartialEq, Clone)]
 pub struct GateIndexVec(Vec<GateIndex>);
@@ -47,6 +48,34 @@ impl From<GateIndexVec> for Vec<u32> {
 impl From<Vec<GateIndex>> for GateIndexVec {
     fn from(vec: Vec<GateIndex>) -> Self {
         Self(vec)
+    }
+}
+
+impl From<GateIndexVec> for GarbledBoolean {
+    fn from(vec: GateIndexVec) -> Self {
+        GarbledBoolean::from(vec.0[0])
+    }
+}
+
+impl From<Vec<&u32>> for GateIndexVec {
+    fn from(vec: Vec<&u32>) -> Self {
+        let mut indices = Vec::new();
+        for index in vec {
+            indices.push(*index);
+        }
+        Self(indices)
+    }
+}
+
+impl From<&u32> for GateIndexVec {
+    fn from(index: &u32) -> Self {
+        Self(vec![*index])
+    }
+}
+
+impl From<&GateIndexVec> for GateIndexVec {
+    fn from(vec: &GateIndexVec) -> Self {
+        vec.clone()
     }
 }
 

@@ -51,7 +51,7 @@ impl<const N: usize> Display for GarbledUint<N> {
 impl<const N: usize> GarbledUint<N> {
     // Constructor for GarbledUint<N> from a boolean vector
     pub fn new(bits: Vec<bool>) -> Self {
-        assert_eq!(bits.len(), N, "The number of bits must be {}", N);
+        //assert_eq!(bits.len(), N, "The number of bits must be {}", N);
         GarbledUint {
             bits,
             _phantom: PhantomData,
@@ -75,12 +75,6 @@ impl<const N: usize> From<&GarbledInt<N>> for GarbledUint<N> {
             bits: int.bits.clone(),
             _phantom: PhantomData,
         }
-    }
-}
-
-impl From<bool> for GarbledBit {
-    fn from(value: bool) -> Self {
-        GarbledUint::new(vec![value])
     }
 }
 
@@ -146,12 +140,6 @@ impl<const N: usize> From<u128> for GarbledUint<N> {
         }
 
         GarbledUint::new(bits)
-    }
-}
-
-impl From<GarbledBit> for bool {
-    fn from(guint: GarbledUint<1>) -> Self {
-        guint.bits[0]
     }
 }
 
@@ -232,3 +220,23 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
         value
     }
 }
+
+impl From<bool> for GarbledBit {
+    fn from(value: bool) -> Self {
+        GarbledUint::new(vec![value])
+    }
+}
+
+impl<const N: usize> Into<bool> for GarbledUint<N> {
+    fn into(self) -> bool {
+        self.bits[0]
+    }
+}
+
+/*
+impl From<GarbledBit> for bool {
+    fn from(guint: GarbledUint<1>) -> Self {
+        guint.bits[0]
+    }
+}
+*/

@@ -24,7 +24,12 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
         panic!("Expected typed argument");
     };
 
-    //let type_name = quote! {T};
+    // get the type of the first output parameter
+    let output_type = if let syn::ReturnType::Type(_, ty) = &input_fn.sig.output {
+        quote! {#ty}
+    } else {
+        panic!("Expected typed return type");
+    };
 
     // We need to extract each input's identifier
     let mapped_inputs = inputs.iter().map(|input| {
@@ -77,7 +82,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     let output_type = if mode == "compile" {
         quote! {(Circuit, Vec<bool>)}
     } else {
-        quote! {#type_name}
+        quote! {#output_type}
     };
 
     let operation = if mode == "compile" {
@@ -86,7 +91,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
         }
     } else {
         quote! {
-            let compiled_circuit = context.compile(&output);
+            let compiled_circuit = context.compile(&output.into());
             let result = context.execute::<N>(&compiled_circuit).expect("Execution failed");
             result.into()
         }
