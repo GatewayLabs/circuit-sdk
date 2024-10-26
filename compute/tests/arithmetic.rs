@@ -24,8 +24,6 @@ fn test_uint_add() {
     let result: u8 = (a + b).into(); // Perform addition on the 4-bit values
     assert_eq!(result, 170_u8 + 85_u8); // Expected result of addition between 10101010 and 01010101
 
-    CircuitBuilder::reset();
-
     let a: GarbledUint16 = 4370_u16.into(); // Binary 1010101010101011
     let b: GarbledUint16 = 2184_u16.into(); // Binary 0101010101010101
 

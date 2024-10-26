@@ -1,93 +1,35 @@
 use crate::executor::get_executor;
+use crate::operations::circuits::types::GateIndexVec;
 use crate::uint::GarbledUint;
-use once_cell::sync::Lazy;
+use std::cell::RefCell;
 use std::cmp::Ordering;
-use std::collections::BTreeSet;
 use std::sync::Mutex;
+use std::sync::OnceLock;
+use std::thread;
 use tandem::GateIndex;
 use tandem::{Circuit, Gate};
 
-#[derive(Default, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct GateIndexVec(pub Vec<GateIndex>);
-
-impl GateIndexVec {
-    pub fn push(&mut self, value: GateIndex) {
-        self.0.push(value);
-    }
-
-    pub fn push_all(&mut self, values: &GateIndexVec) {
-        self.0.extend_from_slice(&values.0);
-    }
-
-    pub fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    pub fn is_empty(&self) -> bool {
-        self.0.is_empty()
-    }
-
-    pub fn iter(&self) -> std::slice::Iter<GateIndex> {
-        self.0.iter()
-    }
-}
-
-impl From<GateIndexVec> for Vec<u32> {
-    fn from(vec: GateIndexVec) -> Self {
-        vec.0.to_vec()
-    }
-}
-
-// implement indexing for GateVector
-impl std::ops::Index<usize> for GateIndexVec {
-    type Output = GateIndex;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0[index]
-    }
-}
-
-impl FromIterator<u32> for GateIndexVec {
-    fn from_iter<I: IntoIterator<Item = u32>>(iter: I) -> Self {
-        let mut vec = Vec::new();
-        for i in iter {
-            vec.push(i as GateIndex);
-        }
-        GateIndexVec(vec)
-    }
-}
-
-impl From<Vec<u32>> for GateIndexVec {
-    fn from(vec: Vec<u32>) -> Self {
-        vec.into_iter().map(|x| x as GateIndex).collect()
-    }
-}
-
 // Global instance of CircuitBuilder
-static CIRCUIT_BUILDER: Lazy<Mutex<CircuitBuilder>> =
-    Lazy::new(|| Mutex::new(CircuitBuilder::default()));
+thread_local! {
+    pub(super) static CIRCUIT_BUILDER: RefCell<CircuitBuilder> = RefCell::new(CircuitBuilder::default());
+}
+
+static CIRCUIT_BUILDER2: OnceLock<Mutex<CircuitBuilder>> = OnceLock::new();
 
 #[derive(Default)]
 pub struct CircuitBuilder {
-    input_labels: BTreeSet<GateIndexVec>,
     inputs: Vec<bool>,
     gates: Vec<Gate>,
 }
 
 impl CircuitBuilder {
-    pub fn instance() -> &'static Mutex<CircuitBuilder> {
-        &CIRCUIT_BUILDER
+    // Provides a global accessor to a mutable `CircuitBuilder`
+    pub fn global() -> &'static Mutex<CircuitBuilder> {
+        CIRCUIT_BUILDER2.get_or_init(|| Mutex::new(CircuitBuilder::default()))
     }
-
-    pub fn reset() {
-        let mut builder = CIRCUIT_BUILDER.lock().unwrap();
-        *builder = CircuitBuilder::default();
-    }
-
     pub fn input<const R: usize>(&mut self, input: &GarbledUint<R>) -> GateIndexVec {
         // get the cumulative size of all inputs in input_labels
-        let input_offset = self.input_labels.iter().map(|x| x.len()).sum::<usize>();
-
+        let input_offset = self.inputs.len();
         let mut input_label = GateIndexVec::default();
         for (i, bool_value) in input.bits.iter().enumerate() {
             self.gates.insert(0, Gate::InContrib);
@@ -95,7 +37,6 @@ impl CircuitBuilder {
             self.inputs.push(*bool_value);
             input_label.push((input_offset + i) as GateIndex);
         }
-        self.input_labels.insert(input_label.clone());
         input_label
     }
 
@@ -153,8 +94,12 @@ impl CircuitBuilder {
     }
 
     pub fn not(&mut self, a: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        (0..a.len()).map(|i| self.push_not(&a[i])).collect()
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let not = self.push_not(&a[i]);
+            output.push(not);
+        }
+        output
     }
 
     // Add a gate for OR operation: OR(a, b) = (a ⊕ b) ⊕ (a & b)
@@ -341,20 +286,46 @@ macro_rules! build_and_execute {
             lhs: &GarbledUint<N>,
             rhs: &GarbledUint<N>,
         ) -> GarbledUint<N> {
-            let mut builder = CircuitBuilder::default();
+            //let mut builder = CircuitBuilder::default();
             // Access the global CircuitBuilder instance
-            //let mut builder = CircuitBuilder::instance().lock().unwrap();
+            // Clone the inputs to ensure they have a 'static lifetime
+            let lhs_clone = lhs.clone();
+            let rhs_clone = rhs.clone();
+            thread::spawn(move || {
+                let mut builder = CircuitBuilder::default();
+                let a = builder.input(&lhs_clone);
+                let b = builder.input(&rhs_clone);
 
-            let a = builder.input(lhs);
-            let b = builder.input(rhs);
+                let output = builder.$op(&a, &b);
+                let circuit = builder.compile(&output);
 
-            let output = builder.$op(&a, &b);
-            let circuit = builder.compile(&output);
+                // Execute the circuit
+                builder
+                    .execute(&circuit)
+                    .expect("Failed to execute circuit")
+            })
+            .join()
+            .unwrap()
 
-            // Execute the circuit
-            builder
-                .execute(&circuit)
-                .expect("Failed to execute circuit")
+            /*
+            thread::spawn(move || {
+                CIRCUIT_BUILDER.with(|builder| {
+                    let a = builder.borrow_mut().input(&lhs_clone);
+                    let b = builder.borrow_mut().input(&rhs_clone);
+
+                    let output = builder.borrow_mut().$op(&a, &b);
+                    let circuit = builder.borrow_mut().compile(&output);
+
+                    // Execute the circuit
+                    builder
+                        .borrow_mut()
+                        .execute(&circuit)
+                        .expect("Failed to execute circuit")
+                })
+            })
+            .join()
+            .unwrap()
+            */
         }
     };
 }
@@ -567,6 +538,53 @@ mod tests {
     use crate::uint::GarbledUint8;
 
     #[test]
+    fn test1() {
+        fn build_and_execute_mixed<const N: usize>(
+            lhs: &GarbledUint<N>,
+            rhs: &GarbledUint<N>,
+        ) -> GarbledUint<N> {
+            //let mut builder = CircuitBuilder::default();
+            let lhs_clone = lhs.clone();
+            let rhs_clone = rhs.clone();
+            thread::spawn(move || {
+                CIRCUIT_BUILDER.with(|builder| {
+                    let a = builder.borrow_mut().input(&lhs_clone);
+                    let b = builder.borrow_mut().input(&rhs_clone);
+
+                    let output = &a + &b;
+                    let output = &output + &a;
+
+                    // Create a full adder for each bit
+                    //let add_output = builder.add(&a, &b).0;
+                    //let sub_output = builder.sub(&add_output, &b).0;
+                    //let output = builder.or(&sub_output, &a);
+
+                    //let output = builder.mul(&a, &b);
+                    //let output = builder.mul(&output, &a);
+
+                    //let output = builder.add(&a, &b);
+                    let circuit = builder.borrow_mut().compile(&output);
+
+                    // Execute the circuit
+                    builder
+                        .borrow_mut()
+                        .execute(&circuit)
+                        .expect("Failed to execute addition circuit")
+                })
+            })
+            .join()
+            .unwrap()
+        }
+
+        let a: GarbledUint8 = 2_u8.into();
+        let b: GarbledUint8 = 5_u8.into();
+
+        let result = build_and_execute_mixed(&a, &b);
+        let result_value: u8 = result.into();
+        assert_eq!(result_value, 2 + 5 + 2);
+    }
+
+    #[test]
     fn test_build_and_execute_mux1() {
         let s: GarbledBit = true.into();
         let a: GarbledBit = false.into();
@@ -639,7 +657,7 @@ mod tests {
             lhs: &GarbledUint<N>,
             rhs: &GarbledUint<N>,
         ) -> GarbledUint<N> {
-            let mut builder = CircuitBuilder::instance().lock().unwrap();
+            let mut builder = CircuitBuilder::default();
             let a = builder.input(lhs);
             let b = builder.input(rhs);
 
@@ -838,14 +856,12 @@ mod tests {
             let d = &context.input(&d.clone().into());
 
             let output = {
-                let res = &context.mul(a, b);
-                let res = &context.add(res, c);
-                &context.sub(res, d)
+                let res = a * b + c - d;
+                let res = &res + &b;
+                res
             };
 
-            let output = &output.clone();
-
-            let compiled_circuit = context.compile(output);
+            let compiled_circuit = context.compile(&output);
             let result = context
                 .execute::<N>(&compiled_circuit)
                 .expect("Failed to execute the circuit");
