@@ -646,7 +646,7 @@ mod tests {
             .execute::<1>(&circuit)
             .expect("Failed to execute equality circuit");
         let result_value: bool = result.into();
-        assert_eq!(result_value, true);
+        assert!(result_value);
     }
 
     #[test]
@@ -665,7 +665,7 @@ mod tests {
             .execute::<1>(&circuit)
             .expect("Failed to execute equality circuit");
         let result_value: bool = result.into();
-        assert_eq!(result_value, false);
+        assert!(!result_value);
     }
 
     #[test]
@@ -684,7 +684,7 @@ mod tests {
             .execute::<1>(&circuit)
             .expect("Failed to execute inequality circuit");
         let result_value: bool = result.into();
-        assert_eq!(result_value, true);
+        assert!(result_value);
     }
 
     #[test]
@@ -703,7 +703,7 @@ mod tests {
             .execute::<1>(&circuit)
             .expect("Failed to execute inequality circuit");
         let result_value: bool = result.into();
-        assert_eq!(result_value, false);
+        assert!(!result_value);
     }
 
     #[test]
@@ -722,7 +722,7 @@ mod tests {
             .execute::<1>(&circuit)
             .expect("Failed to execute less than circuit");
         let result_value: bool = result.into();
-        assert_eq!(result_value, true);
+        assert!(result_value);
     }
 
     #[test]
@@ -741,7 +741,7 @@ mod tests {
             .execute::<1>(&circuit)
             .expect("Failed to execute less than circuit");
         let result_value: bool = result.into();
-        assert_eq!(result_value, false);
+        assert!(!result_value);
     }
 
     #[test]

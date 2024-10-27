@@ -524,5 +524,5 @@ fn test_macro_bool_return() {
     let b = 3_u8;
 
     let result = equal(a, b);
-    assert_eq!(result, false);
+    assert!(!result);
 }
