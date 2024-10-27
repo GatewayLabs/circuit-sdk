@@ -526,3 +526,75 @@ fn test_macro_bool_return() {
     let result = equal(a, b);
     assert!(!result);
 }
+
+// div
+#[test]
+fn test_macro_div() {
+    #[circuit(execute)]
+    fn div(a: u8, b: u8) -> u8 {
+        a / b
+    }
+
+    let a = 20_u8;
+    let b = 5_u8;
+
+    let result = div(a, b);
+    assert_eq!(result, a / b);
+}
+
+#[test]
+fn test_macro_div_with_remainder() {
+    #[circuit(execute)]
+    fn div(a: u8, b: u8) -> u8 {
+        a / b
+    }
+
+    let a = 20_u8;
+    let b = 3_u8;
+
+    let result = div(a, b);
+    assert_eq!(result, a / b);
+}
+
+#[test]
+fn test_macro_div_with_remainder2() {
+    #[circuit(execute)]
+    fn div(a: u8, b: u8) -> u8 {
+        a / b
+    }
+
+    let a = 20_u8;
+    let b = 7_u8;
+
+    let result = div(a, b);
+    assert_eq!(result, a / b);
+}
+
+// rem
+#[test]
+fn test_macro_rem() {
+    #[circuit(execute)]
+    fn rem(a: u8, b: u8) -> u8 {
+        a % b
+    }
+
+    let a = 20_u8;
+    let b = 5_u8;
+
+    let result = rem(a, b);
+    assert_eq!(result, a % b);
+}
+
+#[test]
+fn test_macro_rem_with_remainder() {
+    #[circuit(execute)]
+    fn rem(a: u8, b: u8) -> u8 {
+        a % b
+    }
+
+    let a = 20_u8;
+    let b = 3_u8;
+
+    let result = rem(a, b);
+    assert_eq!(result, a % b);
+}
