@@ -11,10 +11,14 @@ use compute::prelude::*;
 /// - `income`: The applicant's income level.
 /// - `credit_score`: The applicant's credit score.
 /// - `debt_ratio`: The applicant's debt-to-income ratio (in percentage).
-/// - `high_income_req`: The high income requirement for full approval.
-/// - `min_credit_score`: The minimum credit score requirement for conditional approval.
-/// - `max_debt_ratio`: The maximum debt-to-income ratio allowed for full approval.
-/// - `max_conditional_debt_ratio`: The maximum debt-to-income ratio for conditional approval.
+/// - `HIGH_INCOME_REQ`: The high income requirement for full approval.
+/// - `MIN_INCOME_REQ`: The minimum income requirement for conditional approval.
+/// - `MIN_CREDIT_SCORE`: The minimum credit score requirement for conditional approval.
+/// - `MAX_DEBT_RATIO`: The maximum debt-to-income ratio allowed for full approval.
+/// - `MAX_CONDITIONAL_DEBT_RATIO`: The maximum debt-to-income ratio for conditional approval.
+/// - `FULLY_APPROVED`: The status code for full approval.
+/// - `CONDITIONAL_APPROVED`: The status code for conditional approval.
+/// - `DENIED`: The status code for denial.
 ///
 /// # Returns
 /// - `u8`: Returns 2 for "Full Approval," 1 for "Conditional Approval," and 0 for "Denied."
