@@ -143,6 +143,12 @@ impl<const N: usize> From<u128> for GarbledUint<N> {
     }
 }
 
+impl<const N: usize> From<GarbledUint<N>> for bool {
+    fn from(guint: GarbledUint<N>) -> Self {
+        guint.bits[0]
+    }
+}
+
 impl<const N: usize> From<GarbledUint<N>> for u8 {
     fn from(guint: GarbledUint<N>) -> Self {
         assert!(N <= 8, "Uint<N> can only be converted to u8 if N <= 8");
@@ -224,12 +230,6 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
 impl From<bool> for GarbledBit {
     fn from(value: bool) -> Self {
         GarbledUint::new(vec![value])
-    }
-}
-
-impl<const N: usize> Into<bool> for GarbledUint<N> {
-    fn into(self) -> bool {
-        self.bits[0]
     }
 }
 

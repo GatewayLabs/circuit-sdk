@@ -1,7 +1,6 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::ExprAssign;
 use syn::{
     parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprUnary, FnArg, ItemFn, Pat, PatType,
 };
@@ -70,6 +69,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     // Dynamically generate the `generate` function calls using the parameter names
     let match_arms = quote! {
         match std::any::type_name::<#type_name>() {
+            "bool" => generate::<1, #type_name>(#(#param_names),*),
             "u8" => generate::<8, #type_name>(#(#param_names),*),
             "u16" => generate::<16, #type_name>(#(#param_names),*),
             "u32" => generate::<32, #type_name>(#(#param_names),*),
@@ -100,10 +100,11 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
 
     // Build the function body with circuit context, compile, and execute
     let expanded = quote! {
-        #[allow(non_camel_case_types)]
+        #[allow(non_camel_case_types, non_snake_case)]
         fn #fn_name<#type_name>(#inputs) -> #output_type
         where
-        #type_name: Into<GarbledUint<8>> + From<GarbledUint<8>>
+        #type_name: Into<GarbledUint<1>> + From<GarbledUint<1>>
+                + Into<GarbledUint<8>> + From<GarbledUint<8>>
                 + Into<GarbledUint<16>> + From<GarbledUint<16>>
                 + Into<GarbledUint<32>> + From<GarbledUint<32>>
                 + Into<GarbledUint<64>> + From<GarbledUint<64>>
@@ -114,7 +115,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
             where
                 #type_name: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
             {
-                let mut context = compute::operations::circuits::builder::CircuitBuilder::default();
+                let mut context = CircuitBuilder::default();
                 #(#mapped_inputs)*
 
                 // Use the transformed function block (with context.add and if/else replacements)
@@ -170,11 +171,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Eq(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.eq(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.eq(&left.into(), &right.into())
+            }}
         }
         Expr::Binary(ExprBinary {
             left,
@@ -182,11 +185,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Ne(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.ne(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.ne(&left.into(), &right.into())
+            }}
         }
         Expr::Binary(ExprBinary {
             left,
@@ -194,11 +199,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Gt(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.gt(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.gt(&left.into(), &right.into())
+            }}
         }
         Expr::Binary(ExprBinary {
             left,
@@ -206,11 +213,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Ge(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.ge(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.ge(&left.into(), &right.into())
+            }}
         }
         Expr::Binary(ExprBinary {
             left,
@@ -218,11 +227,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Lt(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.lt(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.lt(&left.into(), &right.into())
+            }}
         }
         Expr::Binary(ExprBinary {
             left,
@@ -230,11 +241,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Le(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.le(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.le(&left.into(), &right.into())
+            }}
         }
         Expr::Binary(ExprBinary {
             left,
@@ -242,9 +255,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Add(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.add(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.add(&left.into(), &right.into())
+            }}
         }
 
         /*
@@ -266,9 +283,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Sub(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.sub(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.sub(&left.into(), &right.into())
+            }}
         }
         // multiplication
         Expr::Binary(ExprBinary {
@@ -277,9 +298,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Mul(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.mul(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.mul(&left.into(), &right.into())
+            }}
         }
         // division - TODO: Implement division
         Expr::Binary(ExprBinary {
@@ -288,9 +313,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Div(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.div(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.div(&left.into(), &right.into())
+            }}
         }
         // modulo - TODO: Implement modulo
         Expr::Binary(ExprBinary {
@@ -299,38 +328,44 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Rem(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.rem(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.rem(&left.into(), &right.into())
+            }}
         }
         // logical AND
-        // Logical AND (&&)
         Expr::Binary(ExprBinary {
             left,
             right,
             op: BinOp::And(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.and(&#left.into(), &#right.into())
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.land(&left, &right)
+            }}
         }
 
         // logical OR
-        // Logical OR (||)
         Expr::Binary(ExprBinary {
             left,
             right,
             op: BinOp::Or(_),
             ..
         }) => {
-            let left = replace_expressions(*left);
-            let right = replace_expressions(*right);
-            syn::parse_quote! {
-                &context.or(&#left.into(), &#right.into())
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.lor(&left, &right)
+            }}
         }
 
         // bitwise AND
@@ -340,9 +375,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitAnd(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.and(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.and(&left.into(), &right.into())
+            }}
         }
         // bitwise OR
         Expr::Binary(ExprBinary {
@@ -351,9 +390,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitOr(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.or(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.or(&left.into(), &right.into())
+            }}
         }
         // bitwise XOR
         Expr::Binary(ExprBinary {
@@ -362,9 +405,13 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitXor(_),
             ..
         }) => {
-            syn::parse_quote! {
-                &context.xor(&#left, &#right)
-            }
+            let left_expr = replace_expressions(*left);
+            let right_expr = replace_expressions(*right);
+            syn::parse_quote! {{
+                let left = #left_expr;
+                let right = #right_expr;
+                &context.xor(&left.into(), &right.into())
+            }}
         }
         // bitwise NOT
         Expr::Unary(ExprUnary {
@@ -372,12 +419,12 @@ fn replace_expressions(expr: Expr) -> Expr {
             expr,
             ..
         }) => {
-            syn::parse_quote! {
-                &context.not(&#expr)
-            }
+            let single_expr = replace_expressions(*expr);
+            syn::parse_quote! {{
+                let single = #single_expr;
+                &context.not(&single.into())
+            }}
         }
-        // Handle if/else by translating to context.mux
-        // Handle if/else by translating to context.mux
         Expr::If(ExprIf {
             cond,
             then_branch,

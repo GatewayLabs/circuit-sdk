@@ -20,6 +20,7 @@ pub struct CircuitBuilder {
 
 impl CircuitBuilder {
     // Static `global` function to access `CIRCUIT_BUILDER`
+    #[allow(dead_code)]
     pub(super) fn global<F, R>(f: F) -> R
     where
         F: FnOnce(&mut CircuitBuilder) -> R,
@@ -91,6 +92,14 @@ impl CircuitBuilder {
         output
     }
 
+    pub fn land(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        let and = self.push_and(a, b);
+        output.push(and);
+        output.into()
+    }
+
     // Add a a.len()OT gate for a single input and return the index
     pub fn push_not(&mut self, a: &GateIndex) -> GateIndex {
         let not_index = self.gates.len() as u32;
@@ -122,6 +131,11 @@ impl CircuitBuilder {
             output.push(or_gate);
         }
         output
+    }
+
+    pub fn lor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let output = self.or(a, b);
+        output.into()
     }
 
     // Add a a.len()Aa.len()D gate: a.len()Aa.len()D(a, b) = a.len()OT(a & b)
@@ -175,7 +189,7 @@ impl CircuitBuilder {
         // repeat with output_indices
         let mut output = GateIndexVec::default();
         for i in 0..a.len() {
-            let mux = self.push_mux(&s, &b[i], &a[i]);
+            let mux = self.push_mux(s, &b[i], &a[i]);
             output.push(mux);
         }
         output

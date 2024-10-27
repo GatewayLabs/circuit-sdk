@@ -711,7 +711,7 @@ fn gateway_encrypted_mux() {
     let b: GarbledBoolean = bool2.into();
     let c: GarbledBoolean = bool3.into();
 
-    let result = a.mux(&b, &c);
+    let result = GarbledBoolean::mux(&a, &b, &c);
     let result: bool = result.into();
     assert_eq!(result, if bool1 { bool2 } else { bool3 });
 }
@@ -926,7 +926,6 @@ criterion_group!(
     targets =
             benchmark_gateway_encrypted_mux,
             benchmark_tfhe_encrypted_mux,
-
             benchmark_gateway_encrypted_addition,
             benchmark_tfhe_encrypted_addition,
             benchmark_gateway_encrypted_subtraction,

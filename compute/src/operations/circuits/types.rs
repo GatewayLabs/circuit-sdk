@@ -85,6 +85,18 @@ impl From<&GateIndexVec> for GateIndexVec {
     }
 }
 
+impl From<GateIndexVec> for GateIndex {
+    fn from(vec: GateIndexVec) -> Self {
+        vec.0[0]
+    }
+}
+
+impl From<&GateIndexVec> for GateIndex {
+    fn from(vec: &GateIndexVec) -> Self {
+        vec.0[0]
+    }
+}
+
 /*
 use crate::operations::circuits::builder::CircuitBuilder;
 

@@ -21,6 +21,6 @@ impl<const N: usize> GarbledInt<N> {
         if_true: &GarbledInt<N>,
         if_false: &GarbledInt<N>,
     ) -> GarbledInt<N> {
-        build_and_execute_mux(&condition, &if_true.into(), &if_false.into()).into()
+        build_and_execute_mux(condition, &if_true.into(), &if_false.into()).into()
     }
 }

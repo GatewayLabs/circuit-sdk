@@ -49,8 +49,8 @@ fn test_macro_arithmetic_u128() {
     #[circuit(execute)]
     fn multi_arithmetic_u128(a: u8, b: u8, c: u8, d: u8) -> u8 {
         let res = a + b;
-        let res = &res + c;
-        &res - &d
+        let res = res + c;
+        res - d
     }
 
     let a = 2_u128;
@@ -333,7 +333,7 @@ fn test_macro_bitwise_nand() {
     #[circuit(execute)]
     fn bitwise_nand(a: u8, b: u8) -> u8 {
         let and = a & b;
-        !&and
+        !and
     }
 
     let a = 2_u8;
@@ -348,7 +348,7 @@ fn test_macro_bitwise_nor() {
     #[circuit(execute)]
     fn bitwise_nor(a: u8, b: u8) -> u8 {
         let or = a | b;
-        !&or
+        !or
     }
 
     let a = 2_u8;
@@ -363,7 +363,7 @@ fn test_macro_bitwise_xnor() {
     #[circuit(execute)]
     fn bitwise_xnor(a: u8, b: u8) -> u8 {
         let xor = a ^ b;
-        !&xor
+        !xor
     }
 
     let a = 2_u8;
