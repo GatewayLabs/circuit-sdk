@@ -100,7 +100,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
 
     // Build the function body with circuit context, compile, and execute
     let expanded = quote! {
-        #[allow(non_camel_case_types, non_snake_case)]
+        #[allow(non_camel_case_types, non_snake_case, clippy::builtin_type_shadow, clippy::too_many_arguments)]
         fn #fn_name<#type_name>(#inputs) -> #output_type
         where
         #type_name: Into<GarbledUint<1>> + From<GarbledUint<1>>
