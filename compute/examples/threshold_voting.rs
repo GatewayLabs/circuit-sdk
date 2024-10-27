@@ -13,14 +13,14 @@ use compute::prelude::*;
 /// # Example
 /// This example demonstrates checking if a candidate with 150 votes meets a threshold of 100 votes.
 #[circuit(execute)]
-fn has_enough_votes(votes: u8, threshold: u8) -> bool {
-    votes >= threshold
+fn has_enough_votes(votes: u8) -> bool {
+    let THRESHOLD = 100;
+    votes >= THRESHOLD
 }
 
 fn main() {
     let votes = 150_u8;
-    let threshold = 100_u8;
 
-    let result = has_enough_votes(votes, threshold);
+    let result = has_enough_votes(votes);
     println!("Does the candidate have enough votes? {}", result); // Expected: true
 }
