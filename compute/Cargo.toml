@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+circuit_macro = { path = "../circuit_macro" }
 tracing = { workspace = true, features = ["log"] }
 anyhow = { workspace = true }
 tandem = { git = "https://github.com/sine-fdn/tandem.git" }

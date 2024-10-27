@@ -6,6 +6,15 @@ use tandem::Circuit;
 use crate::evaluator::{Evaluator, GatewayEvaluator};
 use crate::garbler::{Garbler, GatewayGarbler};
 
+/// A static Lazy instance for holding the singleton LocalSimulator.
+static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> =
+    Lazy::new(|| Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>);
+
+/// Provides access to the singleton Executor instance.
+pub fn get_executor() -> Arc<dyn Executor + Send + Sync> {
+    SINGLETON_EXECUTOR.clone()
+}
+
 pub trait Executor {
     /// Executes the 2 Party MPC protocol.
     ///
@@ -22,13 +31,20 @@ pub trait Executor {
         input_contributor: &[bool],
         input_evaluator: &[bool],
     ) -> Result<Vec<bool>>;
+
+    fn instance() -> &'static Arc<dyn Executor + Send + Sync>
+    where
+        Self: Sized,
+    {
+        &SINGLETON_EXECUTOR
+    }
 }
 
 pub struct LocalSimulator;
 
 impl Executor for LocalSimulator {
     /// The Multi-Party Computation is performed using the full cryptographic protocol exposed by the
-    /// [`Contributor`] and [`Evaluator`]. The messages between contributor and evaluator are exchanged
+    /// `Contributor` and `Evaluator`. The messages between contributor and evaluator are exchanged
     /// using local message queues. This function thus simulates an MPC execution on a local machine
     /// under ideal network conditions, without any latency or bandwidth restrictions.
     fn execute(
@@ -57,13 +73,4 @@ impl Executor for LocalSimulator {
         let output = evaluator.output(&msg_for_evaluator)?;
         Ok(output)
     }
-}
-
-/// A static Lazy instance for holding the singleton LocalSimulator.
-static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> =
-    Lazy::new(|| Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>);
-
-/// Provides access to the singleton Executor instance.
-pub(crate) fn get_executor() -> Arc<dyn Executor + Send + Sync> {
-    SINGLETON_EXECUTOR.clone()
 }

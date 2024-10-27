@@ -678,6 +678,90 @@ fn gateway_encrypted_le() -> Result<(), Box<dyn ::std::error::Error>> {
     Ok(())
 }
 
+fn tfhe_encrypted_division() -> Result<(), Box<dyn ::std::error::Error>> {
+    use tfhe::prelude::*;
+    use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
+    // Basic configuration to use homomorphic integers
+    let config = ConfigBuilder::default().build();
+
+    // Key generation
+    let (client_key, server_keys) = generate_keys(config);
+
+    let clear_a = 12345678910u128;
+    let clear_b = 1234;
+
+    // Encrypting the input data using the (private) client_key
+    let encrypted_a = FheUint128::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint128::try_encrypt(clear_b, &client_key).unwrap();
+
+    // On the server side:
+    set_server_key(server_keys);
+
+    // Clear equivalent computations: 12345678910 * 1234
+    let encrypted_res_mul = &encrypted_a / &encrypted_b;
+
+    let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
+    assert_eq!(clear_res, clear_a / clear_b);
+
+    Ok(())
+}
+
+fn gateway_encrypted_division() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint128;
+
+    let clear_a = 12345678910u128;
+    let clear_b = 1234;
+
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
+
+    let result: u128 = (&a / &b).into();
+    assert_eq!(result, clear_a / clear_b);
+    Ok(())
+}
+
+fn tfhe_encrypted_modulus() -> Result<(), Box<dyn std::error::Error>> {
+    use tfhe::prelude::*;
+    use tfhe::{generate_keys, set_server_key, ConfigBuilder, FheUint128};
+    // Basic configuration to use homomorphic integers
+    let config = ConfigBuilder::default().build();
+
+    // Key generation
+    let (client_key, server_keys) = generate_keys(config);
+
+    let clear_a = 12345678910u128;
+    let clear_b = 1234;
+
+    // Encrypting the input data using the (private) client_key
+    let encrypted_a = FheUint128::try_encrypt(clear_a, &client_key).unwrap();
+    let encrypted_b = FheUint128::try_encrypt(clear_b, &client_key).unwrap();
+
+    // On the server side:
+    set_server_key(server_keys);
+
+    // Clear equivalent computations: 12345678910 * 1234
+    let encrypted_res_mul = &encrypted_a % &encrypted_b;
+
+    let clear_res: u128 = encrypted_res_mul.decrypt(&client_key);
+    assert_eq!(clear_res, clear_a % clear_b);
+
+    Ok(())
+}
+
+fn gateway_encrypted_modulus() -> Result<(), Box<dyn ::std::error::Error>> {
+    use compute::uint::GarbledUint128;
+
+    let clear_a = 12345678910u128;
+    let clear_b = 1234;
+
+    let a: GarbledUint128 = clear_a.into();
+    let b: GarbledUint128 = clear_b.into();
+
+    let result: u128 = (&a % &b).into();
+    assert_eq!(result, clear_a % clear_b);
+    Ok(())
+}
+
 fn tfhe_encrypted_mux() {
     use tfhe::boolean::prelude::*;
     // We generate a set of client/server keys, using the default parameters:
@@ -711,7 +795,7 @@ fn gateway_encrypted_mux() {
     let b: GarbledBoolean = bool2.into();
     let c: GarbledBoolean = bool3.into();
 
-    let result = a.mux(&b, &c);
+    let result = GarbledBoolean::mux(&a, &b, &c);
     let result: bool = result.into();
     assert_eq!(result, if bool1 { bool2 } else { bool3 });
 }
@@ -914,6 +998,32 @@ fn benchmark_tfhe_encrypted_mux(c: &mut Criterion) {
     c.bench_function("tfhe_encrypted_mux", |b| b.iter(tfhe_encrypted_mux));
 }
 
+// Benchmark 35: Benchmarking benchmark_gateway_encrypted_division
+fn benchmark_gateway_encrypted_division(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_division", |b| {
+        b.iter(gateway_encrypted_division)
+    });
+}
+
+// Benchmark 36: Benchmarking benchmark_tfhe_encrypted_division
+fn benchmark_tfhe_encrypted_division(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_division", |b| {
+        b.iter(tfhe_encrypted_division)
+    });
+}
+
+// Benchmark 37: Benchmarking benchmark_gateway_encrypted_modulus
+fn benchmark_gateway_encrypted_modulus(c: &mut Criterion) {
+    c.bench_function("gateway_encrypted_modulus", |b| {
+        b.iter(gateway_encrypted_modulus)
+    });
+}
+
+// Benchmark 38: Benchmarking benchmark_tfhe_encrypted_modulus
+fn benchmark_tfhe_encrypted_modulus(c: &mut Criterion) {
+    c.bench_function("tfhe_encrypted_modulus", |b| b.iter(tfhe_encrypted_modulus));
+}
+
 // Configure Criterion with a sample size of 10
 fn custom_criterion() -> Criterion {
     Criterion::default().sample_size(10)
@@ -924,9 +1034,13 @@ criterion_group!(
     name = benches;
     config = custom_criterion();
     targets =
+            benchmark_gateway_encrypted_division,
+            benchmark_tfhe_encrypted_division,
+            benchmark_gateway_encrypted_modulus,
+            benchmark_tfhe_encrypted_modulus,
+
             benchmark_gateway_encrypted_mux,
             benchmark_tfhe_encrypted_mux,
-
             benchmark_gateway_encrypted_addition,
             benchmark_tfhe_encrypted_addition,
             benchmark_gateway_encrypted_subtraction,
