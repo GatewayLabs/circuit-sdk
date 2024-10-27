@@ -129,7 +129,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     };
 
     // Print the expanded code to stderr
-    println!("Generated code:\n{}", expanded);
+    //println!("Generated code:\n{}", expanded);
 
     TokenStream::from(expanded)
 }
