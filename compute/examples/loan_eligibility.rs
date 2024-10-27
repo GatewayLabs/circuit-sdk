@@ -39,8 +39,6 @@ fn evaluate_loan_application(
     CONDITIONAL_APPROVED: u32,
     DENIED: u32,
 ) -> u32 {
-    //let income_and_credit_score = income >= HIGH_INCOME_REQ && credit_score >= MIN_CREDIT_SCORE;
-
     // Check for Full Approval
     if income >= HIGH_INCOME_REQ && credit_score >= MIN_CREDIT_SCORE && debt_ratio <= MAX_DEBT_RATIO
     {
