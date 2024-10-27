@@ -1,20 +1,26 @@
-/*
-use circuit_macro::circuit;
-use compute::operations::circuits::builder::{CircuitBuilder, GateIndex};
-use compute::uint::GarbledUint;
+use compute::prelude::*;
 
-#[ignore = "reason"]
 #[test]
-fn test_macro_logical_and() {
+fn test_macro_constants() {
     #[circuit(execute)]
-    fn logical_and(a: bool, b: bool) -> bool {
-        a && b
+    fn constants(a: u8) -> u8 {
+        a + 20
     }
 
-    let a = true;
-    let b = false;
-
-    let result = logical_and(a, b);
-    assert_eq!(result, false);
+    let a = 10_u8;
+    let result = constants(a);
+    assert_eq!(result, 30_u8);
 }
-*/
+
+#[test]
+fn test_macro_embedded_constants() {
+    #[circuit(execute)]
+    fn embedded_constants(a: u8) -> u8 {
+        let B = 20;
+        a + B
+    }
+
+    let a = 10_u8;
+    let result = embedded_constants(a);
+    assert_eq!(result, 30_u8);
+}

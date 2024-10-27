@@ -1,8 +1,9 @@
 extern crate proc_macro;
 use proc_macro::TokenStream;
+use quote::format_ident;
 use quote::quote;
 use syn::{
-    parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprUnary, FnArg, ItemFn, Pat, PatType,
+    parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprUnary, FnArg, ItemFn, Lit, Pat, PatType,
 };
 
 #[proc_macro_attribute]
@@ -47,8 +48,9 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
         }
     });
 
-    // Replace "+" with context.add and handle if/else in the function body
-    let transformed_block = modify_body(*input_fn.block);
+    // Extract constants to be added at the top of the function
+    let mut constants = vec![];
+    let transformed_block = modify_body(*input_fn.block, &mut constants);
 
     // Collect parameter names dynamically
     let param_names: Vec<_> = inputs
@@ -117,6 +119,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
             {
                 let mut context = CircuitBuilder::default();
                 #(#mapped_inputs)*
+                #(#constants)*
 
                 // Use the transformed function block (with context.add and if/else replacements)
                 let output = { #transformed_block };
@@ -135,19 +138,21 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
 }
 
 /// Traverse and transform the function body, replacing binary operators and if/else expressions.
-fn modify_body(block: syn::Block) -> syn::Block {
+/// Also collects constants to add to the circuit context.
+fn modify_body(block: syn::Block, constants: &mut Vec<proc_macro2::TokenStream>) -> syn::Block {
     let stmts = block
         .stmts
         .into_iter()
         .map(|stmt| {
             match stmt {
                 syn::Stmt::Expr(expr, semi_opt) => {
-                    syn::Stmt::Expr(replace_expressions(expr), semi_opt)
+                    syn::Stmt::Expr(replace_expressions(expr, constants), semi_opt)
                 }
                 syn::Stmt::Local(mut local) => {
                     if let Some(local_init) = &mut local.init {
                         // Replace the initializer expression
-                        local_init.expr = Box::new(replace_expressions(*local_init.expr.clone()));
+                        local_init.expr =
+                            Box::new(replace_expressions(*local_init.expr.clone(), constants));
                     }
                     syn::Stmt::Local(local)
                 }
@@ -163,16 +168,29 @@ fn modify_body(block: syn::Block) -> syn::Block {
 }
 
 /// Replaces binary operators and if/else expressions with appropriate context calls.
-fn replace_expressions(expr: Expr) -> Expr {
+fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>) -> Expr {
     match expr {
+        Expr::Lit(syn::ExprLit {
+            lit: Lit::Int(lit_int),
+            ..
+        }) => {
+            let value = lit_int
+                .base10_parse::<u128>()
+                .expect("Expected an integer literal");
+            let const_var = format_ident!("const_{}", value);
+            constants.push(quote! {
+                let #const_var = &context.input::<N>(&#value.into());
+            });
+            syn::parse_quote! {#const_var}
+        }
         Expr::Binary(ExprBinary {
             left,
             right,
             op: BinOp::Eq(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -185,8 +203,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Ne(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -199,8 +217,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Gt(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -213,8 +231,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Ge(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -227,8 +245,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Lt(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -241,8 +259,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Le(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -255,8 +273,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Add(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -283,8 +301,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Sub(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -298,8 +316,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Mul(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -313,8 +331,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Div(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -328,8 +346,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Rem(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -343,8 +361,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::And(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -359,8 +377,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::Or(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -375,8 +393,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitAnd(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -390,8 +408,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitOr(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -405,8 +423,8 @@ fn replace_expressions(expr: Expr) -> Expr {
             op: BinOp::BitXor(_),
             ..
         }) => {
-            let left_expr = replace_expressions(*left);
-            let right_expr = replace_expressions(*right);
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
@@ -419,7 +437,7 @@ fn replace_expressions(expr: Expr) -> Expr {
             expr,
             ..
         }) => {
-            let single_expr = replace_expressions(*expr);
+            let single_expr = replace_expressions(*expr, constants);
             syn::parse_quote! {{
                 let single = #single_expr;
                 &context.not(&single.into())
@@ -432,14 +450,16 @@ fn replace_expressions(expr: Expr) -> Expr {
             ..
         }) => {
             if let Some((_, else_branch)) = else_branch {
-                let then_expr = modify_body(then_branch.clone());
+                let then_expr = modify_body(then_branch.clone(), constants);
 
                 let else_expr = match *else_branch {
-                    syn::Expr::Block(syn::ExprBlock { block, .. }) => modify_body(block.clone()),
+                    syn::Expr::Block(syn::ExprBlock { block, .. }) => {
+                        modify_body(block.clone(), constants)
+                    }
                     _ => panic!("Expected a block in else branch"),
                 };
 
-                let cond = replace_expressions(*cond.clone());
+                let cond = replace_expressions(*cond.clone(), constants);
 
                 syn::parse_quote! {{
                     let if_true = #then_expr;

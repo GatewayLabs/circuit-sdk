@@ -13,14 +13,13 @@ use compute::prelude::*;
 /// # Example
 /// This example demonstrates verifying if a user with level 5 can access an area that requires level 4.
 #[circuit(execute)]
-fn has_access(user_level: u8, required_level: u8) -> bool {
-    user_level >= required_level
+fn has_access(user_level: u8) -> bool {
+    let REQUIRED_LEVEL = 4;
+    user_level >= REQUIRED_LEVEL
 }
 
 fn main() {
     let user_level = 5_u8;
-    let required_level = 4_u8;
-
-    let result = has_access(user_level, required_level);
+    let result = has_access(user_level);
     println!("Does the user have access? {}", result); // Expected: true
 }

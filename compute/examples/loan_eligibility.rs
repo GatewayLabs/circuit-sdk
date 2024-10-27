@@ -11,17 +11,9 @@ use compute::prelude::*;
 /// - `income`: The applicant's income level.
 /// - `credit_score`: The applicant's credit score.
 /// - `debt_ratio`: The applicant's debt-to-income ratio (in percentage).
-/// - `HIGH_INCOME_REQ`: The high income requirement for full approval.
-/// - `MIN_INCOME_REQ`: The minimum income requirement for conditional approval.
-/// - `MIN_CREDIT_SCORE`: The minimum credit score requirement for conditional approval.
-/// - `MAX_DEBT_RATIO`: The maximum debt-to-income ratio allowed for full approval.
-/// - `MAX_CONDITIONAL_DEBT_RATIO`: The maximum debt-to-income ratio for conditional approval.
-/// - `FULLY_APPROVED`: The status code for full approval.
-/// - `CONDITIONAL_APPROVED`: The status code for conditional approval.
-/// - `DENIED`: The status code for denial.
 ///
 /// # Returns
-/// - `u8`: Returns 2 for "Full Approval," 1 for "Conditional Approval," and 0 for "Denied."
+/// - `u32`: Returns 2 for "Full Approval," 1 for "Conditional Approval," and 0 for "Denied."
 ///
 /// # Example
 /// This example demonstrates evaluating an applicant with an income of 75,000, a credit score of 680,
@@ -30,19 +22,18 @@ use compute::prelude::*;
 /// - Conditional approval requires credit score >= 650 and income >= 50,000 and debt ratio <= 40.
 
 #[circuit(execute)]
-fn evaluate_loan_application(
-    income: u32,
-    credit_score: u32,
-    debt_ratio: u32,
-    HIGH_INCOME_REQ: u32,
-    MIN_INCOME_REQ: u32,
-    MIN_CREDIT_SCORE: u32,
-    MAX_DEBT_RATIO: u32,
-    MAX_CONDITIONAL_DEBT_RATIO: u32,
-    FULLY_APPROVED: u32,
-    CONDITIONAL_APPROVED: u32,
-    DENIED: u32,
-) -> u32 {
+fn evaluate_loan_application(income: u32, credit_score: u32, debt_ratio: u32) -> u32 {
+    // Constants for loan approval criteria
+    let HIGH_INCOME_REQ = 70000;
+    let MIN_INCOME_REQ = 50000;
+    let MIN_CREDIT_SCORE = 650;
+    let MAX_DEBT_RATIO = 35;
+    let MAX_CONDITIONAL_DEBT_RATIO = 40_u32;
+
+    // Loan approval status codes
+    let FULLY_APPROVED = 2;
+    let CONDITIONAL_APPROVED = 1;
+    let DENIED = 0;
     // Check for Full Approval
     if income >= HIGH_INCOME_REQ && credit_score >= MIN_CREDIT_SCORE && debt_ratio <= MAX_DEBT_RATIO
     {
@@ -60,37 +51,12 @@ fn evaluate_loan_application(
 }
 
 fn main() {
-    enum LoanStatus {
-        Denied,
-        ConditionalApproval,
-        FullApproval,
-    }
-
-    // Approval requirements passed as parameters
-    const HIGH_INCOME_REQ: u32 = 70000_u32;
-    const MIN_INCOME_REQ: u32 = 50000_u32;
-    const MIN_CREDIT_SCORE: u32 = 650_u32;
-    const MAX_DEBT_RATIO: u32 = 35_u32;
-    const MAX_CONDITIONAL_DEBT_RATIO: u32 = 40_u32;
-
     // Example applicant data
     let income = 75000_u32;
     let credit_score = 680_u32;
     let debt_ratio = 30_u32;
 
-    let result = evaluate_loan_application(
-        income,
-        credit_score,
-        debt_ratio,
-        HIGH_INCOME_REQ,
-        MIN_INCOME_REQ,
-        MIN_CREDIT_SCORE,
-        MAX_DEBT_RATIO,
-        MAX_CONDITIONAL_DEBT_RATIO,
-        LoanStatus::FullApproval as u32,
-        LoanStatus::ConditionalApproval as u32,
-        LoanStatus::Denied as u32,
-    );
+    let result = evaluate_loan_application(income, credit_score, debt_ratio);
 
     // Output the decision based on result
     match result {
