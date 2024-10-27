@@ -28,6 +28,22 @@ impl GateIndexVec {
     pub fn iter(&self) -> std::slice::Iter<GateIndex> {
         self.0.iter()
     }
+
+    pub fn with_capacity(capacity: usize) -> Self {
+        Self(Vec::with_capacity(capacity))
+    }
+
+    pub fn capacity(&self) -> usize {
+        self.0.capacity()
+    }
+
+    pub fn insert(&mut self, index: usize, element: GateIndex) {
+        self.0.insert(index, element);
+    }
+
+    pub fn truncate(&mut self, len: usize) {
+        self.0.truncate(len);
+    }
 }
 
 // Implement indexing for GateVector

@@ -244,12 +244,54 @@ impl CircuitBuilder {
         result
     }
 
-    pub fn div(&mut self, _a: &GateIndexVec, _b: &GateIndexVec) -> GateIndexVec {
-        unimplemented!()
+    fn div_inner(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> (GateIndexVec, GateIndexVec) {
+        let n = a.len();
+        let mut quotient = GateIndexVec::default();
+        let mut remainder = GateIndexVec::default();
+
+        // Initialize remainder with 0
+        for _ in 0..n {
+            remainder.push(GateIndex::default()); // Zero initialize
+        }
+
+        // Iterate through each bit, starting from the most significant
+        for i in (0..n).rev() {
+            // Shift remainder left by 1 (equivalent to adding a bit)
+            remainder.insert(0, a[i]);
+            if remainder.len() > n {
+                remainder.truncate(n); // Ensure remainder does not exceed bit width
+            }
+
+            // Check if remainder is greater than or equal to divisor
+            let greater_or_equal = self.ge(&remainder, b);
+
+            // If remainder is greater than or equal to divisor, set quotient bit to 1 and subtract divisor from remainder
+            if greater_or_equal != GateIndex::default() {
+                // Subtract divisor from remainder if it’s greater than or equal
+                let new_remainder = self.sub(&remainder, b);
+                remainder = self.mux(&greater_or_equal, &new_remainder, &remainder);
+
+                // Set quotient bit to 1
+                quotient.insert(0, greater_or_equal);
+            } else {
+                // Set quotient bit to 0
+                quotient.insert(0, GateIndex::default());
+            }
+
+            if quotient.len() > n {
+                quotient.truncate(n); // Ensure quotient does not exceed bit width
+            }
+        }
+
+        (quotient, remainder)
     }
 
-    pub fn rem(&mut self, _a: &GateIndexVec, _b: &GateIndexVec) -> GateIndexVec {
-        unimplemented!()
+    pub fn div(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        self.div_inner(a, b).0
+    }
+
+    pub fn rem(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        self.div_inner(a, b).1
     }
 
     pub fn eq(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
@@ -373,6 +415,8 @@ build_and_execute!(build_and_execute_xnor, xnor);
 build_and_execute!(build_and_execute_addition, add);
 build_and_execute!(build_and_execute_subtraction, sub);
 build_and_execute!(build_and_execute_multiplication, mul);
+build_and_execute!(build_and_execute_division, div);
+build_and_execute!(build_and_execute_remainder, rem);
 
 fn full_adder(
     builder: &mut CircuitBuilder,
@@ -564,6 +608,26 @@ mod tests {
     use crate::uint::GarbledUint32;
     use crate::uint::GarbledUint64;
     use crate::uint::GarbledUint8;
+
+    #[test]
+    fn test_div() {
+        let a: GarbledUint8 = 10_u8.into();
+        let b: GarbledUint8 = 2_u8.into();
+
+        let result = build_and_execute_division(&a, &b);
+        let result_value: u8 = result.into();
+        assert_eq!(result_value, 10 / 2);
+    }
+
+    #[test]
+    fn test_rem() {
+        let a: GarbledUint8 = 10_u8.into();
+        let b: GarbledUint8 = 3_u8.into();
+
+        let result = build_and_execute_remainder(&a, &b);
+        let result_value: u8 = result.into();
+        assert_eq!(result_value, 10 % 3);
+    }
 
     #[test]
     fn test_build_and_execute_mux1() {
