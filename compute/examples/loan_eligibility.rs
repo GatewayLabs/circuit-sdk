@@ -66,27 +66,27 @@ fn main() {
         FullApproval,
     }
 
+    // Approval requirements passed as parameters
+    const HIGH_INCOME_REQ: u32 = 70000_u32;
+    const MIN_INCOME_REQ: u32 = 50000_u32;
+    const MIN_CREDIT_SCORE: u32 = 650_u32;
+    const MAX_DEBT_RATIO: u32 = 35_u32;
+    const MAX_CONDITIONAL_DEBT_RATIO: u32 = 40_u32;
+
     // Example applicant data
     let income = 75000_u32;
     let credit_score = 680_u32;
     let debt_ratio = 30_u32;
 
-    // Approval requirements passed as parameters
-    let high_income_req = 70000_u32;
-    let min_income_req = 50000_u32;
-    let min_credit_score = 650_u32;
-    let max_debt_ratio = 35_u32;
-    let max_conditional_debt_ratio = 40_u32;
-
     let result = evaluate_loan_application(
         income,
         credit_score,
         debt_ratio,
-        high_income_req,
-        min_income_req,
-        min_credit_score,
-        max_debt_ratio,
-        max_conditional_debt_ratio,
+        HIGH_INCOME_REQ,
+        MIN_INCOME_REQ,
+        MIN_CREDIT_SCORE,
+        MAX_DEBT_RATIO,
+        MAX_CONDITIONAL_DEBT_RATIO,
         LoanStatus::FullApproval as u32,
         LoanStatus::ConditionalApproval as u32,
         LoanStatus::Denied as u32,
