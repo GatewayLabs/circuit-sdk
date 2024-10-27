@@ -29,7 +29,7 @@ fn test_macro_arithmetic_compiler() {
 #[test]
 fn test_macro_arithmetic() {
     #[circuit(execute)]
-    fn multi_arithmetic(a: u8, b: u8, c: u8, d: u8) -> (Circuit, Vec<bool>) {
+    fn multi_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
         let res = a * b;
         let res = res + c;
         res - d
@@ -202,6 +202,26 @@ fn test_macro_if_else3() {
     let a = 5_u8;
     let result = mux_circuit(a, b);
     assert_eq!(result, a + b);
+}
+
+#[test]
+fn test_macro_if_else4() {
+    #[circuit(execute)]
+    fn mux_circuit(a: u8, b: u8) -> u8 {
+        if a == b {
+            let c = a * b;
+            c + a
+        } else {
+            let x = a + b;
+            x * x
+        }
+    }
+
+    let a = 5_u8;
+    let b = 7_u8;
+
+    let result = mux_circuit(a, b);
+    assert_eq!(result, (a + b) * (a + b));
 }
 
 #[ignore = "division not yet supported"]
@@ -491,4 +511,18 @@ fn test_macro_less_than_or_equal() {
     let a = 4_u8;
     let result = less_than_or_equal(a, b);
     assert_eq!(result, a + b);
+}
+
+#[test]
+fn test_macro_bool_return() {
+    #[circuit(execute)]
+    fn equal(a: u8, b: u8) -> bool {
+        a == b
+    }
+
+    let a = 2_u8;
+    let b = 3_u8;
+
+    let result = equal(a, b);
+    assert_eq!(result, false);
 }

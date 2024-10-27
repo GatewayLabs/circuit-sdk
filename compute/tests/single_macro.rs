@@ -22,3 +22,18 @@ fn test_macro_if_else() {
     // assert_eq!(result, (a * b) + a);
     assert_eq!(result, (a + b) * (a + b));
 }
+
+#[test]
+fn test_macro_addition() {
+    #[circuit(execute)]
+    fn addition_circuit(a: u8, b: u8) -> bool {
+        let a = a + b;
+        a == b
+    }
+
+    let a = 2_u8;
+    let b = 2_u8;
+
+    let result = addition_circuit(a, b);
+    assert_eq!(result, false);
+}

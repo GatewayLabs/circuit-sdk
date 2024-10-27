@@ -73,6 +73,12 @@ impl From<&u32> for GateIndexVec {
     }
 }
 
+impl From<u32> for GateIndexVec {
+    fn from(index: u32) -> Self {
+        Self(vec![index])
+    }
+}
+
 impl From<&GateIndexVec> for GateIndexVec {
     fn from(vec: &GateIndexVec) -> Self {
         vec.clone()
