@@ -44,7 +44,7 @@ pub struct LocalSimulator;
 
 impl Executor for LocalSimulator {
     /// The Multi-Party Computation is performed using the full cryptographic protocol exposed by the
-    /// [`Contributor`] and [`Evaluator`]. The messages between contributor and evaluator are exchanged
+    /// `Contributor` and `Evaluator`. The messages between contributor and evaluator are exchanged
     /// using local message queues. This function thus simulates an MPC execution on a local machine
     /// under ideal network conditions, without any latency or bandwidth restrictions.
     fn execute(
