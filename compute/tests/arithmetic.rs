@@ -6,6 +6,16 @@ use compute::uint::{
 };
 
 #[test]
+fn test_uint16_add() {
+    let a: GarbledUint16 = 11_u16.into();
+    let b: GarbledUint16 = 2_u16.into();
+    let c: GarbledUint16 = 3_u16.into();
+
+    let result: u16 = (a + b - c).into(); // Perform addition on the 4-bit values
+    assert_eq!(result, 11 + 2 - 3); // Expected result of addition between 1010101010101011, 0101010101010101 and 42
+}
+
+#[test]
 fn test_uint_add() {
     let a: GarbledUint8 = 170_u8.into(); // Binary 10101010
     let b: GarbledUint8 = 85_u8.into(); // Binary 01010101
@@ -401,4 +411,128 @@ fn test_multiple_additions() {
 
     let result: u32 = (a + b + c + d + e).into();
     assert_eq!(result, 170_u32 + 85_u32 + 42_u32 + 21_u32 + 10_u32);
+}
+
+// div
+
+#[test]
+fn test_uint_div() {
+    let a: GarbledUint8 = 6_u8.into(); // Binary 0110
+    let b: GarbledUint8 = 2_u8.into(); // Binary 0010
+
+    let result: u8 = (a / b).into();
+    assert_eq!(result, 6 / 2); // 0110 / 0010 = 0011
+
+    let a: GarbledUint16 = 300_u16.into(); // Binary 1010101010101011
+    let b: GarbledUint16 = 7_u16.into(); // Binary 0101010101010101
+
+    let result: u16 = (a / b).into();
+    assert_eq!(result, 300_u16 / 7_u16); // Expected result of division between 1010101010101011 and 0101010101010101
+}
+
+#[test]
+fn test_int_div() {
+    let a: GarbledInt8 = 6_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    let result: i8 = (a / b).into();
+    assert_eq!(result, 6_i8 / 2_i8);
+
+    let a: GarbledInt16 = 134_i16.into();
+    let b: GarbledInt16 = 85_i16.into();
+
+    let result: i16 = (a / b).into();
+    assert_eq!(result, 134_i16 / 85_i16);
+}
+
+#[test]
+fn test_uint_div_assign() {
+    let mut a: GarbledUint8 = 6_u8.into(); // Binary 0110
+    let b: GarbledUint8 = 2_u8.into(); // Binary 0010
+
+    a /= b;
+    assert_eq!(<GarbledUint<8> as Into<u8>>::into(a), 6 / 2); // 0110 / 0010 = 0011
+
+    let mut a: GarbledUint16 = 300_u16.into(); // Binary 1010101010101011
+    let b: GarbledUint16 = 7_u16.into(); // Binary 0101010101010101
+
+    a /= b;
+    assert_eq!(<GarbledUint<16> as Into<u16>>::into(a), 300_u16 / 7_u16); // Expected result of division between 1010101010101011 and 0101010101010101
+}
+
+#[test]
+fn test_int_div_assign() {
+    let mut a: GarbledInt8 = 6_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    a /= b;
+    assert_eq!(<GarbledInt<8> as Into<i8>>::into(a), 6_i8 / 2_i8);
+
+    let mut a: GarbledInt16 = 134_i16.into();
+    let b: GarbledInt16 = 85_i16.into();
+
+    a /= b;
+    assert_eq!(<GarbledInt<16> as Into<i16>>::into(a), 134_i16 / 85_i16);
+}
+
+// rem
+
+#[test]
+fn test_uint_rem() {
+    let a: GarbledUint8 = 6_u8.into(); // Binary 0110
+    let b: GarbledUint8 = 2_u8.into(); // Binary 0010
+
+    let result: u8 = (a % b).into();
+    assert_eq!(result, 6 % 2); // 0110 % 0010 = 0000
+
+    let a: GarbledUint16 = 300_u16.into(); // Binary 1010101010101011
+    let b: GarbledUint16 = 7_u16.into(); // Binary 0101010101010101
+
+    let result: u16 = (a % b).into();
+    assert_eq!(result, 300_u16 % 7_u16); // Expected result of remainder between 1010101010101011 and 0101010101010101
+}
+
+#[test]
+fn test_int_rem() {
+    let a: GarbledInt8 = 6_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    let result: i8 = (a % b).into();
+    assert_eq!(result, 6_i8 % 2_i8);
+
+    let a: GarbledInt16 = 134_i16.into();
+    let b: GarbledInt16 = 85_i16.into();
+
+    let result: i16 = (a % b).into();
+    assert_eq!(result, 134_i16 % 85_i16);
+}
+
+#[test]
+fn test_uint_rem_assign() {
+    let mut a: GarbledUint8 = 6_u8.into(); // Binary 0110
+    let b: GarbledUint8 = 2_u8.into(); // Binary 0010
+
+    a %= b;
+    assert_eq!(<GarbledUint<8> as Into<u8>>::into(a), 6 % 2); // 0110 % 0010 = 0000
+
+    let mut a: GarbledUint16 = 300_u16.into(); // Binary 1010101010101011
+    let b: GarbledUint16 = 7_u16.into(); // Binary 0101010101010101
+
+    a %= b;
+    assert_eq!(<GarbledUint<16> as Into<u16>>::into(a), 300_u16 % 7_u16); // Expected result of remainder between 1010101010101011 and 0101010101010101
+}
+
+#[test]
+fn test_int_rem_assign() {
+    let mut a: GarbledInt8 = 6_i8.into();
+    let b: GarbledInt8 = 2_i8.into();
+
+    a %= b;
+    assert_eq!(<GarbledInt<8> as Into<i8>>::into(a), 6_i8 % 2_i8);
+
+    let mut a: GarbledInt16 = 134_i16.into();
+    let b: GarbledInt16 = 85_i16.into();
+
+    a %= b;
+    assert_eq!(<GarbledInt<16> as Into<i16>>::into(a), 134_i16 % 85_i16);
 }

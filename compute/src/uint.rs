@@ -11,6 +11,10 @@ pub type GarbledUint16 = GarbledUint<16>;
 pub type GarbledUint32 = GarbledUint<32>;
 pub type GarbledUint64 = GarbledUint<64>;
 pub type GarbledUint128 = GarbledUint<128>;
+pub type GarbledUint160 = GarbledUint<160>;
+pub type GarbledUint256 = GarbledUint<256>;
+pub type GarbledUint512 = GarbledUint<512>;
+pub type GarbledUint1024 = GarbledUint<1024>;
 
 // Define a new type Uint<N>
 #[derive(Debug, Clone)]
@@ -27,6 +31,14 @@ impl<const N: usize> GarbledUint<N> {
     pub fn one() -> Self {
         GarbledUint::new(vec![true])
     }
+
+    pub fn len(&self) -> usize {
+        self.bits.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.bits.is_empty()
+    }
 }
 
 impl<const N: usize> Display for GarbledUint<N> {
@@ -39,7 +51,7 @@ impl<const N: usize> Display for GarbledUint<N> {
 impl<const N: usize> GarbledUint<N> {
     // Constructor for GarbledUint<N> from a boolean vector
     pub fn new(bits: Vec<bool>) -> Self {
-        assert_eq!(bits.len(), N, "The number of bits must be {}", N);
+        //assert_eq!(bits.len(), N, "The number of bits must be {}", N);
         GarbledUint {
             bits,
             _phantom: PhantomData,
@@ -63,12 +75,6 @@ impl<const N: usize> From<&GarbledInt<N>> for GarbledUint<N> {
             bits: int.bits.clone(),
             _phantom: PhantomData,
         }
-    }
-}
-
-impl From<bool> for GarbledBit {
-    fn from(value: bool) -> Self {
-        GarbledUint::new(vec![value])
     }
 }
 
@@ -137,8 +143,8 @@ impl<const N: usize> From<u128> for GarbledUint<N> {
     }
 }
 
-impl From<GarbledBit> for bool {
-    fn from(guint: GarbledUint<1>) -> Self {
+impl<const N: usize> From<GarbledUint<N>> for bool {
+    fn from(guint: GarbledUint<N>) -> Self {
         guint.bits[0]
     }
 }
@@ -220,3 +226,17 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
         value
     }
 }
+
+impl From<bool> for GarbledBit {
+    fn from(value: bool) -> Self {
+        GarbledUint::new(vec![value])
+    }
+}
+
+/*
+impl From<GarbledBit> for bool {
+    fn from(guint: GarbledUint<1>) -> Self {
+        guint.bits[0]
+    }
+}
+*/

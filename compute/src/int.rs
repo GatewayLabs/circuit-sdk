@@ -11,6 +11,10 @@ pub type GarbledInt16 = GarbledInt<16>;
 pub type GarbledInt32 = GarbledInt<32>;
 pub type GarbledInt64 = GarbledInt<64>;
 pub type GarbledInt128 = GarbledInt<128>;
+pub type GarbledInt160 = GarbledInt<160>;
+pub type GarbledInt256 = GarbledInt<256>;
+pub type GarbledInt512 = GarbledInt<512>;
+pub type GarbledInt1024 = GarbledInt<1024>;
 
 // Define a new type GarbledInt<N>
 #[derive(Debug, Clone)]
@@ -28,6 +32,7 @@ impl<const N: usize> Display for GarbledInt<N> {
             32 => write!(f, "{}", i32::from(self.clone())),
             64 => write!(f, "{}", i64::from(self.clone())),
             128 => write!(f, "{}", i128::from(self.clone())),
+            160..=1024 => write!(f, "GarbledInt<{}>", N),
             _ => panic!("Unsupported bit size for GarbledInt"),
         }
     }

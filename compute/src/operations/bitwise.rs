@@ -1,5 +1,5 @@
 use crate::int::GarbledInt;
-use crate::operations::circuits::{
+use crate::operations::circuits::builder::{
     build_and_execute_and, build_and_execute_nand, build_and_execute_nor, build_and_execute_not,
     build_and_execute_or, build_and_execute_xnor, build_and_execute_xor,
 };

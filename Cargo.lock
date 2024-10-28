@@ -45,9 +45,9 @@ checksum = "1bec1de6f59aedf83baf9ff929c98f2ad654b97c9510f4e70cf6f661d49fd5b1"
 
 [[package]]
 name = "anyhow"
-version = "1.0.89"
+version = "1.0.90"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86fdf8605db99b54d3cd748a44c6d04df638eb5dafb219b135d0149bd0db01f6"
+checksum = "37bf3594c4c988a53154954629820791dde498571819ae4ca50ca811e060cc95"
 
 [[package]]
 name = "arrayref"
@@ -185,6 +185,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "circuit_macro"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "clap"
 version = "4.5.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -216,9 +225,11 @@ dependencies = [
  "anyhow",
  "bincode",
  "blake3",
+ "circuit_macro",
  "curve25519-dalek",
  "garble_lang",
  "hex",
+ "once_cell",
  "rand",
  "rand_chacha",
  "serde",
@@ -574,12 +585,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.20.1"
+version = "1.20.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82881c4be219ab5faaf2ad5e5e5ecdff8c66bd7402ca3160975c93b24961afd1"
-dependencies = [
- "portable-atomic",
-]
+checksum = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775"
 
 [[package]]
 name = "oorandom"
@@ -626,12 +634,6 @@ checksum = "51bae2ac328883f7acdfea3d66a7c35751187f870bc81f94563733a154d7a670"
 dependencies = [
  "plotters-backend",
 ]
-
-[[package]]
-name = "portable-atomic"
-version = "1.9.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cc9c68a3f6da06753e9335d63e27f6b9754dd1920d941135b7ea8224f141adb2"
 
 [[package]]
 name = "ppv-lite86"
@@ -867,9 +869,9 @@ dependencies = [
 
 [[package]]
 name = "tfhe"
-version = "0.8.0"
+version = "0.8.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81923c2433f461e35f3d0b933696335e4f03b874438c844c576eab99e302fe00"
+checksum = "e4504375366bae25ff025c6bc19ee6272347121147581aa0fd36c7fc20ab6600"
 dependencies = [
  "aligned-vec",
  "bincode",
