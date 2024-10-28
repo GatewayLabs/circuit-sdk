@@ -8,6 +8,7 @@ pub mod uint;
 pub mod prelude {
     pub use crate::operations::circuits::builder::CircuitBuilder;
 
+    pub use crate::executor::get_executor;
     pub use crate::int::{
         GarbledInt, GarbledInt128, GarbledInt16, GarbledInt256, GarbledInt32, GarbledInt512,
         GarbledInt64, GarbledInt8,
@@ -18,4 +19,5 @@ pub mod prelude {
         GarbledUint32, GarbledUint4, GarbledUint512, GarbledUint64, GarbledUint8,
     };
     pub use circuit_macro::circuit;
+    pub use tandem::Circuit;
 }
