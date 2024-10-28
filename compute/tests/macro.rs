@@ -1,9 +1,4 @@
-use circuit_macro::circuit;
-use compute::executor::get_executor;
-use compute::operations::circuits::builder::CircuitBuilder;
-use compute::uint::GarbledUint;
-
-use tandem::Circuit;
+use compute::prelude::*;
 
 #[test]
 fn test_macro_arithmetic_compiler() {
@@ -910,8 +905,6 @@ fn test_if_else() {
 
 #[test]
 fn test_macro_bool_literal() {
-    use compute::prelude::*;
-
     #[circuit(execute)]
     fn boolean_literal(a: bool) -> bool {
         let x = false;
@@ -931,8 +924,6 @@ fn test_macro_bool_literal() {
 
 #[test]
 fn test_macro_bool_literal2() {
-    use compute::prelude::*;
-
     #[circuit(execute)]
     fn boolean_literal2(a: bool) -> bool {
         if a {
