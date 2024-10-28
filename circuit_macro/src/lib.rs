@@ -134,7 +134,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     };
 
     // Print the expanded code to stderr
-    // println!("Generated code:\n{}", expanded);
+    println!("Generated code:\n{}", expanded);
 
     TokenStream::from(expanded)
 }
@@ -547,7 +547,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                             let if_true = #then_block;
                             let if_false = #else_if_expr;
                             let cond = #cond_expr;
-                            &context.mux(cond, if_true, if_false)
+                            &context.mux(cond.into(), if_true, if_false)
                         }}
                     }
                     _ => {
@@ -556,7 +556,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                             let if_true = #then_block;
                             let if_false = #else_block;
                             let cond = #cond_expr;
-                            &context.mux(cond, if_true, if_false)
+                            &context.mux(cond.into(), if_true, if_false)
                         }}
                     }
                 }

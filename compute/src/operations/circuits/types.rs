@@ -113,6 +113,12 @@ impl From<&GateIndexVec> for GateIndex {
     }
 }
 
+impl<'a> Into<&'a GateIndex> for &'a GateIndexVec {
+    fn into(self) -> &'a GateIndex {
+        &self.0[0]
+    }
+}
+
 /*
 use crate::operations::circuits::builder::CircuitBuilder;
 

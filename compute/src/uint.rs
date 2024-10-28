@@ -78,6 +78,12 @@ impl<const N: usize> From<&GarbledInt<N>> for GarbledUint<N> {
     }
 }
 
+impl<const N: usize> From<bool> for GarbledUint<N> {
+    fn from(value: bool) -> Self {
+        GarbledUint::new(vec![value])
+    }
+}
+
 impl<const N: usize> From<u8> for GarbledUint<N> {
     fn from(value: u8) -> Self {
         assert!(N <= 8, "Uint<N> can only support up to 8 bits for u8");
@@ -224,12 +230,6 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
         }
 
         value
-    }
-}
-
-impl From<bool> for GarbledBit {
-    fn from(value: bool) -> Self {
-        GarbledUint::new(vec![value])
     }
 }
 
