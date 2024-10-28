@@ -926,7 +926,7 @@ fn test_macro_bool_literal() {
 
     let bool1 = true;
     let result = boolean_literal(bool1);
-    assert_eq!(result, if bool1 { false } else { true });
+    assert_eq!(result, !bool1);
 }
 
 #[test]
@@ -944,5 +944,5 @@ fn test_macro_bool_literal2() {
 
     let bool1 = false;
     let result = boolean_literal2(bool1);
-    assert_eq!(result, if bool1 { false } else { true });
+    assert_eq!(result, !bool1);
 }
