@@ -288,8 +288,6 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.add(&left.into(), &right.into())
             }}
         }
-
-        /*
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -300,7 +298,6 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.add(&#left, &#right)
             }
         }
-        */
         // subtraction
         Expr::Binary(ExprBinary {
             left,
@@ -316,6 +313,18 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.sub(&left.into(), &right.into())
             }}
         }
+        // subtraction assignment
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::SubAssign(_),
+            ..
+        }) => {
+            syn::parse_quote! {
+                &context.sub(&#left, &#right)
+            }
+        }
+
         // multiplication
         Expr::Binary(ExprBinary {
             left,
@@ -331,7 +340,19 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.mul(&left.into(), &right.into())
             }}
         }
-        // division - TODO: Implement division
+
+        // multiplication assignment
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::MulAssign(_),
+            ..
+        }) => {
+            syn::parse_quote! {
+                &context.mul(&#left, &#right)
+            }
+        }
+        // division
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -346,7 +367,18 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.div(&left.into(), &right.into())
             }}
         }
-        // modulo - TODO: Implement modulo
+        // division assignment
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::DivAssign(_),
+            ..
+        }) => {
+            syn::parse_quote! {
+                &context.div(&#left, &#right)
+            }
+        }
+        // modulo
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -360,6 +392,17 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 let right = #right_expr;
                 &context.rem(&left.into(), &right.into())
             }}
+        }
+        // modulo assignment
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::RemAssign(_),
+            ..
+        }) => {
+            syn::parse_quote! {
+                &context.rem(&#left, &#right)
+            }
         }
         // logical AND
         Expr::Binary(ExprBinary {
@@ -408,6 +451,18 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.and(&left.into(), &right.into())
             }}
         }
+        // bitwise AND assignment
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::BitAndAssign(_),
+            ..
+        }) => {
+            syn::parse_quote! {
+                &context.and(&#left, &#right)
+            }
+        }
+
         // bitwise OR
         Expr::Binary(ExprBinary {
             left,
@@ -423,6 +478,18 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.or(&left.into(), &right.into())
             }}
         }
+        // bitwise OR assignment
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::BitOrAssign(_),
+            ..
+        }) => {
+            syn::parse_quote! {
+                &context.or(&#left, &#right)
+            }
+        }
+
         // bitwise XOR
         Expr::Binary(ExprBinary {
             left,
@@ -438,6 +505,18 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.xor(&left.into(), &right.into())
             }}
         }
+        // bitwise XOR assignment
+        Expr::Binary(ExprBinary {
+            left,
+            right,
+            op: BinOp::BitXorAssign(_),
+            ..
+        }) => {
+            syn::parse_quote! {
+                &context.xor(&#left, &#right)
+            }
+        }
+
         // bitwise NOT
         Expr::Unary(ExprUnary {
             op: syn::UnOp::Not(_),
