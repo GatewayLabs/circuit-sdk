@@ -120,6 +120,8 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
                 let mut context = CircuitBuilder::default();
                 #(#mapped_inputs)*
                 #(#constants)*
+                let const_true = &context.input::<N>(&1u128.into());
+                let const_false = &context.input::<N>(&0u128.into());
 
                 // Use the transformed function block (with context.add and if/else replacements)
                 let output = { #transformed_block };
@@ -170,6 +172,11 @@ fn modify_body(block: syn::Block, constants: &mut Vec<proc_macro2::TokenStream>)
 /// Replaces binary operators and if/else expressions with appropriate context calls.
 fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>) -> Expr {
     match expr {
+        // Handle parentheses to ensure proper order of operations
+        Expr::Paren(expr_paren) => {
+            let inner_expr = replace_expressions(*expr_paren.expr, constants);
+            syn::parse_quote! { (#inner_expr) }
+        }
         Expr::Lit(syn::ExprLit {
             lit: Lit::Int(lit_int),
             ..
@@ -443,32 +450,48 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 &context.not(&single.into())
             }}
         }
+
         Expr::If(ExprIf {
             cond,
             then_branch,
             else_branch,
             ..
         }) => {
-            if let Some((_, else_branch)) = else_branch {
-                let then_expr = modify_body(then_branch.clone(), constants);
+            let cond_expr = replace_expressions(*cond, constants);
+            let then_block = modify_body(then_branch, constants);
 
-                let else_expr = match *else_branch {
-                    syn::Expr::Block(syn::ExprBlock { block, .. }) => {
-                        modify_body(block.clone(), constants)
+            if let Some((_, else_expr)) = else_branch {
+                match *else_expr {
+                    Expr::If(else_if) => {
+                        let else_if_expr = replace_expressions(Expr::If(else_if), constants);
+                        syn::parse_quote! {{
+                            let if_true = #then_block;
+                            let if_false = #else_if_expr;
+                            let cond = #cond_expr;
+                            &context.mux(cond, if_true, if_false)
+                        }}
                     }
-                    _ => panic!("Expected a block in else branch"),
-                };
-
-                let cond = replace_expressions(*cond.clone(), constants);
-
-                syn::parse_quote! {{
-                    let if_true = #then_expr;
-                    let if_false = #else_expr;
-                    let cond = #cond;
-                    &context.mux(cond, if_true, if_false)
-                }}
+                    _ => {
+                        let else_block = modify_body(syn::parse_quote! { #else_expr }, constants);
+                        syn::parse_quote! {{
+                            let if_true = #then_block;
+                            let if_false = #else_block;
+                            let cond = #cond_expr;
+                            &context.mux(cond, if_true, if_false)
+                        }}
+                    }
+                }
             } else {
-                panic!("Expected else branch for if expression");
+                panic!("If without else is not supported");
+                /*
+                syn::parse_quote! {{
+                    let if_true = #then_block;
+                    //let if_false = context.len() + 1;
+                    let cond = #cond_expr;
+                    let if_false = &context.len() + 1;
+                    &context.mux(&cond, &if_true, &if_false.into());
+                }}
+                */
             }
         }
 
