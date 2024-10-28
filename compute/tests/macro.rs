@@ -907,3 +907,42 @@ fn test_if_else() {
     let result = if_else(a);
     assert_eq!(result, 52_u8);
 }
+
+#[test]
+fn test_macro_bool_literal() {
+    use compute::prelude::*;
+
+    #[circuit(execute)]
+    fn boolean_literal(a: bool) -> bool {
+        let x = false;
+        let y = true;
+
+        if a {
+            x
+        } else {
+            y
+        }
+    }
+
+    let bool1 = true;
+    let result = boolean_literal(bool1);
+    assert_eq!(result, !bool1);
+}
+
+#[test]
+fn test_macro_bool_literal2() {
+    use compute::prelude::*;
+
+    #[circuit(execute)]
+    fn boolean_literal2(a: bool) -> bool {
+        if a {
+            false
+        } else {
+            true
+        }
+    }
+
+    let bool1 = false;
+    let result = boolean_literal2(bool1);
+    assert_eq!(result, !bool1);
+}
