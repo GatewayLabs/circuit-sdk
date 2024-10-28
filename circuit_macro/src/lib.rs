@@ -134,7 +134,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     };
 
     // Print the expanded code to stderr
-    //println!("Generated code:\n{}", expanded);
+    println!("Generated code:\n{}", expanded);
 
     TokenStream::from(expanded)
 }
@@ -172,11 +172,23 @@ fn modify_body(block: syn::Block, constants: &mut Vec<proc_macro2::TokenStream>)
 /// Replaces binary operators and if/else expressions with appropriate context calls.
 fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>) -> Expr {
     match expr {
-        // Handle parentheses to ensure proper order of operations
-        Expr::Paren(expr_paren) => {
-            let inner_expr = replace_expressions(*expr_paren.expr, constants);
-            syn::parse_quote! { (#inner_expr) }
+        // return statement
+        Expr::Return(_) => {
+            panic!("Return statement not allowed in circuit macro");
         }
+        // boolean literal
+        Expr::Lit(syn::ExprLit {
+            lit: Lit::Bool(lit_bool),
+            ..
+        }) => {
+            let value = lit_bool.value;
+            let const_var = format_ident!("const_{}", value as u128);
+            constants.push(quote! {
+                let #const_var = &context.input::<N>(&#value.into());
+            });
+            syn::parse_quote! {#const_var}
+        }
+        // integer literal
         Expr::Lit(syn::ExprLit {
             lit: Lit::Int(lit_int),
             ..
@@ -190,6 +202,12 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             });
             syn::parse_quote! {#const_var}
         }
+        // Handle parentheses to ensure proper order of operations
+        Expr::Paren(expr_paren) => {
+            let inner_expr = replace_expressions(*expr_paren.expr, constants);
+            syn::parse_quote! { (#inner_expr) }
+        }
+
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -565,8 +583,8 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                     let if_true = #then_block;
                     //let if_false = context.len() + 1;
                     let cond = #cond_expr;
-                    let if_false = &context.len() + 1;
-                    &context.mux(&cond, &if_true, &if_false.into());
+                    let if_false = &context.len();
+                    &context.mux(cond.into(), &if_true, &if_false.into());
                 }}
             }
         }
