@@ -30,7 +30,7 @@ fn tfhe_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 // Another function to benchmark
-fn gateway_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
+fn _gateway_encrypted_addition2() -> Result<(), Box<dyn std::error::Error>> {
     use compute::uint::GarbledUint128;
 
     let clear_a = 12297829382473034410u128;
@@ -41,6 +41,23 @@ fn gateway_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
 
     let result = &a + &b;
     let result: u128 = result.into();
+    assert_eq!(result, clear_a + clear_b);
+    Ok(())
+}
+
+// Another function to benchmark
+fn gateway_encrypted_addition() -> Result<(), Box<dyn std::error::Error>> {
+    use compute::prelude::*;
+
+    #[circuit(execute)]
+    fn addition(a: u128, b: u128) -> u128 {
+        a + b
+    }
+
+    let clear_a = 12297829382473034410u128;
+    let clear_b = 424242424242u128;
+
+    let result = addition(clear_a, clear_b);
     assert_eq!(result, clear_a + clear_b);
     Ok(())
 }
@@ -1034,15 +1051,15 @@ criterion_group!(
     name = benches;
     config = custom_criterion();
     targets =
+            benchmark_gateway_encrypted_addition,
+            benchmark_tfhe_encrypted_addition,
+
             benchmark_gateway_encrypted_division,
             benchmark_tfhe_encrypted_division,
             benchmark_gateway_encrypted_modulus,
             benchmark_tfhe_encrypted_modulus,
-
             benchmark_gateway_encrypted_mux,
             benchmark_tfhe_encrypted_mux,
-            benchmark_gateway_encrypted_addition,
-            benchmark_tfhe_encrypted_addition,
             benchmark_gateway_encrypted_subtraction,
             benchmark_tfhe_encrypted_subtraction,
             benchmark_gateway_encrypted_multiplication,

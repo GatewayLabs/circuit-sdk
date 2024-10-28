@@ -623,3 +623,31 @@ fn test_macro_embedded_constants() {
     let result = embedded_constants(a);
     assert_eq!(result, 30_u8);
 }
+
+#[test]
+fn test_order_of_operations() {
+    #[circuit(execute)]
+    fn order_of_operations(a: u16, b: u16, c: u16) -> u16 {
+        a + b * c
+    }
+
+    let a = 10_u16;
+    let b = 20_u16;
+    let c = 30_u16;
+    let result = order_of_operations(a, b, c);
+    assert_eq!(result, 610_u16);
+}
+
+#[test]
+fn test_order_of_operations2() {
+    #[circuit(execute)]
+    fn order_of_operations(a: u16, b: u16, c: u16) -> u16 {
+        (a + b) * c
+    }
+
+    let a = 10_u16;
+    let b = 20_u16;
+    let c = 30_u16;
+    let result = order_of_operations(a, b, c);
+    assert_eq!(result, 900);
+}

@@ -100,7 +100,7 @@ impl CircuitBuilder {
         output.into()
     }
 
-    // Add a a.len()OT gate for a single input and return the index
+    // Add a NOT gate for a single input and return the index
     pub fn push_not(&mut self, a: &GateIndex) -> GateIndex {
         let not_index = self.gates.len() as u32;
         self.gates.push(Gate::Not(*a));
@@ -190,6 +190,16 @@ impl CircuitBuilder {
         let mut output = GateIndexVec::default();
         for i in 0..a.len() {
             let mux = self.push_mux(s, &b[i], &a[i]);
+            output.push(mux);
+        }
+        output
+    }
+
+    pub fn mux2(&mut self, s: &GateIndex, a: &GateIndexVec, b: &GateIndex) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let mux = self.push_mux(s, b, &a[i]);
             output.push(mux);
         }
         output
@@ -498,10 +508,9 @@ fn partial_product_shift(
     for i in 0..lhs.len() {
         if i < shift {
             // For the lower bits, we push a constant 0.
-            let zero_bit = builder.len();
-            builder.push_not(&rhs[0]);
-            let _zero = builder.push_and(&rhs[0], &zero_bit); // Constant 0
-            shifted.push(builder.len() - 1);
+            let zero_bit = builder.push_not(&rhs[0]);
+            let and_gate = builder.push_and(&rhs[0], &zero_bit); // Constant 0
+            shifted.push(and_gate);
         } else {
             let lhs_bit = lhs[i - shift];
             let and_gate = builder.push_and(&lhs_bit, &(rhs[shift]));

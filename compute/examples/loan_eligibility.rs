@@ -38,15 +38,15 @@ fn evaluate_loan_application(income: u32, credit_score: u32, debt_ratio: u32) ->
     if income >= HIGH_INCOME_REQ && credit_score >= MIN_CREDIT_SCORE && debt_ratio <= MAX_DEBT_RATIO
     {
         FULLY_APPROVED
-    } else {
-        let income_and_credit_score = income >= MIN_INCOME_REQ && credit_score >= MIN_CREDIT_SCORE;
+    } else if income >= MIN_INCOME_REQ
+        && credit_score >= MIN_CREDIT_SCORE
+        && debt_ratio >= MAX_CONDITIONAL_DEBT_RATIO
+    {
         // Check for Conditional Approval
-        if income_and_credit_score && debt_ratio <= MAX_CONDITIONAL_DEBT_RATIO {
-            CONDITIONAL_APPROVED
-        } else {
-            // Denied if neither criteria met
-            DENIED
-        }
+        CONDITIONAL_APPROVED
+    } else {
+        // Denied if neither criteria met
+        DENIED
     }
 }
 
@@ -54,7 +54,7 @@ fn main() {
     // Example applicant data
     let income = 75000_u32;
     let credit_score = 680_u32;
-    let debt_ratio = 30_u32;
+    let debt_ratio = 90_u32;
 
     let result = evaluate_loan_application(income, credit_score, debt_ratio);
 
