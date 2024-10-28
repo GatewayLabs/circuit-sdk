@@ -651,3 +651,115 @@ fn test_order_of_operations2() {
     let result = order_of_operations(a, b, c);
     assert_eq!(result, 900);
 }
+
+#[test]
+fn test_add_assign() {
+    #[circuit(execute)]
+    fn add_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c += b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = add_assign(a, b);
+    assert_eq!(result, 30_u8);
+}
+
+#[test]
+fn test_sub_assign() {
+    #[circuit(execute)]
+    fn sub_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c -= b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = sub_assign(a, b);
+    assert_eq!(result, 246_u8);
+}
+
+#[test]
+fn test_mul_assign() {
+    #[circuit(execute)]
+    fn mul_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c *= b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = mul_assign(a, b);
+    assert_eq!(result, 200_u8);
+}
+
+#[test]
+fn test_div_assign() {
+    #[circuit(execute)]
+    fn div_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c /= b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = div_assign(a, b);
+    assert_eq!(result, 0_u8);
+}
+
+#[test]
+fn test_rem_assign() {
+    #[circuit(execute)]
+    fn rem_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c %= b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = rem_assign(a, b);
+    assert_eq!(result, 10_u8);
+}
+
+#[test]
+fn test_bitand_assign() {
+    #[circuit(execute)]
+    fn bitand_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c &= b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = bitand_assign(a, b);
+    assert_eq!(result, 0_u8);
+}
+
+#[test]
+fn test_bitor_assign() {
+    #[circuit(execute)]
+    fn bitor_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c |= b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = bitor_assign(a, b);
+    assert_eq!(result, 30_u8);
+}
+
+#[test]
+fn test_bitxor_assign() {
+    #[circuit(execute)]
+    fn bitxor_assign(a: u8, b: u8) -> u8 {
+        let c = a;
+        c ^= b
+    }
+
+    let a = 10_u8;
+    let b = 20_u8;
+    let result = bitxor_assign(a, b);
+    assert_eq!(result, 30_u8);
+}
