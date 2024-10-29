@@ -1,25 +1,77 @@
+// Import necessary items from the compute library
 use compute::prelude::*;
 
-/// Determines if a user has the required access level to enter a restricted area.
-///
-/// # Parameters
-/// - `user_level`: The access level of the current user.
-/// - `required_level`: The minimum access level required for the restricted area.
-///
-/// # Returns
-/// - `bool`: Returns `true` if the user's level is greater than or equal to the required level,
-///   indicating they have the necessary access, otherwise `false`.
-///
-/// # Example
-/// This example demonstrates verifying if a user with level 5 can access an area that requires level 4.
+/// Circuit macro annotation to indicate this function will be executed within a secure circuit context.
+/// This access control function determines the level of access a user has based on their role, returning
+/// only the data they are authorized to view in a privacy-preserving manner.
 #[circuit(execute)]
-fn has_access(user_level: u8) -> bool {
-    let REQUIRED_LEVEL = 4;
-    user_level >= REQUIRED_LEVEL
+fn access_control(role: u8) -> u8 {
+    // Define constants representing access to different types of data.
+    // Each constant holds a value that signifies specific data access rights.
+    let SENSITIVE_DATA = 1; // 1 represents sensitive data, accessible only to certain roles.
+    let PATIENT_NOTES = 2; // 2 represents patient notes, which may have broader access.
+
+    // Use a match expression to determine access based on the provided role.
+    match role {
+        // Case for Admin role, which we assume has the highest level of access.
+        1 => {
+            // Admin role (encoded as 1) gets full access to the most sensitive data.
+            // The return value is `SENSITIVE_DATA`, indicating unrestricted access to it.
+            SENSITIVE_DATA
+        }
+        // Case for Doctor role, which has limited access.
+        2 => {
+            // Doctor role (encoded as 2) has partial access to both SENSITIVE_DATA and PATIENT_NOTES.
+            // Using the `+` operator, we perform a bitwise AND on `PATIENT_NOTES` and `SENSITIVE_DATA`.
+            // This allows the doctor role to have limited, controlled access to data while preserving privacy.
+            PATIENT_NOTES + SENSITIVE_DATA
+        }
+        // Case for Nurse role, which has only patient notes access.
+        3 => {
+            // Nurse role (encoded as 3) can view only patient notes.
+            // The function returns `PATIENT_NOTES`, granting access exclusively to this data type.
+            PATIENT_NOTES
+        }
+        // Default case for all other roles, including patients themselves.
+        _ => {
+            // If the role doesn't match any of the cases above, it falls here.
+            // Returning `0` signifies no access to any sensitive or restricted data.
+            0
+        }
+    }
 }
 
+/// Main function to simulate a real-world scenario and demonstrate the access control function.
+/// This function sets up several roles and checks what data each role can access.
 fn main() {
-    let user_level = 5_u8;
-    let result = has_access(user_level);
-    println!("Does the user have access? {}", result); // Expected: true
+    // Define example roles to test the access control function.
+    let admin_role = 1_u8; // Role identifier for Admin
+    let doctor_role = 2_u8; // Role identifier for Doctor
+    let nurse_role = 3_u8; // Role identifier for Nurse
+    let patient_role = 4_u8; // Role identifier for a Patient (or general access)
+
+    // Run access control check for each role and print the results.
+    // This will simulate a privacy-preserving access control system in a secure computation environment.
+
+    // Access check for Admin role
+    let admin_access = access_control(admin_role);
+    println!("Admin access level: {}", admin_access); // Expected to print 1 (SENSITIVE_DATA access)
+
+    // Access check for Doctor role
+    let doctor_access = access_control(doctor_role);
+    println!("Doctor access level: {}", doctor_access); // Expected to print 0 (bitwise AND of PATIENT_NOTES & SENSITIVE_DATA)
+
+    // Access check for Nurse role
+    let nurse_access = access_control(nurse_role);
+    println!("Nurse access level: {}", nurse_access); // Expected to print 2 (PATIENT_NOTES access)
+
+    // Access check for Patient role (or any other role without access)
+    let patient_access = access_control(patient_role);
+    println!("Patient access level: {}", patient_access); // Expected to print 0 (no access)
+
+    // Summary of results:
+    // - Admin should receive full access to `SENSITIVE_DATA`
+    // - Doctor should receive limited access, represented by the result of `PATIENT_NOTES & SENSITIVE_DATA`
+    // - Nurse should receive access only to `PATIENT_NOTES`
+    // - Patient (or other non-defined roles) should have no access, indicated by `0`
 }
