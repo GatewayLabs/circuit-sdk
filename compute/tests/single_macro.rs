@@ -1,23 +1,21 @@
 use compute::prelude::*;
 
 #[test]
-fn testy() {
-    use compute::prelude::*;
-
+fn macro_test_if_with_consts() {
     #[circuit(execute)]
-    fn mux(a: bool) -> bool {
-        let x = false;
-        let y = true;
-
-        if a {
-            x
+    fn if_test(a: u8) -> u8 {
+        if a == 42 {
+            a + 1
         } else {
-            y
+            54
         }
     }
 
-    let bool1 = true;
+    let a = 42_u8;
+    let result = if_test(a);
+    assert_eq!(result, 43);
 
-    let result = mux(bool1);
-    assert!(!result);
+    let a = 43_u8;
+    let result = if_test(a);
+    assert_eq!(result, 54);
 }

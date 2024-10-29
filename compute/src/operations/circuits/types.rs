@@ -119,3 +119,21 @@ impl<'a> Into<&'a GateIndex> for &'a GateIndexVec {
         &self.0[0]
     }
 }
+
+impl<'a> From<&'a &GateIndexVec> for &'a GateIndexVec {
+    fn from(vec: &'a &GateIndexVec) -> Self {
+        vec
+    }
+}
+
+impl<'a> From<&'a &mut &GateIndexVec> for &'a GateIndexVec {
+    fn from(vec: &'a &mut &GateIndexVec) -> Self {
+        vec
+    }
+}
+
+impl<'a> From<&'a mut &GateIndexVec> for &'a GateIndexVec {
+    fn from(vec: &'a mut &GateIndexVec) -> Self {
+        vec
+    }
+}

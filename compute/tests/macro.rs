@@ -62,9 +62,9 @@ fn test_macro_mixed_arithmetic() {
     #[circuit(execute)]
     fn mixed_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
         let res = a * b;
-        let res = context.add(res, c);
+        let res = context.add(&res, c);
         let res = res - d;
-        context.mul(res, a)
+        context.mul(&res, a)
     }
 
     let a = 2_u8;
@@ -123,7 +123,7 @@ fn test_macro_mux() {
     #[circuit(execute)]
     fn mux_circuit(a: u8, b: u8) -> u8 {
         let condition = a == b;
-        &context.mux(condition, a, b)
+        &context.mux(&condition, a, b)
     }
 
     let a = 5_u8;
@@ -936,4 +936,176 @@ fn test_macro_bool_literal2() {
     let bool1 = false;
     let result = boolean_literal2(bool1);
     assert_eq!(result, !bool1);
+}
+
+#[test]
+fn macro_test_if_assign() {
+    #[circuit(execute)]
+    fn if_test(a: u8) -> u8 {
+        let y = 22;
+
+        let mut c = 100;
+        if a == 1 {
+            c = c + 1;
+            c
+        } else {
+            c = y + 1;
+            c
+        }
+    }
+
+    let a = 1_u8;
+    let result = if_test(a);
+    assert_eq!(result, 101);
+
+    let a = 2_u8;
+    let result = if_test(a);
+    assert_eq!(result, 23);
+}
+
+#[test]
+fn macro_test_assignment2() {
+    #[circuit(execute)]
+    fn assignment_test2(a: u8) -> u8 {
+        let mut x = 11;
+        x = a + 1;
+        x
+    }
+
+    let a = 42_u8;
+    let result = assignment_test2(a);
+    assert_eq!(result, 43);
+}
+
+#[test]
+fn macro_test_assignment() {
+    #[circuit(execute)]
+    fn assignment_test(a: u8) -> u8 {
+        let mut x = 11;
+        x = a;
+        x
+    }
+
+    let a = 42_u8;
+    let result = assignment_test(a);
+    assert_eq!(result, 42);
+}
+
+#[test]
+fn test_macro_match() {
+    #[circuit(execute)]
+    fn match_test(a: u8) -> u8 {
+        match a {
+            1 => 7,
+            2 => 8,
+            3 => 9,
+            _ => 10,
+        }
+    }
+
+    let a = 1_u8;
+    let result = match_test(a);
+    assert_eq!(result, 7_u8);
+
+    let a = 2_u8;
+    let result = match_test(a);
+    assert_eq!(result, 8_u8);
+
+    let a = 3_u8;
+    let result = match_test(a);
+    assert_eq!(result, 9_u8);
+
+    let a = 4_u8;
+    let result = match_test(a);
+    assert_eq!(result, 10_u8);
+}
+
+#[test]
+fn test_macro_match_with_expr() {
+    #[circuit(execute)]
+    fn match_test_with_expr(a: u8) -> u8 {
+        match a {
+            1 => {
+                let b = 5;
+                b + 2
+            }
+            2 => 8,
+            3 => 9,
+            _ => 10,
+        }
+    }
+
+    let a = 1_u8;
+    let result = match_test_with_expr(a);
+    assert_eq!(result, 7_u8);
+
+    let a = 2_u8;
+    let result = match_test_with_expr(a);
+    assert_eq!(result, 8_u8);
+
+    let a = 3_u8;
+    let result = match_test_with_expr(a);
+    assert_eq!(result, 9_u8);
+
+    let a = 4_u8;
+    let result = match_test_with_expr(a);
+    assert_eq!(result, 10_u8);
+}
+
+#[test]
+fn test_macro_match_with_block() {
+    #[circuit(execute)]
+    fn match_test_with_block(a: u8) -> u8 {
+        match a {
+            1 => {
+                let b = 5;
+                b + 2
+            }
+            2 => {
+                let c = 6;
+                c + 2
+            }
+            3 => {
+                let d = 7;
+                d + 2
+            }
+            _ => 10,
+        }
+    }
+
+    let a = 1_u8;
+    let result = match_test_with_block(a);
+    assert_eq!(result, 7_u8);
+
+    let a = 2_u8;
+    let result = match_test_with_block(a);
+    assert_eq!(result, 8_u8);
+
+    let a = 3_u8;
+    let result = match_test_with_block(a);
+    assert_eq!(result, 9_u8);
+
+    let a = 4_u8;
+    let result = match_test_with_block(a);
+    assert_eq!(result, 10_u8);
+}
+
+#[test]
+fn macro_test_if_with_consts() {
+    #[circuit(execute)]
+    fn if_test(a: u8) -> u8 {
+        if a == 42 {
+            a + 1
+        } else {
+            54
+        }
+    }
+
+    let a = 42_u8;
+    let result = if_test(a);
+    assert_eq!(result, 43);
+
+    let a = 43_u8;
+    let result = if_test(a);
+    assert_eq!(result, 54);
 }

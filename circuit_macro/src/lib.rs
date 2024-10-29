@@ -1,7 +1,12 @@
 extern crate proc_macro;
+use core::panic;
+
 use proc_macro::TokenStream;
 use quote::format_ident;
 use quote::quote;
+use syn::ExprAssign;
+use syn::ExprBlock;
+use syn::ExprMatch;
 use syn::{
     parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprUnary, FnArg, ItemFn, Lit, Pat, PatType,
 };
@@ -102,7 +107,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
 
     // Build the function body with circuit context, compile, and execute
     let expanded = quote! {
-        #[allow(non_camel_case_types, non_snake_case, clippy::builtin_type_shadow, clippy::too_many_arguments)]
+        #[allow(non_camel_case_types, non_snake_case, clippy::builtin_type_shadow, unused_assignments)]
         fn #fn_name<#type_name>(#inputs) -> #output_type
         where
         #type_name: Into<GarbledUint<1>> + From<GarbledUint<1>>
@@ -120,8 +125,8 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
                 let mut context = CircuitBuilder::default();
                 #(#mapped_inputs)*
                 #(#constants)*
-                let const_true = &context.input::<N>(&1u128.into());
-                let const_false = &context.input::<N>(&0u128.into());
+                let const_true = &context.input::<N>(&true.into());
+                let const_false = &context.input::<N>(&false.into());
 
                 // Use the transformed function block (with context.add and if/else replacements)
                 let output = { #transformed_block };
@@ -153,11 +158,26 @@ fn modify_body(block: syn::Block, constants: &mut Vec<proc_macro2::TokenStream>)
                 syn::Stmt::Local(mut local) => {
                     if let Some(local_init) = &mut local.init {
                         // Replace the initializer expression
-                        local_init.expr =
-                            Box::new(replace_expressions(*local_init.expr.clone(), constants));
+                        //local_init.expr =
+                        //    Box::new(replace_expressions(*local_init.expr.clone(), constants));
+
+                        let local_expr = replace_expressions(*local_init.expr.clone(), constants);
+
+                        if let syn::Pat::Ident(ref pat_ident) = local.pat {
+                            if pat_ident.mutability.is_some() {
+                                local_init.expr = Box::new(syn::parse_quote! {
+                                    #local_expr.clone()
+                                });
+                            } else {
+                                local_init.expr = Box::new(syn::parse_quote! {
+                                    #local_expr
+                                });
+                            }
+                        }
                     }
                     syn::Stmt::Local(local)
                 }
+
                 other => other,
             }
         })
@@ -172,9 +192,27 @@ fn modify_body(block: syn::Block, constants: &mut Vec<proc_macro2::TokenStream>)
 /// Replaces binary operators and if/else expressions with appropriate context calls.
 fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>) -> Expr {
     match expr {
+        // if there is a block, recursively call modify_body
+        Expr::Block(ExprBlock { block, .. }) => {
+            let transformed_block = modify_body(block, constants);
+            syn::parse_quote! { #transformed_block }
+        }
+        // implement assignment
+        Expr::Assign(ExprAssign { left, right, .. }) => {
+            let left_expr = replace_expressions(*left, constants);
+            let right_expr = replace_expressions(*right, constants);
+            syn::parse_quote! {
+                #left_expr = #right_expr.clone()
+            }
+        }
         // return statement
         Expr::Return(_) => {
             panic!("Return statement not allowed in circuit macro");
+        }
+        // parentheses to ensure proper order of operations
+        Expr::Paren(expr_paren) => {
+            let inner_expr = replace_expressions(*expr_paren.expr, constants);
+            syn::parse_quote! { (#inner_expr) }
         }
         // boolean literal
         Expr::Lit(syn::ExprLit {
@@ -184,11 +222,11 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             let value = lit_bool.value;
             let const_var = format_ident!("const_{}", value as u128);
             constants.push(quote! {
-                let #const_var = &context.input::<N>(&#value.into());
+                let #const_var = &context.input::<N>(&#value.into()).clone();
             });
             syn::parse_quote! {#const_var}
         }
-        // integer literal
+        // integer literal - handle as a constant in the circuit context
         Expr::Lit(syn::ExprLit {
             lit: Lit::Int(lit_int),
             ..
@@ -198,16 +236,11 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                 .expect("Expected an integer literal");
             let const_var = format_ident!("const_{}", value);
             constants.push(quote! {
-                let #const_var = &context.input::<N>(&#value.into());
+                let #const_var = &context.input::<N>(&#value.into()).clone();
             });
             syn::parse_quote! {#const_var}
         }
-        // Handle parentheses to ensure proper order of operations
-        Expr::Paren(expr_paren) => {
-            let inner_expr = replace_expressions(*expr_paren.expr, constants);
-            syn::parse_quote! { (#inner_expr) }
-        }
-
+        // equality
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -219,9 +252,10 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.eq(&left.into(), &right.into())
+                context.eq(&left.into(), &right.into())
             }}
         }
+        // inequality
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -233,9 +267,10 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.ne(&left.into(), &right.into())
+                context.ne(&left.into(), &right.into())
             }}
         }
+        // greater than
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -247,9 +282,10 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.gt(&left.into(), &right.into())
+                context.gt(&left.into(), &right.into())
             }}
         }
+        // greater than or equal
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -261,9 +297,10 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.ge(&left.into(), &right.into())
+                context.ge(&left.into(), &right.into())
             }}
         }
+        // less than
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -275,9 +312,10 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.lt(&left.into(), &right.into())
+                context.lt(&left.into(), &right.into())
             }}
         }
+        // less than or equal
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -289,9 +327,10 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.le(&left.into(), &right.into())
+                context.le(&left.into(), &right.into())
             }}
         }
+        // addition
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -301,11 +340,12 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             let left_expr = replace_expressions(*left, constants);
             let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
-                let left = #left_expr;
-                let right = #right_expr;
-                &context.add(&left.into(), &right.into())
+                let left = &#left_expr;
+                let right = &#right_expr;
+                context.add(left.into(), right.into())
             }}
         }
+        // addition assignment
         Expr::Binary(ExprBinary {
             left,
             right,
@@ -313,7 +353,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.add(&#left, &#right)
+                context.add(&#left, &#right)
             }
         }
         // subtraction
@@ -328,7 +368,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.sub(&left.into(), &right.into())
+                context.sub(&left.into(), &right.into())
             }}
         }
         // subtraction assignment
@@ -339,10 +379,9 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.sub(&#left, &#right)
+                context.sub(&#left, &#right)
             }
         }
-
         // multiplication
         Expr::Binary(ExprBinary {
             left,
@@ -353,12 +392,11 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             let left_expr = replace_expressions(*left, constants);
             let right_expr = replace_expressions(*right, constants);
             syn::parse_quote! {{
-                let left = #left_expr;
-                let right = #right_expr;
-                &context.mul(&left.into(), &right.into())
+                let left = &#left_expr;
+                let right = &#right_expr;
+                context.mul(left.into(), right.into())
             }}
         }
-
         // multiplication assignment
         Expr::Binary(ExprBinary {
             left,
@@ -367,7 +405,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.mul(&#left, &#right)
+                context.mul(&#left, &#right)
             }
         }
         // division
@@ -382,7 +420,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.div(&left.into(), &right.into())
+                context.div(&left.into(), &right.into())
             }}
         }
         // division assignment
@@ -393,7 +431,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.div(&#left, &#right)
+                context.div(&#left, &#right)
             }
         }
         // modulo
@@ -408,7 +446,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.rem(&left.into(), &right.into())
+                context.rem(&left.into(), &right.into())
             }}
         }
         // modulo assignment
@@ -419,7 +457,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.rem(&#left, &#right)
+                context.rem(&#left, &#right)
             }
         }
         // logical AND
@@ -434,7 +472,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.land(&left, &right)
+                context.land(&left, &right)
             }}
         }
 
@@ -450,7 +488,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.lor(&left, &right)
+                context.lor(&left, &right)
             }}
         }
 
@@ -466,7 +504,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.and(&left.into(), &right.into())
+                context.and(&left.into(), &right.into())
             }}
         }
         // bitwise AND assignment
@@ -477,7 +515,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.and(&#left, &#right)
+                context.and(&#left, &#right)
             }
         }
 
@@ -493,7 +531,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.or(&left.into(), &right.into())
+                context.or(&left.into(), &right.into())
             }}
         }
         // bitwise OR assignment
@@ -504,7 +542,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.or(&#left, &#right)
+                context.or(&#left, &#right)
             }
         }
 
@@ -520,7 +558,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             syn::parse_quote! {{
                 let left = #left_expr;
                 let right = #right_expr;
-                &context.xor(&left.into(), &right.into())
+                context.xor(&left.into(), &right.into())
             }}
         }
         // bitwise XOR assignment
@@ -531,7 +569,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             ..
         }) => {
             syn::parse_quote! {
-                &context.xor(&#left, &#right)
+                context.xor(&#left, &#right)
             }
         }
 
@@ -544,7 +582,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             let single_expr = replace_expressions(*expr, constants);
             syn::parse_quote! {{
                 let single = #single_expr;
-                &context.not(&single.into())
+                context.not(&single.into())
             }}
         }
 
@@ -565,7 +603,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                             let if_true = #then_block;
                             let if_false = #else_if_expr;
                             let cond = #cond_expr;
-                            &context.mux(cond.into(), if_true, if_false)
+                            context.mux(&cond.into(), &if_true, &if_false)
                         }}
                     }
                     _ => {
@@ -574,21 +612,59 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                             let if_true = #then_block;
                             let if_false = #else_block;
                             let cond = #cond_expr;
-                            &context.mux(cond.into(), if_true, if_false)
+                            context.mux(&cond.into(), &if_true, &if_false)
                         }}
                     }
                 }
             } else {
-                syn::parse_quote! {{
-                    let if_true = #then_block;
-                    //let if_false = context.len() + 1;
-                    let cond = #cond_expr;
-                    let if_false = &context.len();
-                    &context.mux(cond.into(), &if_true, &if_false.into());
-                }}
+                panic!("else branch is required");
+                /*
+                syn::parse_quote! {
+                    {
+                        let if_true = #then_block;
+                        let cond = #cond_expr;
+                        let if_false = context.len();
+                        &context.mux(&cond.into(), &if_true.into(), &if_false.into());
+                    }
+                }
+                */
             }
         }
 
+        // support match arms with mux and other operations
+        Expr::Match(ExprMatch { expr, arms, .. }) => {
+            let match_expr = replace_expressions(*expr, constants);
+
+            // Process each arm, building up the conditional chain
+            let arm_exprs = arms.into_iter().rev().fold(None, |acc, arm| {
+                let pat = arm.pat;
+                let body_expr = replace_expressions(*arm.body, constants);
+
+                // Create conditional expression for each arm
+                let cond_expr =
+                    replace_expressions(syn::parse_quote! { #match_expr == #pat }, constants);
+
+                Some(if let Some(else_expr) = acc {
+                    let else_expr = replace_expressions(else_expr, constants);
+
+                    syn::parse_quote! {{
+                        let if_true = { #body_expr };
+                        let if_false = { #else_expr };
+                        let cond = { #cond_expr };
+                        context.mux(&cond.into(), &if_true, &if_false)
+                    }}
+                } else {
+                    syn::parse_quote! {{
+                        { #body_expr }
+                    }}
+                })
+            });
+
+            match arm_exprs {
+                Some(result) => result,
+                None => panic!("Match expression requires at least one arm"),
+            }
+        }
         other => other,
     }
 }
