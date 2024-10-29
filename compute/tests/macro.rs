@@ -123,7 +123,7 @@ fn test_macro_mux() {
     #[circuit(execute)]
     fn mux_circuit(a: u8, b: u8) -> u8 {
         let condition = a == b;
-        &context.mux(&condition, &a, &b)
+        &context.mux(&condition, a, b)
     }
 
     let a = 5_u8;
