@@ -11,23 +11,27 @@ fn access_control(role: u8) -> u8 {
     let SENSITIVE_DATA = 1; // 1 represents sensitive data, accessible only to certain roles.
     let PATIENT_NOTES = 2; // 2 represents patient notes, which may have broader access.
 
+    let ADMIN_ROLE = 1; // Role identifier for Admin
+    let DOCTOR_ROLE = 2; // Role identifier for Doctor
+    let NURSE_ROLE = 3; // Role identifier for Nurse
+
     // Use a match expression to determine access based on the provided role.
-    match role {
+    let determined_role = match role {
         // Case for Admin role, which we assume has the highest level of access.
-        1 => {
+        ADMIN_ROLE => {
             // Admin role (encoded as 1) gets full access to the most sensitive data.
             // The return value is `SENSITIVE_DATA`, indicating unrestricted access to it.
             SENSITIVE_DATA
         }
         // Case for Doctor role, which has limited access.
-        2 => {
+        DOCTOR_ROLE => {
             // Doctor role (encoded as 2) has partial access to both SENSITIVE_DATA and PATIENT_NOTES.
             // Using the `+` operator, we perform a bitwise AND on `PATIENT_NOTES` and `SENSITIVE_DATA`.
             // This allows the doctor role to have limited, controlled access to data while preserving privacy.
             PATIENT_NOTES + SENSITIVE_DATA
         }
         // Case for Nurse role, which has only patient notes access.
-        3 => {
+        NURSE_ROLE => {
             // Nurse role (encoded as 3) can view only patient notes.
             // The function returns `PATIENT_NOTES`, granting access exclusively to this data type.
             PATIENT_NOTES
@@ -38,7 +42,10 @@ fn access_control(role: u8) -> u8 {
             // Returning `0` signifies no access to any sensitive or restricted data.
             0
         }
-    }
+    };
+
+    // Return the determined role access level.
+    determined_role
 }
 
 /// Main function to simulate a real-world scenario and demonstrate the access control function.

@@ -1109,3 +1109,204 @@ fn macro_test_if_with_consts() {
     let result = if_test(a);
     assert_eq!(result, 54);
 }
+
+#[test]
+fn macro_test_if_with_consts2() {
+    #[circuit(execute)]
+    fn if_test(a: u8) -> u8 {
+        let accum = 0;
+        let if_else = if a == 42 {
+            let accum2 = accum + 11;
+            43 + accum2
+        } else if a == 32 {
+            let accum2 = accum + 22;
+            33 + accum2
+        } else {
+            let accum2 = accum + 33;
+            54 + accum2
+        };
+        if_else
+    }
+
+    let a = 42_u8;
+    let result = if_test(a);
+    assert_eq!(result, 54);
+
+    let a = 32_u8;
+    let result = if_test(a);
+    assert_eq!(result, 55);
+
+    let a = 0_u8;
+    let result = if_test(a);
+    assert_eq!(result, 87);
+}
+
+#[test]
+fn macro_test_if_with_consts1() {
+    #[circuit(execute)]
+    fn if_test(a: u8) -> u8 {
+        let ACCUM = 5;
+
+        // Test if the if-else statement is correctly generated
+        let if_else = if a == 42 {
+            let accum2 = ACCUM + 1;
+            43 + accum2
+        } else if a == 32 {
+            let accum2 = ACCUM + 2;
+            33 + accum2
+        } else {
+            let accum2 = ACCUM + 3;
+            2 + accum2
+        };
+        if_else
+    }
+
+    let a = 42_u8;
+    let result = if_test(a);
+    assert_eq!(result, 49);
+
+    let a = 32_u8;
+    let result = if_test(a);
+    assert_eq!(result, 40);
+
+    let a = 12_u8;
+    let result = if_test(a);
+    assert_eq!(result, 10);
+
+    let a = 0_u8;
+    let result = if_test(a);
+    assert_eq!(result, 10);
+}
+
+#[test]
+fn macro_test_match_with_consts() {
+    #[circuit(execute)]
+    fn if_test(a: u8) -> u8 {
+        let FIRST_ARM = 49;
+        let SECOND_ARM = 40;
+
+        // Test if the match statement is correctly generated
+        let match_out = match a {
+            FIRST_ARM => {
+                let MULTIPLIER = 2;
+                a * MULTIPLIER
+            }
+            SECOND_ARM => {
+                let MULTIPLIER = 3;
+                a * MULTIPLIER
+            }
+            _ => {
+                let MULTIPLIER = 1;
+                a * MULTIPLIER
+            }
+        };
+
+        match_out
+    }
+
+    let a = 49_u8;
+    let result = if_test(a);
+    assert_eq!(result, 98);
+
+    let a = 40_u8;
+    let result = if_test(a);
+    assert_eq!(result, 120);
+
+    let a = 12_u8;
+    let result = if_test(a);
+    assert_eq!(result, 12);
+}
+
+#[test]
+fn macro_test_if_and_match_with_consts() {
+    #[circuit(execute)]
+    fn if_test(a: u8) -> u8 {
+        let ACCUM = 5;
+
+        // Test if the if-else statement is correctly generated
+        let if_else = if a == 42 {
+            let accum2 = ACCUM + 1;
+            43 + accum2
+        } else if a == 32 {
+            let accum2 = ACCUM + 2;
+            33 + accum2
+        } else {
+            let accum2 = ACCUM + 3;
+            2 + accum2
+        };
+
+        let FIRST_ARM = 49;
+        let SECOND_ARM = 40;
+
+        // Test if the match statement is correctly generated
+        let match_out = match &if_else {
+            FIRST_ARM => {
+                let MULTIPLIER = 2;
+                a * MULTIPLIER
+            }
+            SECOND_ARM => {
+                let MULTIPLIER = 3;
+                a * MULTIPLIER
+            }
+            _ => {
+                let MULTIPLIER = 1;
+                a * MULTIPLIER
+            }
+        };
+
+        match_out + if_else
+    }
+
+    let a = 42_u8;
+    let result = if_test(a);
+    assert_eq!(result, 133);
+
+    let a = 32_u8;
+    let result = if_test(a);
+    assert_eq!(result, 136);
+
+    let a = 12_u8;
+    let result = if_test(a);
+    assert_eq!(result, 22);
+}
+
+#[test]
+fn test_macro_if_bool() {
+    #[circuit(execute)]
+    fn if_test(a: bool) -> bool {
+        if a {
+            true
+        } else {
+            false
+        }
+        // defaults to false
+    }
+
+    let a = true;
+    let result = if_test(a);
+    assert!(result);
+
+    let a = false;
+    let result = if_test(a);
+    assert!(!result);
+}
+
+#[test]
+fn test_macro_if() {
+    #[circuit(execute)]
+    fn if_test(a: u8) -> u8 {
+        if a <= 50 {
+            25
+        } else {
+            100
+        }
+    }
+
+    let a = 42_u8;
+    let result = if_test(a);
+    assert_eq!(result, 25);
+
+    let a = 132_u8;
+    let result = if_test(a);
+    assert_eq!(result, 100);
+}

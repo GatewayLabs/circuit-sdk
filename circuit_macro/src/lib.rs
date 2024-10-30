@@ -2,13 +2,11 @@ extern crate proc_macro;
 use core::panic;
 
 use proc_macro::TokenStream;
-use quote::format_ident;
-use quote::quote;
-use syn::ExprAssign;
-use syn::ExprBlock;
-use syn::ExprMatch;
+use quote::{format_ident, quote};
+use std::collections::HashSet;
 use syn::{
-    parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprUnary, FnArg, ItemFn, Lit, Pat, PatType,
+    parse_macro_input, BinOp, Expr, ExprAssign, ExprBinary, ExprBlock, ExprIf, ExprLet, ExprMatch,
+    ExprReference, ExprUnary, FnArg, ItemFn, Lit, Pat, PatType,
 };
 
 #[proc_macro_attribute]
@@ -56,6 +54,13 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     // Extract constants to be added at the top of the function
     let mut constants = vec![];
     let transformed_block = modify_body(*input_fn.block, &mut constants);
+
+    // remove duplicates
+    let mut seen = HashSet::new();
+    let constants: Vec<proc_macro2::TokenStream> = constants
+        .into_iter()
+        .filter(|item| seen.insert(item.to_string()))
+        .collect();
 
     // Collect parameter names dynamically
     let param_names: Vec<_> = inputs
@@ -201,8 +206,18 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
         Expr::Assign(ExprAssign { left, right, .. }) => {
             let left_expr = replace_expressions(*left, constants);
             let right_expr = replace_expressions(*right, constants);
-            syn::parse_quote! {
-                #left_expr = #right_expr.clone()
+
+            match right_expr {
+                Expr::Reference(ExprReference { .. }) => {
+                    syn::parse_quote! {
+                        #left_expr = &#right_expr.clone()
+                    }
+                }
+                _ => {
+                    syn::parse_quote! {
+                        #left_expr = #right_expr.clone()
+                    }
+                }
             }
         }
         // return statement
@@ -221,9 +236,16 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
         }) => {
             let value = lit_bool.value;
             let const_var = format_ident!("const_{}", value as u128);
-            constants.push(quote! {
-                let #const_var = &context.input::<N>(&#value.into()).clone();
-            });
+
+            if value {
+                constants.push(quote! {
+                    let #const_var = &context.input::<N>(&1_u128.into()).clone();
+                });
+            } else {
+                constants.push(quote! {
+                    let #const_var = &context.input::<N>(&0_u128.into()).clone();
+                });
+            }
             syn::parse_quote! {#const_var}
         }
         // integer literal - handle as a constant in the circuit context
@@ -586,6 +608,7 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             }}
         }
 
+        /*
         Expr::If(ExprIf {
             cond,
             then_branch,
@@ -595,76 +618,210 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             let cond_expr = replace_expressions(*cond, constants);
             let then_block = modify_body(then_branch, constants);
 
-            if let Some((_, else_expr)) = else_branch {
-                match *else_expr {
-                    Expr::If(else_if) => {
-                        let else_if_expr = replace_expressions(Expr::If(else_if), constants);
-                        syn::parse_quote! {{
-                            let if_true = #then_block;
-                            let if_false = #else_if_expr;
-                            let cond = #cond_expr;
-                            context.mux(&cond.into(), &if_true, &if_false)
-                        }}
-                    }
-                    _ => {
-                        let else_block = modify_body(syn::parse_quote! { #else_expr }, constants);
-                        syn::parse_quote! {{
-                            let if_true = #then_block;
-                            let if_false = #else_block;
-                            let cond = #cond_expr;
-                            context.mux(&cond.into(), &if_true, &if_false)
-                        }}
-                    }
-                }
+            // If there's an explicit else block, use it; otherwise, continue with remaining expressions
+            let else_expr = if let Some((_, else_expr)) = else_branch {
+                replace_expressions(*else_expr, constants)
             } else {
+                // Placeholder for remaining function body as the fall-through `else` case
+                //syn::parse_quote! { context.input::<N>(&0u128.into()) }
                 panic!("else branch is required");
-                /*
-                syn::parse_quote! {
-                    {
-                        let if_true = #then_block;
-                        let cond = #cond_expr;
-                        let if_false = context.len();
-                        &context.mux(&cond.into(), &if_true.into(), &if_false.into());
+            };
+
+            // Generate code for conditional execution and fall-through
+            syn::parse_quote! {{
+                let cond = #cond_expr;
+                let if_true = #then_block;
+                let if_false = #else_expr;
+                context.mux(&cond.into(), &if_true, &if_false)
+            }}
+        }
+        */
+        Expr::If(ExprIf {
+            cond,
+            then_branch,
+            else_branch,
+            ..
+        }) => {
+            // Check if `cond` is an `if let` with a range pattern
+            let cond_expr = match *cond {
+                Expr::Let(ExprLet { pat, expr, .. }) => {
+                    match &*pat {
+                        // Handle inclusive range pattern (e.g., 1..=5)
+                        syn::Pat::Range(syn::PatRange {
+                            start: Some(start),
+                            end: Some(end),
+                            limits: syn::RangeLimits::Closed(_),
+                            ..
+                        }) => {
+                            let start_expr = replace_expressions(*start.clone(), constants);
+                            let end_expr = replace_expressions(*end.clone(), constants);
+                            let input_expr = replace_expressions(*expr, constants);
+
+                            // Inclusive range with embedded `let` statements for `lhs` and `rhs`
+                            syn::parse_quote! {{
+                                let lhs = &context.ge(&#input_expr.into(), &#start_expr.into()).into();
+                                let rhs = &context.le(&#input_expr.into(), &#end_expr.into()).into();
+                                context.and(lhs, rhs)
+                            }}
+                        }
+                        // Handle exclusive range pattern (e.g., 1..10)
+                        syn::Pat::Range(syn::PatRange {
+                            start: Some(start),
+                            end: Some(end),
+                            limits: syn::RangeLimits::HalfOpen(_),
+                            ..
+                        }) => {
+                            let start_expr = replace_expressions(*start.clone(), constants);
+                            let end_expr = replace_expressions(*end.clone(), constants);
+                            let input_expr = replace_expressions(*expr, constants);
+
+                            // Exclusive range with embedded `let` statements for `lhs` and `rhs`
+                            syn::parse_quote! {{
+                                let lhs = &context.ge(&#input_expr.into(), &#start_expr.into()).into();
+                                let rhs = &context.lt(&#input_expr.into(), &#end_expr.into()).into();
+                                context.and(lhs, rhs)
+                            }}
+                        }
+                        // Handle single literal pattern, e.g., `if let 5 = n`
+                        syn::Pat::Lit(lit) => {
+                            let lit_expr = replace_expressions(Expr::Lit(lit.clone()), constants);
+                            let input_expr = replace_expressions(*expr, constants);
+
+                            syn::parse_quote! {
+                                context.eq(&#input_expr.into(), &#lit_expr.into())
+                            }
+                        }
+                        _ => panic!(
+                            "Unsupported pattern in if let: expected a range or literal pattern."
+                        ),
                     }
                 }
-                */
-            }
+                ref _other => {
+                    replace_expressions(*cond, constants) // Fallback for non-let conditions
+                }
+            };
+
+            let then_block = modify_body(then_branch, constants);
+
+            // Check if an `else` branch exists, as it's required.
+            let else_expr = if let Some((_, else_expr)) = else_branch {
+                replace_expressions(*else_expr, constants)
+            } else {
+                panic!("else branch is required for range if let");
+            };
+
+            // Generate code for conditional execution and chaining
+            syn::parse_quote! {{
+                let cond = #cond_expr;
+                let if_true = #then_block;
+                let if_false = #else_expr;
+                context.mux(&cond.into(), &if_true, &if_false)
+            }}
         }
 
-        // support match arms with mux and other operations
+        // Support match arms with mux and other operations
         Expr::Match(ExprMatch { expr, arms, .. }) => {
             let match_expr = replace_expressions(*expr, constants);
 
+            // Define an input variable to use in range proof processing
+            let input = syn::Ident::new("input", proc_macro2::Span::call_site());
+            let input_binding = quote! { let #input = #match_expr; };
+
             // Process each arm, building up the conditional chain
-            let arm_exprs = arms.into_iter().rev().fold(None, |acc, arm| {
-                let pat = arm.pat;
-                let body_expr = replace_expressions(*arm.body, constants);
+            let arm_exprs = arms
+                .into_iter()
+                .rev()
+                .fold(None as Option<Expr>, |acc, arm| {
+                    let pat = arm.pat;
+                    let body_expr = replace_expressions(*arm.body, constants);
 
-                // Create conditional expression for each arm
-                let cond_expr =
-                    replace_expressions(syn::parse_quote! { #match_expr == #pat }, constants);
+                    // Create conditional expression for each arm, handling ranges
+                    let cond_expr = match &pat {
+                        // Handle inclusive range pattern (start..=end)
+                        syn::Pat::Range(syn::PatRange {
+                            start: Some(start),
+                            end: Some(end),
+                            limits: syn::RangeLimits::Closed(_),
+                            ..
+                        }) => {
+                            let start = replace_expressions(*start.clone(), constants);
+                            let end = replace_expressions(*end.clone(), constants);
+                            quote! {
+                                let lhs = &context.ge(&#input.into(), &#start.into()).into();
+                                let rhs = &context.le(&#input.into(), &#end.into()).into();
+                                context.and(
+                                    lhs,
+                                    rhs
+                                )
+                            }
+                        }
+                        // Handle exclusive range pattern (start..end)
+                        syn::Pat::Range(syn::PatRange {
+                            start: Some(start),
+                            end: Some(end),
+                            limits: syn::RangeLimits::HalfOpen(_),
+                            ..
+                        }) => {
+                            let start = replace_expressions(*start.clone(), constants);
+                            let end = replace_expressions(*end.clone(), constants);
+                            quote! {
+                                let lhs = &context.ge(&#input.into(), &#start.into()).into();
+                                let rhs = &context.lt(&#input.into(), &#end.into()).into();
+                                context.and(
+                                    lhs,
+                                    rhs
+                                )
+                            }
+                        }
+                        // Handle single value pattern (e.g., `5`)
+                        syn::Pat::Lit(lit) => {
+                            let lit_expr =
+                                replace_expressions(syn::Expr::Lit(lit.clone()), constants);
+                            quote! {
+                                context.eq(&#input.into(), &#lit_expr.into())
+                            }
+                        }
 
-                Some(if let Some(else_expr) = acc {
-                    let else_expr = replace_expressions(else_expr, constants);
+                        syn::Pat::Ident(pat) => {
+                            // Create conditional expression for each arm
+                            let cond_expr = replace_expressions(
+                                syn::parse_quote! { #match_expr == #pat },
+                                constants,
+                            );
 
-                    syn::parse_quote! {{
-                        let if_true = { #body_expr };
-                        let if_false = { #else_expr };
-                        let cond = { #cond_expr };
-                        context.mux(&cond.into(), &if_true, &if_false)
-                    }}
-                } else {
-                    syn::parse_quote! {{
-                        { #body_expr }
-                    }}
-                })
-            });
+                            syn::parse_quote! {{
+                                { #cond_expr }
+                            }}
+                        }
+                        // Handle the wildcard pattern `_` as default/fallback case
+                        syn::Pat::Wild(_) => quote! { true },
+                        other => panic!("{:?}: Unsupported pattern in match arm", other),
+                    };
+
+                    // Chain the condition with the body, selecting based on condition
+                    Some(if let Some(else_expr) = acc {
+                        syn::parse_quote! {{
+                            let if_true = { #body_expr };
+                            let if_false = { #else_expr };
+                            let cond = { #cond_expr };
+                            context.mux(&cond.into(), &if_true, &if_false)
+                        }}
+                    } else {
+                        syn::parse_quote! {{
+                            { #body_expr }
+                        }}
+                    })
+                });
 
             match arm_exprs {
-                Some(result) => result,
+                Some(result) => syn::parse_quote! {{
+                    #input_binding // Bind `input` at the beginning
+                    #result        // Process the chained expressions
+                }},
                 None => panic!("Match expression requires at least one arm"),
             }
         }
+
         other => other,
     }
 }
