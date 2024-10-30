@@ -195,12 +195,14 @@ impl CircuitBuilder {
         output
     }
 
-    pub fn mux2(&mut self, s: &GateIndex, a: &GateIndexVec, b: &GateIndex) -> GateIndexVec {
+    pub fn mux_lookahead(&mut self, a: &GateIndexVec) -> GateIndexVec {
         // repeat with output_indices
         let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let mux = self.push_mux(s, b, &a[i]);
-            output.push(mux);
+        let mut counter = self.len() + 5 + 1;
+
+        for _ in 0..a.len() {
+            output.push(counter);
+            counter += 6 + 1;
         }
         output
     }
@@ -580,7 +582,6 @@ pub(crate) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> G
         .expect("Failed to execute a.len()OT circuit")
 }
 
-#[allow(dead_code)]
 pub(crate) fn build_and_execute_mux<const N: usize>(
     condition: &GarbledBoolean,
     if_true: &GarbledUint<N>,
@@ -919,130 +920,5 @@ mod tests {
 
         let result_value: u8 = result.into();
         assert_eq!(result_value, 2 + 5);
-    }
-
-    use circuit_macro::circuit;
-
-    #[test]
-    fn test_macro_arithmetic() {
-        let a = 2_u8;
-        let b = 5_u8;
-        let c = 3_u8;
-        let d = 4_u8;
-
-        let result_u8 = my_circuit(&2u8, &3u8, &1u8, &4u8);
-        println!("Result for u8: {}", result_u8);
-
-        let result: u8 = my_circuit(&a, &b, &c, &d);
-        assert_eq!(result, a * b + c - d);
-
-        let result = my_circuit_from_macro(a, b, c, d);
-        assert_eq!(result, a * b + c - d);
-
-        let result = my_circuit_from_macro2(&a, &b, &c, &d);
-        assert_eq!(result, a * b + c - d);
-    }
-
-    #[circuit(execute)]
-    fn my_circuit_from_macro(a: U8, b: U8, c: U8, d: U8) -> U8 {
-        let res = a * b;
-        let res = res + c;
-        res - d
-    }
-
-    fn my_circuit_from_macro2<U8>(a: &U8, b: &U8, c: &U8, d: &U8) -> U8
-    where
-        U8: Into<GarbledUint<8>>
-            + From<GarbledUint<8>>
-            + Into<GarbledUint<16>>
-            + From<GarbledUint<16>>
-            + Into<GarbledUint<32>>
-            + From<GarbledUint<32>>
-            + Into<GarbledUint<64>>
-            + From<GarbledUint<64>>
-            + Into<GarbledUint<128>>
-            + From<GarbledUint<128>>
-            + Clone,
-    {
-        fn generate<const N: usize, U8>(a: &U8, b: &U8, c: &U8, d: &U8) -> U8
-        where
-            U8: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
-        {
-            let mut context = CircuitBuilder::default();
-            let a = &context.input(&a.clone().into());
-            let b = &context.input(&b.clone().into());
-            let c = &context.input(&c.clone().into());
-            let d = &context.input(&d.clone().into());
-            let output = {
-                {
-                    let res = &context.mul(a, b);
-                    let res = &context.add(res, c);
-                    &context.sub(res, d)
-                }
-            };
-            let compiled_circuit = context.compile(output);
-            let result = context
-                .execute::<N>(&compiled_circuit)
-                .expect("Failed to execute the circuit");
-            result.into()
-        }
-        match std::any::type_name::<U8>() {
-            "u8" => generate::<8, U8>(a, b, c, d),
-            "u16" => generate::<16, U8>(a, b, c, d),
-            "u32" => generate::<32, U8>(a, b, c, d),
-            "u64" => generate::<64, U8>(a, b, c, d),
-            "u128" => generate::<128, U8>(a, b, c, d),
-            _ => panic!("Unsupported type"),
-        }
-    }
-
-    fn my_circuit<T>(a: &T, b: &T, c: &T, d: &T) -> T
-    where
-        T: Into<GarbledUint<8>>
-            + From<GarbledUint<8>>
-            + Into<GarbledUint<16>>
-            + From<GarbledUint<16>>
-            + Into<GarbledUint<32>>
-            + From<GarbledUint<32>>
-            + Into<GarbledUint<64>>
-            + From<GarbledUint<64>>
-            + Into<GarbledUint<128>>
-            + From<GarbledUint<128>>
-            + Clone,
-    {
-        fn generate<const N: usize, T>(a: &T, b: &T, c: &T, d: &T) -> T
-        where
-            T: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
-        {
-            let mut context = CircuitBuilder::default();
-            //let a = &2_u8;
-            let a = &context.input(&a.clone().into());
-            let b = &context.input(&b.clone().into());
-            let c = &context.input(&c.clone().into());
-            let d = &context.input(&d.clone().into());
-
-            let output = {
-                let res = &context.mul(a, b);
-                let res = &context.add(res, c);
-                &context.sub(res, d)
-            };
-
-            let output = &output.clone();
-
-            let compiled_circuit = context.compile(output);
-            let result = context
-                .execute::<N>(&compiled_circuit)
-                .expect("Failed to execute the circuit");
-            result.into()
-        }
-
-        match std::any::type_name::<T>() {
-            "u8" => generate::<8, T>(a, b, c, d),
-            "u16" => generate::<16, T>(a, b, c, d),
-            "u32" => generate::<32, T>(a, b, c, d),
-            "u64" => generate::<64, T>(a, b, c, d),
-            "u128" => generate::<128, T>(a, b, c, d),
-            _ => panic!("Unsupported type"),
-        }
     }
 }
