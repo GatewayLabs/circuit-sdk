@@ -645,8 +645,6 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             // Check if `cond` is an `if let` with a range pattern
             let cond_expr = match *cond {
                 Expr::Let(ExprLet { pat, expr, .. }) => {
-                    println!("Processing if let with pattern: {:?}", pat);
-
                     match &*pat {
                         // Handle inclusive range pattern (e.g., 1..=5)
                         syn::Pat::Range(syn::PatRange {
@@ -655,15 +653,9 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                             limits: syn::RangeLimits::Closed(_),
                             ..
                         }) => {
-                            println!("Detected inclusive range: {:?}..={:?}", start, end);
                             let start_expr = replace_expressions(*start.clone(), constants);
                             let end_expr = replace_expressions(*end.clone(), constants);
                             let input_expr = replace_expressions(*expr, constants);
-
-                            println!(
-                                "Start: {:#?}, End: {:#?}, Input: {:#?}",
-                                start_expr, end_expr, input_expr
-                            );
 
                             // Inclusive range with embedded `let` statements for `lhs` and `rhs`
                             syn::parse_quote! {{
@@ -679,7 +671,6 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                             limits: syn::RangeLimits::HalfOpen(_),
                             ..
                         }) => {
-                            println!("Detected exclusive range: {:?}..{:?}", start, end);
                             let start_expr = replace_expressions(*start.clone(), constants);
                             let end_expr = replace_expressions(*end.clone(), constants);
                             let input_expr = replace_expressions(*expr, constants);
@@ -693,7 +684,6 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                         }
                         // Handle single literal pattern, e.g., `if let 5 = n`
                         syn::Pat::Lit(lit) => {
-                            println!("Detected literal pattern: {:?}", lit);
                             let lit_expr = replace_expressions(Expr::Lit(lit.clone()), constants);
                             let input_expr = replace_expressions(*expr, constants);
 
@@ -706,16 +696,12 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
                         ),
                     }
                 }
-                ref other => {
-                    println!("Unsupported condition type: {:?}", other);
+                ref _other => {
                     replace_expressions(*cond, constants) // Fallback for non-let conditions
                 }
             };
 
-            println!("Condition expression created: {:?}", cond_expr);
-
             let then_block = modify_body(then_branch, constants);
-            println!("Then block processed.");
 
             // Check if an `else` branch exists, as it's required.
             let else_expr = if let Some((_, else_expr)) = else_branch {
@@ -723,8 +709,6 @@ fn replace_expressions(expr: Expr, constants: &mut Vec<proc_macro2::TokenStream>
             } else {
                 panic!("else branch is required for range if let");
             };
-
-            println!("Else expression created: {:?}", else_expr);
 
             // Generate code for conditional execution and chaining
             syn::parse_quote! {{
