@@ -43,19 +43,19 @@ fn test_macro_range_expr_bool() {
 
     let n = 3_u16;
     let result = describe_number(n);
-    assert_eq!(result, true);
+    assert!(result);
 
     let n = 8_u16;
     let result = describe_number(n);
-    assert_eq!(result, false);
+    assert!(!result);
 
     let n = 15_u16;
     let result = describe_number(n);
-    assert_eq!(result, true);
+    assert!(result);
 
     let n = 25_u16;
     let result = describe_number(n);
-    assert_eq!(result, false);
+    assert!(!result);
 }
 
 #[test]
