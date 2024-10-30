@@ -1284,11 +1284,11 @@ fn test_macro_if_bool() {
 
     let a = true;
     let result = if_test(a);
-    assert_eq!(result, true);
+    assert!(result);
 
     let a = false;
     let result = if_test(a);
-    assert_eq!(result, false);
+    assert!(!result);
 }
 
 #[test]

@@ -2,17 +2,11 @@ extern crate proc_macro;
 use core::panic;
 
 use proc_macro::TokenStream;
-use quote::format_ident;
-use quote::quote;
+use quote::{format_ident, quote};
 use std::collections::HashSet;
-use syn::ExprAssign;
-use syn::ExprBlock;
-use syn::ExprMatch;
-use syn::ExprRange;
-use syn::ExprReference;
 use syn::{
-    parse_macro_input, BinOp, Expr, ExprBinary, ExprIf, ExprLet, ExprUnary, FnArg, ItemFn, Lit,
-    Pat, PatType,
+    parse_macro_input, BinOp, Expr, ExprAssign, ExprBinary, ExprBlock, ExprIf, ExprLet, ExprMatch,
+    ExprReference, ExprUnary, FnArg, ItemFn, Lit, Pat, PatType,
 };
 
 #[proc_macro_attribute]
@@ -150,7 +144,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
     };
 
     // Print the expanded code to stderr
-    println!("Generated code:\n{}", expanded);
+    // println!("Generated code:\n{}", expanded);
 
     TokenStream::from(expanded)
 }
