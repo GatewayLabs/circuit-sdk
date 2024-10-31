@@ -6,9 +6,6 @@ The Gateway and TFHE frameworks differ significantly in speed, as seen in the me
 
 Each function is tested in isolation to benchmark its specific computational characteristics, and the results, with times measured in milliseconds, indicate that Gateway generally performs at a much higher speed, making it more suitable for use cases that require frequent and rapid encrypted operations.
 
-Benchmarks were run on a Apple M3 Pro with 36 GB RAM.
-
-
 | Operation                        | Gateway Time (ms) | TFHE Time (ms) |
 |----------------------------------|-------------------|----------------|
 | **Bitwise AND**                  | 36.323           | 454.66         |
@@ -30,3 +27,5 @@ Benchmarks were run on a Apple M3 Pro with 36 GB RAM.
 | **Division**                     | 3,408.9          | 91,404         |
 | **Modulus**                      | 3,434.3          | 87,183         |
 | **MUX**                          | 36.123           | 172.44         |
+
+_Benchmarks were run on a Apple M3 Pro with 36 GB RAM._
