@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use anyhow::Result;
 use rand::SeedableRng;
 use rand_chacha::ChaCha20Rng;
@@ -52,5 +54,13 @@ impl Garbler for GatewayGarbler {
 
     fn is_complete(&self) -> bool {
         self.steps_remaining == 0
+    }
+}
+
+impl Debug for GatewayGarbler {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("GatewayGarbler")
+            .field("steps_remaining", &self.steps_remaining)
+            .finish()
     }
 }

@@ -1,6 +1,7 @@
 use anyhow::Result;
 use rand::SeedableRng;
 use rand_chacha::ChaCha20Rng;
+use std::fmt::Debug;
 use tandem::states::Evaluator as TandemEvaluator;
 use tandem::Circuit;
 
@@ -54,5 +55,11 @@ impl Evaluator for GatewayEvaluator {
 
     fn output(self, message: &[u8]) -> Result<Vec<bool>> {
         self.evaluator.output(message).map_err(anyhow::Error::new)
+    }
+}
+
+impl Debug for GatewayEvaluator {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "GatewayEvaluator")
     }
 }

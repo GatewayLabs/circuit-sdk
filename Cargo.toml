@@ -5,7 +5,7 @@ members = [
     "benchmark",
     "compute",
     "vm",
-    "circuit_macro",
+    "circuit_macro", "server",
 ]
 
 [workspace.package]
