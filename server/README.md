@@ -1,4 +1,5 @@
-# Secure Arithmetic Evaluation with s2n-quic and Gateway Evaluator
+# QUIC Circuit Evaluator Service
+⚠️ Note: this is a development server, not tested or ready for production use
 
 This repository provides a secure arithmetic evaluation server and client using **garbled circuits** over **QUIC protocol**. The server and client securely communicate to perform arithmetic operations within a garbled circuit framework. It demonstrates a sample function, `multi_arithmetic`, using the `s2n-quic` library, tracing for logging, and gateway evaluator and garbler components.
 
