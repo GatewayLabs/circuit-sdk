@@ -20,4 +20,9 @@ pub mod prelude {
     };
     pub use circuit_macro::circuit;
     pub use tandem::Circuit;
+
+    pub use crate::evaluator::Evaluator;
+    pub use crate::evaluator::GatewayEvaluator;
+    pub use crate::garbler::Garbler;
+    pub use crate::garbler::GatewayGarbler;
 }
