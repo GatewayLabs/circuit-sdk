@@ -19,7 +19,7 @@ pub mod prelude {
         GarbledUint32, GarbledUint4, GarbledUint512, GarbledUint64, GarbledUint8,
     };
     pub use circuit_macro::circuit;
-    pub use tandem::Circuit;
+    pub use tandem::{Circuit, Gate};
 
     pub use crate::evaluator::Evaluator;
     pub use crate::evaluator::GatewayEvaluator;
