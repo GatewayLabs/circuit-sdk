@@ -4,6 +4,8 @@
 [![Docs.rs](https://docs.rs/cryptomata/badge.svg)](https://docs.rs/cryptomata)
 [![CI](https://github.com/Gateway-DAO/cryptomata/workflows/CI/badge.svg)](https://github.com/Gateway-DAO/cryptomata/actions)
 
+![gvm](https://github.com/user-attachments/assets/f830c785-5ba6-4d8b-b4ad-2731c0fa5fcf)
+
 ## Installation
 
 ### Cargo
