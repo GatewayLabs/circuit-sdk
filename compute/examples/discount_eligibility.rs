@@ -12,7 +12,7 @@ use compute::prelude::*;
 ///
 /// # Example
 /// This example demonstrates checking if a purchase of 100 qualifies for a discount with a threshold of 80.
-#[circuit(execute)]
+#[encrypted(execute)]
 fn qualifies_for_discount(purchase_amount: u16) -> bool {
     let DISCOUNT_THRESHOLD = 80;
     purchase_amount >= DISCOUNT_THRESHOLD

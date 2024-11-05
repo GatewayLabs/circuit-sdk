@@ -37,7 +37,7 @@ use compute::prelude::*;
 /// let access_level = access_content(age);
 /// assert_eq!(access_level, 0); // Invalid age
 /// ```
-#[circuit(execute)]
+#[encrypted(execute)]
 fn access_content(age: u8) -> u8 {
     // Access level codes
     let RESTRICTED = 1; // Restricted access for underage users

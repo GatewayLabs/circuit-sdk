@@ -2,7 +2,7 @@ use compute::prelude::*;
 
 #[test]
 fn test_macro_arithmetic_compiler() {
-    #[circuit(compile)]
+    #[encrypted(compile)]
     fn multi_arithmetic(a: u8, b: u8, c: u8, d: u8) -> (Circuit, Vec<bool>) {
         let res = a * b;
         let res = res + c;
@@ -23,7 +23,7 @@ fn test_macro_arithmetic_compiler() {
 
 #[test]
 fn test_macro_arithmetic() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn multi_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
         let res = a * b;
         let res = res + c;
@@ -41,7 +41,7 @@ fn test_macro_arithmetic() {
 
 #[test]
 fn test_macro_arithmetic_u128() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn multi_arithmetic_u128(a: u8, b: u8, c: u8, d: u8) -> u8 {
         let res = a + b;
         let res = res + c;
@@ -59,7 +59,7 @@ fn test_macro_arithmetic_u128() {
 
 #[test]
 fn test_macro_mixed_arithmetic() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mixed_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
         let res = a * b;
         let res = context.add(&res, c);
@@ -78,7 +78,7 @@ fn test_macro_mixed_arithmetic() {
 
 #[test]
 fn test_macro_addition() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn addition(a: u8, b: u8) -> u8 {
         a + b
     }
@@ -92,7 +92,7 @@ fn test_macro_addition() {
 
 #[test]
 fn test_macro_subtraction() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn subtraction(a: u8, b: u8) -> u8 {
         a - b
     }
@@ -106,7 +106,7 @@ fn test_macro_subtraction() {
 
 #[test]
 fn test_macro_multiplication() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn multiplication(a: u8, b: u8) -> u8 {
         a * b
     }
@@ -120,7 +120,7 @@ fn test_macro_multiplication() {
 
 #[test]
 fn test_macro_mux() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mux_circuit(a: u8, b: u8) -> u8 {
         let condition = a == b;
         &context.mux(&condition, a, b)
@@ -135,7 +135,7 @@ fn test_macro_mux() {
 
 #[test]
 fn test_macro_if_else() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mux_circuit(a: T, b: T) -> T {
         if a == b {
             let c = a * b;
@@ -154,7 +154,7 @@ fn test_macro_if_else() {
 
 #[test]
 fn test_macro_if_else2() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mux_circuit(a: u8, b: u8) -> u8 {
         let true_branch = a * b;
         let false_branch = a + b;
@@ -179,7 +179,7 @@ fn test_macro_if_else2() {
 
 #[test]
 fn test_macro_if_else3() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mux_circuit(a: u8, b: u8) -> u8 {
         if a == b {
             a * b
@@ -201,7 +201,7 @@ fn test_macro_if_else3() {
 
 #[test]
 fn test_macro_if_else4() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mux_circuit(a: u8, b: u8) -> u8 {
         if a == b {
             let c = a * b;
@@ -222,7 +222,7 @@ fn test_macro_if_else4() {
 #[ignore = "division not yet supported"]
 #[test]
 fn test_macro_division() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn division(a: u8, b: u8) -> u8 {
         a / b
     }
@@ -237,7 +237,7 @@ fn test_macro_division() {
 #[ignore = "modulo not yet supported"]
 #[test]
 fn test_macro_remainder() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn remainder(a: u8, b: u8) -> u8 {
         a % b
     }
@@ -251,7 +251,7 @@ fn test_macro_remainder() {
 
 #[test]
 fn test_macro_nested_arithmetic() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn nested_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
         let res = a * b;
         let res = res + c;
@@ -270,7 +270,7 @@ fn test_macro_nested_arithmetic() {
 // test bitwise operations
 #[test]
 fn test_macro_bitwise_and() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_and(a: u8, b: u8) -> u8 {
         a & b
     }
@@ -284,7 +284,7 @@ fn test_macro_bitwise_and() {
 
 #[test]
 fn test_macro_bitwise_or() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_or(a: u8, b: u8) -> u8 {
         a | b
     }
@@ -298,7 +298,7 @@ fn test_macro_bitwise_or() {
 
 #[test]
 fn test_macro_bitwise_xor() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_xor(a: u8, b: u8) -> u8 {
         a ^ b
     }
@@ -312,7 +312,7 @@ fn test_macro_bitwise_xor() {
 
 #[test]
 fn test_macro_bitwise_not() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_not(a: u8) -> u8 {
         !a
     }
@@ -325,7 +325,7 @@ fn test_macro_bitwise_not() {
 
 #[test]
 fn test_macro_bitwise_nand() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_nand(a: u8, b: u8) -> u8 {
         let and = a & b;
         !and
@@ -340,7 +340,7 @@ fn test_macro_bitwise_nand() {
 
 #[test]
 fn test_macro_bitwise_nor() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_nor(a: u8, b: u8) -> u8 {
         let or = a | b;
         !or
@@ -355,7 +355,7 @@ fn test_macro_bitwise_nor() {
 
 #[test]
 fn test_macro_bitwise_xnor() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_xnor(a: u8, b: u8) -> u8 {
         let xor = a ^ b;
         !xor
@@ -370,7 +370,7 @@ fn test_macro_bitwise_xnor() {
 
 #[test]
 fn test_macro_equal() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn equal(a: u8, b: u8) -> u8 {
         if a == b {
             a * b
@@ -388,7 +388,7 @@ fn test_macro_equal() {
 
 #[test]
 fn test_macro_not_equal() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn not_equal(a: u8, b: u8) -> u8 {
         if a != b {
             a * b
@@ -406,7 +406,7 @@ fn test_macro_not_equal() {
 
 #[test]
 fn test_macro_greater_than() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn greater_than(a: u8, b: u8) -> u8 {
         if a > b {
             a * b
@@ -432,7 +432,7 @@ fn test_macro_greater_than() {
 
 #[test]
 fn test_macro_greater_than_or_equal() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn greater_than_or_equal(a: u8, b: u8) -> u8 {
         if a >= b {
             a * b
@@ -458,7 +458,7 @@ fn test_macro_greater_than_or_equal() {
 
 #[test]
 fn test_macro_less_than() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn less_than(a: u8, b: u8) -> u8 {
         if a < b {
             a * b
@@ -484,7 +484,7 @@ fn test_macro_less_than() {
 
 #[test]
 fn test_macro_less_than_or_equal() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn less_than_or_equal(a: u8, b: u8) -> u8 {
         if a <= b {
             a * b
@@ -510,7 +510,7 @@ fn test_macro_less_than_or_equal() {
 
 #[test]
 fn test_macro_bool_return() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn equal(a: u8, b: u8) -> bool {
         a == b
     }
@@ -525,7 +525,7 @@ fn test_macro_bool_return() {
 // div
 #[test]
 fn test_macro_div() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn div(a: u8, b: u8) -> u8 {
         a / b
     }
@@ -539,7 +539,7 @@ fn test_macro_div() {
 
 #[test]
 fn test_macro_div_with_remainder() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn div(a: u8, b: u8) -> u8 {
         a / b
     }
@@ -553,7 +553,7 @@ fn test_macro_div_with_remainder() {
 
 #[test]
 fn test_macro_div_with_remainder2() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn div(a: u8, b: u8) -> u8 {
         a / b
     }
@@ -568,7 +568,7 @@ fn test_macro_div_with_remainder2() {
 // rem
 #[test]
 fn test_macro_rem() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn rem(a: u8, b: u8) -> u8 {
         a % b
     }
@@ -582,7 +582,7 @@ fn test_macro_rem() {
 
 #[test]
 fn test_macro_rem_with_remainder() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn rem(a: u8, b: u8) -> u8 {
         a % b
     }
@@ -596,7 +596,7 @@ fn test_macro_rem_with_remainder() {
 
 #[test]
 fn test_macro_constants() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn constants(a: u8) -> u8 {
         a + 20
     }
@@ -608,7 +608,7 @@ fn test_macro_constants() {
 
 #[test]
 fn test_macro_embedded_constants() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn embedded_constants(a: u8) -> u8 {
         let B = 20;
         a + B
@@ -621,7 +621,7 @@ fn test_macro_embedded_constants() {
 
 #[test]
 fn test_order_of_operations() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn order_of_operations(a: u16, b: u16, c: u16) -> u16 {
         a + b * c
     }
@@ -635,7 +635,7 @@ fn test_order_of_operations() {
 
 #[test]
 fn test_order_of_operations2() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn order_of_operations(a: u16, b: u16, c: u16) -> u16 {
         (a + b) * c
     }
@@ -649,7 +649,7 @@ fn test_order_of_operations2() {
 
 #[test]
 fn test_add_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn add_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c += b
@@ -663,7 +663,7 @@ fn test_add_assign() {
 
 #[test]
 fn test_sub_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn sub_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c -= b
@@ -677,7 +677,7 @@ fn test_sub_assign() {
 
 #[test]
 fn test_mul_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mul_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c *= b
@@ -691,7 +691,7 @@ fn test_mul_assign() {
 
 #[test]
 fn test_div_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn div_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c /= b
@@ -705,7 +705,7 @@ fn test_div_assign() {
 
 #[test]
 fn test_rem_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn rem_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c %= b
@@ -719,7 +719,7 @@ fn test_rem_assign() {
 
 #[test]
 fn test_bitand_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitand_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c &= b
@@ -733,7 +733,7 @@ fn test_bitand_assign() {
 
 #[test]
 fn test_bitor_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitor_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c |= b
@@ -747,7 +747,7 @@ fn test_bitor_assign() {
 
 #[test]
 fn test_bitxor_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitxor_assign(a: u8, b: u8) -> u8 {
         let c = a;
         c ^= b
@@ -761,7 +761,7 @@ fn test_bitxor_assign() {
 
 #[test]
 fn test_if_elif_else() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_statement(a: u8) -> u8 {
         if a > 100 {
             a + 1
@@ -787,7 +787,7 @@ fn test_if_elif_else() {
 
 #[test]
 fn test_nested_if() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn nested_if(a: u8) -> u8 {
         if a > 100 {
             if a > 200 {
@@ -815,7 +815,7 @@ fn test_nested_if() {
 
 #[test]
 fn test_nested_if_else() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn nested_if_else(a: u8) -> u8 {
         if a > 100 {
             if a > 200 {
@@ -851,7 +851,7 @@ fn test_nested_if_else() {
 
 #[test]
 fn test_nested_if_else_if() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn nested_if_else_if(a: u8) -> u8 {
         if a > 100 {
             if a > 200 {
@@ -885,7 +885,7 @@ fn test_nested_if_else_if() {
 
 #[test]
 fn test_if_else() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_else(a: u8) -> u8 {
         if a > 100 {
             a + 1
@@ -905,7 +905,7 @@ fn test_if_else() {
 
 #[test]
 fn test_macro_bool_literal() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn boolean_literal(a: bool) -> bool {
         let x = false;
         let y = true;
@@ -924,7 +924,7 @@ fn test_macro_bool_literal() {
 
 #[test]
 fn test_macro_bool_literal2() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn boolean_literal2(a: bool) -> bool {
         if a {
             false
@@ -940,7 +940,7 @@ fn test_macro_bool_literal2() {
 
 #[test]
 fn macro_test_if_assign() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: u8) -> u8 {
         let y = 22;
 
@@ -965,7 +965,7 @@ fn macro_test_if_assign() {
 
 #[test]
 fn macro_test_assignment2() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn assignment_test2(a: u8) -> u8 {
         let mut x = 11;
         x = a + 1;
@@ -979,7 +979,7 @@ fn macro_test_assignment2() {
 
 #[test]
 fn macro_test_assignment() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn assignment_test(a: u8) -> u8 {
         let mut x = 11;
         x = a;
@@ -993,7 +993,7 @@ fn macro_test_assignment() {
 
 #[test]
 fn test_macro_match() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn match_test(a: u8) -> u8 {
         match a {
             1 => 7,
@@ -1022,7 +1022,7 @@ fn test_macro_match() {
 
 #[test]
 fn test_macro_match_with_expr() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn match_test_with_expr(a: u8) -> u8 {
         match a {
             1 => {
@@ -1054,7 +1054,7 @@ fn test_macro_match_with_expr() {
 
 #[test]
 fn test_macro_match_with_block() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn match_test_with_block(a: u8) -> u8 {
         match a {
             1 => {
@@ -1092,7 +1092,7 @@ fn test_macro_match_with_block() {
 
 #[test]
 fn macro_test_if_with_consts() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: u8) -> u8 {
         if a == 42 {
             a + 1
@@ -1112,7 +1112,7 @@ fn macro_test_if_with_consts() {
 
 #[test]
 fn macro_test_if_with_consts2() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: u8) -> u8 {
         let accum = 0;
         let if_else = if a == 42 {
@@ -1143,7 +1143,7 @@ fn macro_test_if_with_consts2() {
 
 #[test]
 fn macro_test_if_with_consts1() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: u8) -> u8 {
         let ACCUM = 5;
 
@@ -1180,7 +1180,7 @@ fn macro_test_if_with_consts1() {
 
 #[test]
 fn macro_test_match_with_consts() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: u8) -> u8 {
         let FIRST_ARM = 49;
         let SECOND_ARM = 40;
@@ -1219,7 +1219,7 @@ fn macro_test_match_with_consts() {
 
 #[test]
 fn macro_test_if_and_match_with_consts() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: u8) -> u8 {
         let ACCUM = 5;
 
@@ -1272,7 +1272,7 @@ fn macro_test_if_and_match_with_consts() {
 
 #[test]
 fn test_macro_if_bool() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: bool) -> bool {
         if a {
             true
@@ -1293,7 +1293,7 @@ fn test_macro_if_bool() {
 
 #[test]
 fn test_macro_if() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn if_test(a: u8) -> u8 {
         if a <= 50 {
             25

@@ -7,7 +7,7 @@ use std::{error::Error, net::SocketAddr, path::Path};
 use tracing::debug;
 use tracing::info;
 
-#[circuit(compile)]
+#[encrypted(compile)]
 fn multi_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
     let res = a * b;
     let res = res + c;

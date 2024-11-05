@@ -2,7 +2,7 @@ use compute::prelude::*;
 
 #[test]
 fn test_macro_range_expr() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn describe_number(n: u16) -> u16 {
         match n {
             1..=5 => 5,
@@ -31,7 +31,7 @@ fn test_macro_range_expr() {
 
 #[test]
 fn test_macro_range_expr_bool() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn describe_number(n: u16) -> bool {
         match n {
             1..=5 => true,
@@ -60,7 +60,7 @@ fn test_macro_range_expr_bool() {
 
 #[test]
 fn test_macro_range_if_let() {
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn describe_number(n: u16) -> u16 {
         if let 1..=5 = n {
             5

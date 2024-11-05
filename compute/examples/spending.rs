@@ -13,7 +13,7 @@ use compute::prelude::*;
 /// # Example
 /// This example demonstrates checking if a remaining budget of 3000 (after spending 2000 from a budget of 5000)
 /// stays within the maximum allowable limit of 3000.
-#[circuit(execute)]
+#[encrypted(execute)]
 fn can_spend(budget: u16, spent: u16) -> bool {
     let MAX_ALLOWED = 5000;
     let remaining_budget = budget - spent;

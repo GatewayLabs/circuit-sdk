@@ -10,7 +10,7 @@ use syn::{
 };
 
 #[proc_macro_attribute]
-pub fn circuit(attr: TokenStream, item: TokenStream) -> TokenStream {
+pub fn encrypted(attr: TokenStream, item: TokenStream) -> TokenStream {
     let mode = parse_macro_input!(attr as syn::Ident).to_string(); // Retrieve the mode (e.g., "compile" or "execute")
     generate_macro(item, &mode)
 }

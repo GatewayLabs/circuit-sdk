@@ -13,7 +13,7 @@ use compute::prelude::*;
 ///
 /// # Example
 /// This example demonstrates verifying if a room with a temperature of 70°F is within the range of 65°F to 75°F.
-#[circuit(execute)]
+#[encrypted(execute)]
 fn within_temperature_range(current_temp: u8) -> bool {
     let MIN_TEMP = 65;
     let MAX_TEMP = 75;

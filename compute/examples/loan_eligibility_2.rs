@@ -30,7 +30,7 @@ use compute::prelude::*;
 /// assert_eq!(eligibility, 1); // Prime eligibility
 /// ```
 
-#[circuit(execute)]
+#[encrypted(execute)]
 fn check_loan_eligibility(credit_score: u16, income: u16, debt_ratio: u16) -> u16 {
     // Eligibility levels
     let PRIME = 1;

@@ -4,7 +4,7 @@ use compute::prelude::*;
 /// Circuit macro annotation to indicate this function will be executed within a secure circuit context.
 /// This access control function determines the level of access a user has based on their role, returning
 /// only the data they are authorized to view in a privacy-preserving manner.
-#[circuit(execute)]
+#[encrypted(execute)]
 fn access_control(role: u8) -> u8 {
     // Define constants representing access to different types of data.
     // Each constant holds a value that signifies specific data access rights.

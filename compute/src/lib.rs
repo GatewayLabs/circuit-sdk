@@ -18,7 +18,7 @@ pub mod prelude {
         GarbledBoolean, GarbledUint, GarbledUint128, GarbledUint16, GarbledUint2, GarbledUint256,
         GarbledUint32, GarbledUint4, GarbledUint512, GarbledUint64, GarbledUint8,
     };
-    pub use circuit_macro::circuit;
+    pub use circuit_macro::encrypted;
     pub use tandem::{Circuit, Gate};
 
     pub use crate::evaluator::Evaluator;
