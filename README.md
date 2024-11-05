@@ -1,8 +1,7 @@
-# GVM: The Encrypted Computer
-
 [![Crates.io](https://img.shields.io/crates/v/cryptomata.svg)](https://crates.io/crates/cryptomata)
 [![Docs.rs](https://docs.rs/cryptomata/badge.svg)](https://docs.rs/cryptomata)
 [![CI](https://github.com/Gateway-DAO/cryptomata/workflows/CI/badge.svg)](https://github.com/Gateway-DAO/cryptomata/actions)
+# GVM: The Encrypted Computer
 
 ## Building and running an encrypted function
 
