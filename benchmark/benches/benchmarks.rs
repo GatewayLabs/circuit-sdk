@@ -46,7 +46,7 @@ fn _gateway_encrypted_addition2() {
 fn gateway_encrypted_addition() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn addition(a: u128, b: u128) -> u128 {
         a + b
     }
@@ -87,7 +87,7 @@ fn tfhe_encrypted_bitwise_and() {
 fn gateway_encrypted_bitwise_and() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_and(a: u128, b: u128) -> u128 {
         a & b
     }
@@ -128,7 +128,7 @@ fn tfhe_encrypted_bitwise_xor() {
 fn gateway_encrypted_bitwise_xor() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_xor(a: u128, b: u128) -> u128 {
         a ^ b
     }
@@ -206,7 +206,7 @@ fn tfhe_encrypted_bitwise_not() {
 fn gateway_encrypted_bitwise_not() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn bitwise_not(a: u128) -> u128 {
         !a
     }
@@ -246,7 +246,7 @@ fn tfhe_encrypted_subtraction() {
 fn gateway_encrypted_subtraction() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn subtraction(a: u128, b: u128) -> u128 {
         a - b
     }
@@ -287,7 +287,7 @@ fn tfhe_encrypted_multiplication() {
 fn gateway_encrypted_multiplication() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn multiplication(a: u128, b: u128) -> u128 {
         a * b
     }
@@ -328,7 +328,7 @@ fn tfhe_encrypted_nand() {
 fn gateway_encrypted_nand() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn nand(a: u128, b: u128) -> u128 {
         !(a & b)
     }
@@ -369,7 +369,7 @@ fn tfhe_encrypted_nor() {
 fn gateway_encrypted_nor() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn nor(a: u128, b: u128) -> u128 {
         !(a | b)
     }
@@ -410,7 +410,7 @@ fn tfhe_encrypted_xnor() {
 fn gateway_encrypted_xnor() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn xnor(a: u128, b: u128) -> u128 {
         !(a ^ b)
     }
@@ -451,7 +451,7 @@ fn tfhe_encrypted_eq() {
 fn gateway_encrypted_eq() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn eq(a: u128, b: u128) -> bool {
         a == b
     }
@@ -492,7 +492,7 @@ fn tfhe_encrypted_neq() {
 fn gateway_encrypted_neq() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn neq(a: u128, b: u128) -> bool {
         a != b
     }
@@ -533,7 +533,7 @@ fn tfhe_encrypted_gt() {
 fn gateway_encrypted_gt() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn gt(a: u128, b: u128) -> bool {
         a > b
     }
@@ -574,7 +574,7 @@ fn tfhe_encrypted_ge() {
 fn gateway_encrypted_ge() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn ge(a: u128, b: u128) -> bool {
         a >= b
     }
@@ -615,7 +615,7 @@ fn tfhe_encrypted_lt() {
 fn gateway_encrypted_lt() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn lt(a: u128, b: u128) -> bool {
         a < b
     }
@@ -656,7 +656,7 @@ fn tfhe_encrypted_le() {
 fn gateway_encrypted_le() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn le(a: u128, b: u128) -> bool {
         a <= b
     }
@@ -697,7 +697,7 @@ fn tfhe_encrypted_division() {
 fn gateway_encrypted_division() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn division(a: u128, b: u128) -> u128 {
         a / b
     }
@@ -738,7 +738,7 @@ fn tfhe_encrypted_modulus() {
 fn gateway_encrypted_modulus() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn modulus(a: u128, b: u128) -> u128 {
         a % b
     }
@@ -775,7 +775,7 @@ fn tfhe_encrypted_mux() {
 fn gateway_encrypted_mux() {
     use compute::prelude::*;
 
-    #[circuit(execute)]
+    #[encrypted(execute)]
     fn mux(a: bool, b: bool, c: bool) -> bool {
         if a {
             b
