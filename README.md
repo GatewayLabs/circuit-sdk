@@ -1,4 +1,4 @@
-# /priv/: The Encrypted Computer
+# gvm: The Encrypted Computer
 
 [![Crates.io](https://img.shields.io/crates/v/cryptomata.svg)](https://crates.io/crates/cryptomata)
 [![Docs.rs](https://docs.rs/cryptomata/badge.svg)](https://docs.rs/cryptomata)
