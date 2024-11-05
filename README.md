@@ -35,7 +35,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Design
 
-This diagram represents the "Gateway Virtual Machine" (GVM), an encrypted computer that uses **authenticated garbled circuits**. It enables users to process encrypted data while ensuring both privacy and verifiability without the need for additional zero-knowledge proofs (such as SNARKs) for inputs and outputs. Here’s a breakdown of each component and how the authenticated garbled circuit scheme functions:
+The "Gateway Virtual Machine" (GVM), is an encrypted computer based on **authenticated garbled circuits**. It enables users to process encrypted data while ensuring both privacy and verifiability without the need for additional zero-knowledge proofs (such as SNARKs) for inputs and outputs. Here’s a breakdown of each component and how the authenticated garbled circuit scheme functions:
 
 1. **User Encrypted Inputs**:
    - Users provide **encrypted inputs** to the GVM. These inputs are encrypted at the source, maintaining privacy throughout the computation process. Since the GVM is based on authenticated garbled circuits, it can verify these encrypted inputs directly, ensuring their integrity without requiring SNARKs for input validation.
