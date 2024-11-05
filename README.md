@@ -111,3 +111,7 @@ Licensed under either of
    ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
 
 at your option.
+
+## Acknowlegments
+
+The incredible [tandem project](https://github.com/sine-fdn/tandem) and the team over at [Sine Foundation](https://sine.foundation/) for providing the underlying 2PC garbling scheme
