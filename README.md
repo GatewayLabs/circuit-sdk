@@ -8,13 +8,15 @@
 
 Building an encrypted function is as easy as creating a regular rust function with primitive types, decorating it with the `encrypted` macro and running it from main, or another function. This example automatically starts up an embedded evaluator, compiles the `access_content` function into an encrypted circuit and submits the circuits with inputs via regular calls to the function.
 
-Run this example with 
+Run this example with: 
 
 ```
 cargo run --release example age_content_control
 ```
 
 ```rust
+use compute::prelude::*;
+
 #[encrypted(execute)]
 fn access_content(age: u8) -> u8 {
     // Access level codes
