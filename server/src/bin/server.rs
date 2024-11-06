@@ -6,10 +6,9 @@ use std::{error::Error, path::Path};
 use tracing::{debug, error, info, instrument};
 
 #[encrypted(compile)]
-fn multi_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
-    let res = a * b;
-    let res = res + c;
-    res - d
+fn average(a: u128, b: u128, c: u128) -> u128 {
+    let res = a + b + c;
+    res / 3
 }
 
 #[tokio::main]
@@ -37,7 +36,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 info!("Accepted bidirectional stream");
 
                 // Initialize the evaluator instance with circuit and dummy input
-                let (circuit, _) = multi_arithmetic(0_u8, 0_u8, 0_u8, 0_u8);
+                let (circuit, _) = average(0_u128, 0_u128, 0_u128);
 
                 info!("Circuit: {:?}", hex::encode(circuit.blake3_hash()));
 

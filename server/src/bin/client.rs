@@ -8,10 +8,9 @@ use tracing::debug;
 use tracing::info;
 
 #[encrypted(compile)]
-fn multi_arithmetic(a: u8, b: u8, c: u8, d: u8) -> u8 {
-    let res = a * b;
-    let res = res + c;
-    res - d
+fn average(a: u128, b: u128, c: u128) -> u128 {
+    let res = a + b + c;
+    res / 3
 }
 
 #[tokio::main]
@@ -36,12 +35,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     //let (mut receive_stream, mut send_stream) = stream.split();
 
     // Initialize garbler with sample data
-    let a = 2_u8;
-    let b = 5_u8;
-    let c = 3_u8;
-    let d = 4_u8;
-    //let circuit = Circuit::default();
-    let (circuit, input_garbler) = multi_arithmetic(a, b, c, d);
+    let a = 10_u128;
+    let b = 20_u128;
+    let c = 30_u128;
+
+    let (circuit, input_garbler) = average(a, b, c);
     info!("Circuit: {:?}", hex::encode(circuit.blake3_hash()));
 
     let (mut garbler, mut msg_for_evaluator) = GatewayGarbler::start(&circuit, &input_garbler)?;
