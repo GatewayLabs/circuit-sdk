@@ -70,6 +70,28 @@ async fn main() -> Result<(), Box<dyn Error>> {
         info!("Received message, length: {:?}", data.len());
         debug!("Received data: {:?}", hex::encode(&data));
 
+        if garbler.is_complete() {
+            // Receive the final output from the evaluator
+            //let final_output = stream.receive().await?.expect("no data received");
+            info!("Final output received: {:?}", hex::encode(&data));
+            fn bits_to_u128(mut bits: Vec<u8>) -> u128 {
+                bits.reverse();
+                // Ensure we use at most 128 bits (truncate if necessary)
+                let bit_length = bits.len().min(128);
+                let mut result: u128 = 0;
+
+                // Iterate over the bits, shifting and accumulating them into the result
+                for &bit in &bits[..bit_length] {
+                    result = (result << 1) | u128::from(bit);
+                }
+
+                result
+            }
+
+            println!("The resulting number: {}", bits_to_u128(data));
+            break;
+        }
+
         // Pass evaluator response to garbler "next" function
         let (next_garbler, next_message) = garbler.next(&data)?;
         info!("Steps remaining: {}", next_garbler.steps());
@@ -86,13 +108,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         );
 
         msg_for_evaluator = next_message;
-
-        if garbler.is_complete() {
-            // Receive the final output from the evaluator
-            let final_output = stream.receive().await?.expect("no data received");
-            info!("Final output received: {:?}", hex::encode(&final_output));
-            break;
-        }
     }
 
     debug!("last message: {:?}", msg_for_evaluator);
