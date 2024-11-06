@@ -3,6 +3,8 @@
 [![CI](https://github.com/Gateway-DAO/cryptomata/workflows/CI/badge.svg)](https://github.com/Gateway-DAO/cryptomata/actions)
 # GVM: The Encrypted Computer
 
+The "Gateway Virtual Machine" (GVM), is an encrypted virtual machine based on **authenticated garbled circuits**. It enables users to process on encrypted data while ensuring both privacy and verifiability without the need for additional zero-knowledge proofs (such as SNARKs) for inputs and outputs. 
+
 ## Building and running an encrypted function
 
 Building an encrypted function is as easy as creating a regular rust function with primitive types, decorating it with the `encrypted` macro and running it from main, or another function. This example automatically starts up an embedded evaluator, compiles the `access_content` function into an encrypted circuit and submits the circuits with inputs via regular calls to the function.
@@ -60,7 +62,7 @@ fn main() {
 
 ![gvm](https://github.com/user-attachments/assets/752003e7-1a50-4446-9870-cdbb2da98498)
 
-The "Gateway Virtual Machine" (GVM), is an encrypted computer based on **authenticated garbled circuits**. It enables users to process encrypted data while ensuring both privacy and verifiability without the need for additional zero-knowledge proofs (such as SNARKs) for inputs and outputs. Here’s a breakdown of each component and how the authenticated garbled circuit scheme functions:
+Here’s a breakdown of each component and how the authenticated garbled circuit scheme functions:
 
 1. **User Encrypted Inputs**:
    - Users provide **encrypted inputs** to the GVM. These inputs are encrypted at the source, maintaining privacy throughout the computation process. Since the GVM is based on authenticated garbled circuits, it can verify these encrypted inputs directly, ensuring their integrity without requiring SNARKs for input validation.
