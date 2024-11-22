@@ -3,7 +3,9 @@
 [![CI](https://github.com/Gateway-DAO/cryptomata/workflows/CI/badge.svg)](https://github.com/Gateway-DAO/cryptomata/actions)
 # Gateway Circuit SDK
 
-The "Gateway Circuit SDK", is an encrypted runtime environment that uses **authenticated garbled circuits**. It enables users to process on encrypted data while ensuring both privacy and verifiability without the need for additional zero-knowledge proofs (such as SNARKs) for inputs and outputs. 
+The "Gateway Circuit SDK", is an encrypted runtime environment that uses **authenticated garbled circuits**. It enables users to process on encrypted data while ensuring both privacy and verifiability without the need for additional zero-knowledge proofs (such as SNARKs) for inputs and outputs.
+
+![gateway-circuit-sdk](https://github.com/user-attachments/assets/b5051841-97d3-43d8-8b54-681fdaf1cf34)
 
 ## Building and running an encrypted function
 
@@ -61,6 +63,7 @@ fn main() {
 ### Benefits:
 - **Fully Encrypted Computation**: The entire computation is hidden from external observers, including inputs, outputs, and intermediate states.
 - **Input Privacy**: data is fully encrypted going into the function.
+
 
 ## Contribution
 
