@@ -8,8 +8,8 @@
 ///
 /// # Associated Types
 ///
-/// - [`Type`]: The base type for individual operations.
-/// - [`TypeVec`]: A vector of the base type, used for operations involving collections.
+/// - Type: The base type for individual operations.
+/// - TypeVec: A vector of the base type, used for operations involving collections.
 ///
 /// # Required Methods
 ///
