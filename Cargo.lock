@@ -325,6 +325,8 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]

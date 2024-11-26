@@ -127,7 +127,7 @@ fn generate_macro(item: TokenStream, mode: &str) -> TokenStream {
             where
                 #type_name: Into<GarbledUint<N>> + From<GarbledUint<N>> + Clone,
             {
-                let mut context = CircuitBuilder::default();
+                let mut context = WRK17CircuitBuilder::default();
                 #(#mapped_inputs)*
                 #(#constants)*
                 let const_true = &context.input::<N>(&true.into());

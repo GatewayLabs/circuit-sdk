@@ -1,36 +1,37 @@
+use crate::operations::circuits::traits::CircuitExecutor;
 use crate::operations::circuits::types::GateIndexVec;
 use crate::uint::GarbledUint;
 use crate::{executor::get_executor, uint::GarbledBoolean};
-use std::cell::RefCell;
 use std::cmp::Ordering;
+use std::fmt::Debug;
 use tandem::{Circuit, Gate};
 
 pub type GateIndex = u32;
 
-// Global instance of CircuitBuilder
-thread_local! {
-    static CIRCUIT_BUILDER: RefCell<CircuitBuilder> = RefCell::new(CircuitBuilder::default());
-}
-
 #[derive(Default)]
-pub struct CircuitBuilder {
+pub struct WRK17CircuitBuilder {
     inputs: Vec<bool>,
     gates: Vec<Gate>,
 }
 
-impl CircuitBuilder {
-    // Static `global` function to access `CIRCUIT_BUILDER`
-    #[allow(dead_code)]
-    pub(super) fn global<F, R>(f: F) -> R
-    where
-        F: FnOnce(&mut CircuitBuilder) -> R,
-    {
-        CIRCUIT_BUILDER.with(|builder| {
-            // Borrow mutably and pass to the closure `f`
-            f(&mut builder.borrow_mut())
-        })
-    }
+impl Debug for WRK17CircuitBuilder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut debug_struct = f.debug_struct("WRK17CircuitBuilder");
+        debug_struct.field("inputs", &self.inputs);
 
+        // Collect gates into a formatted string with newlines
+        let gates_with_newlines: Vec<String> = self
+            .gates
+            .iter()
+            .map(|gate| format!("{:?}", gate))
+            .collect();
+
+        debug_struct.field("gates", &gates_with_newlines);
+        debug_struct.finish()
+    }
+}
+
+impl WRK17CircuitBuilder {
     pub fn input<const R: usize>(&mut self, input: &GarbledUint<R>) -> GateIndexVec {
         // get the cumulative size of all inputs in input_labels
         //let input_offset = self.input_labels.iter().map(|x| x.len()).sum::<usize>();
@@ -65,39 +66,11 @@ impl CircuitBuilder {
         xor_index
     }
 
-    pub fn xor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let xor = self.push_xor(&a[i], &b[i]);
-            output.push(xor);
-        }
-        output
-    }
-
     // Add an Aa.len()D gate between two inputs and return the index
     pub fn push_and(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
         let and_index = self.gates.len() as u32;
         self.gates.push(Gate::And(*a, *b));
         and_index
-    }
-
-    pub fn and(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let and = self.push_and(&a[i], &b[i]);
-            output.push(and);
-        }
-        output
-    }
-
-    pub fn land(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        let and = self.push_and(a, b);
-        output.push(and);
-        output.into()
     }
 
     // Add a NOT gate for a single input and return the index
@@ -107,35 +80,11 @@ impl CircuitBuilder {
         not_index
     }
 
-    pub fn not(&mut self, a: &GateIndexVec) -> GateIndexVec {
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let not_gate = self.push_not(&a[i]);
-            output.push(not_gate);
-        }
-        output
-    }
-
     // Add a gate for OR operation: OR(a, b) = (a ⊕ b) ⊕ (a & b)
     pub fn push_or(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
         let xor_gate = self.push_xor(a, b);
         let and_gate = self.push_and(a, b);
         self.push_xor(&xor_gate, &and_gate)
-    }
-
-    pub fn or(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let or_gate = self.push_or(&a[i], &b[i]);
-            output.push(or_gate);
-        }
-        output
-    }
-
-    pub fn lor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
-        let output = self.or(a, b);
-        output.into()
     }
 
     // Add a a.len()Aa.len()D gate: a.len()Aa.len()D(a, b) = a.len()OT(a & b)
@@ -144,55 +93,15 @@ impl CircuitBuilder {
         self.push_not(&and_gate)
     }
 
-    pub fn nand(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let nand = self.push_nand(&a[i], &b[i]);
-            output.push(nand);
-        }
-        output
-    }
-
     pub fn push_nor(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
         let or_gate = self.push_or(a, b);
         self.push_not(&or_gate)
-    }
-
-    pub fn nor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let nor = self.push_nor(&a[i], &b[i]);
-            output.push(nor);
-        }
-        output
     }
 
     // Add an Xa.len()OR gate: Xa.len()OR(a, b) = a.len()OT(a ⊕ b)
     pub fn push_xnor(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
         let xor_gate = self.push_xor(a, b);
         self.push_not(&xor_gate)
-    }
-
-    pub fn xnor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let xnor = self.push_xnor(&a[i], &b[i]);
-            output.push(xnor);
-        }
-        output
-    }
-
-    pub fn mux(&mut self, s: &GateIndex, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        // repeat with output_indices
-        let mut output = GateIndexVec::default();
-        for i in 0..a.len() {
-            let mux = self.push_mux(s, &b[i], &a[i]);
-            output.push(mux);
-        }
-        output
     }
 
     pub fn mux_lookahead(&mut self, a: &GateIndexVec) -> GateIndexVec {
@@ -214,46 +123,6 @@ impl CircuitBuilder {
         let and_a_not_s = self.push_and(a, &not_s);
         let and_b_s = self.push_and(b, s);
         self.push_or(&and_a_not_s, &and_b_s)
-    }
-
-    pub fn add(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        let mut carry = None;
-        let mut output_indices = GateIndexVec::default();
-        for i in 0..a.len() {
-            let (sum, new_carry) = full_adder(self, a[i], b[i], carry);
-            output_indices.push(sum);
-            carry = new_carry;
-        }
-        output_indices
-    }
-
-    pub fn sub(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        let mut borrow = None;
-        let mut output_indices = GateIndexVec::default();
-        for i in 0..a.len() {
-            let (diff, new_borrow) = full_subtractor(self, &a[i], &b[i], &borrow);
-            output_indices.push(diff);
-            borrow = new_borrow;
-        }
-        output_indices
-    }
-
-    pub fn mul(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
-        let mut partial_products: Vec<GateIndexVec> = Vec::with_capacity(a.len());
-
-        // Generate partial products
-        for i in 0..a.len() {
-            let shifted_product = partial_product_shift(self, a, b, i);
-            partial_products.push(shifted_product);
-        }
-
-        // Sum up all partial products
-        let mut result = partial_products[0].clone();
-        for partial_product in partial_products.iter().take(a.len()).skip(1) {
-            result = self.add(&result, partial_product);
-        }
-
-        result
     }
 
     fn div_inner(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> (GateIndexVec, GateIndexVec) {
@@ -298,15 +167,171 @@ impl CircuitBuilder {
         (quotient, remainder)
     }
 
-    pub fn div(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+    pub fn compile(&self, output_indices: &GateIndexVec) -> Circuit {
+        Circuit::new(self.gates.clone(), output_indices.clone().into())
+    }
+
+    pub fn execute<const N: usize>(&self, circuit: &Circuit) -> anyhow::Result<GarbledUint<N>> {
+        let result = get_executor().execute(circuit, &self.inputs, &[])?;
+        Ok(GarbledUint::new(result))
+    }
+
+    // Simulate the circuit using the provided input values
+    pub fn compile_and_execute<const N: usize>(
+        &self,
+        output_indices: &GateIndexVec,
+    ) -> anyhow::Result<GarbledUint<N>> {
+        let circuit = self.compile(output_indices);
+        let result = get_executor().execute(&circuit, &self.inputs, &[])?;
+        Ok(GarbledUint::new(result))
+    }
+}
+
+impl CircuitExecutor for WRK17CircuitBuilder {
+    type Type = GateIndex;
+    type TypeVec = GateIndexVec;
+
+    fn xor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let xor = self.push_xor(&a[i], &b[i]);
+            output.push(xor);
+        }
+        output
+    }
+
+    fn and(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let and = self.push_and(&a[i], &b[i]);
+            output.push(and);
+        }
+        output
+    }
+
+    fn land(&mut self, a: &GateIndex, b: &GateIndex) -> GateIndex {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        let and = self.push_and(a, b);
+        output.push(and);
+        output.into()
+    }
+
+    fn not(&mut self, a: &GateIndexVec) -> GateIndexVec {
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let not_gate = self.push_not(&a[i]);
+            output.push(not_gate);
+        }
+        output
+    }
+
+    fn or(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let or_gate = self.push_or(&a[i], &b[i]);
+            output.push(or_gate);
+        }
+        output
+    }
+
+    fn lor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+        let output = self.or(a, b);
+        output.into()
+    }
+
+    fn nand(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let nand = self.push_nand(&a[i], &b[i]);
+            output.push(nand);
+        }
+        output
+    }
+
+    fn nor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let nor = self.push_nor(&a[i], &b[i]);
+            output.push(nor);
+        }
+        output
+    }
+
+    fn xnor(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let xnor = self.push_xnor(&a[i], &b[i]);
+            output.push(xnor);
+        }
+        output
+    }
+
+    fn mux(&mut self, s: &GateIndex, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        // repeat with output_indices
+        let mut output = GateIndexVec::default();
+        for i in 0..a.len() {
+            let mux = self.push_mux(s, &b[i], &a[i]);
+            output.push(mux);
+        }
+        output
+    }
+
+    fn add(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        let mut carry = None;
+        let mut output_indices = GateIndexVec::default();
+        for i in 0..a.len() {
+            let (sum, new_carry) = full_adder(self, a[i], b[i], carry);
+            output_indices.push(sum);
+            carry = new_carry;
+        }
+        output_indices
+    }
+
+    fn sub(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        let mut borrow = None;
+        let mut output_indices = GateIndexVec::default();
+        for i in 0..a.len() {
+            let (diff, new_borrow) = full_subtractor(self, &a[i], &b[i], &borrow);
+            output_indices.push(diff);
+            borrow = new_borrow;
+        }
+        output_indices
+    }
+
+    fn mul(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+        let mut partial_products: Vec<GateIndexVec> = Vec::with_capacity(a.len());
+
+        // Generate partial products
+        for i in 0..a.len() {
+            let shifted_product = partial_product_shift(self, a, b, i);
+            partial_products.push(shifted_product);
+        }
+
+        // Sum up all partial products
+        let mut result = partial_products[0].clone();
+        for partial_product in partial_products.iter().take(a.len()).skip(1) {
+            result = self.add(&result, partial_product);
+        }
+
+        result
+    }
+
+    fn div(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
         self.div_inner(a, b).0
     }
 
-    pub fn rem(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
+    fn rem(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndexVec {
         self.div_inner(a, b).1
     }
 
-    pub fn eq(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+    fn eq(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
         let mut eq_list = vec![0; a.len()];
 
         let i = a.len() - 1;
@@ -322,33 +347,33 @@ impl CircuitBuilder {
         eq_list[0]
     }
 
-    pub fn ne(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+    fn ne(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
         let eq = self.eq(a, b);
         self.push_not(&eq)
     }
 
-    pub fn gt(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+    fn gt(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
         let (lt, eq) = self.compare(a, b);
         let or_gate = self.push_or(&lt, &eq);
         self.push_not(&or_gate)
     }
 
-    pub fn ge(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+    fn ge(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
         let lt = self.lt(a, b);
         self.push_not(&lt)
     }
 
-    pub fn lt(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+    fn lt(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
         let (lt, _eq) = self.compare(a, b);
         lt
     }
 
-    pub fn le(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
+    fn le(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
         let gt = self.gt(a, b);
         self.push_not(&gt)
     }
 
-    pub fn compare(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> (GateIndex, GateIndex) {
+    fn compare(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> (GateIndex, GateIndex) {
         let mut eq_list = vec![0; a.len()];
         let mut lt_list = vec![0; a.len()];
 
@@ -373,25 +398,6 @@ impl CircuitBuilder {
 
         (lt_list[0], eq_list[0])
     }
-
-    pub fn compile(&self, output_indices: &GateIndexVec) -> Circuit {
-        Circuit::new(self.gates.clone(), output_indices.clone().into())
-    }
-
-    pub fn execute<const N: usize>(&self, circuit: &Circuit) -> anyhow::Result<GarbledUint<N>> {
-        let result = get_executor().execute(circuit, &self.inputs, &[])?;
-        Ok(GarbledUint::new(result))
-    }
-
-    // Simulate the circuit using the provided input values
-    pub fn compile_and_execute<const N: usize>(
-        &self,
-        output_indices: &GateIndexVec,
-    ) -> anyhow::Result<GarbledUint<N>> {
-        let circuit = self.compile(output_indices);
-        let result = get_executor().execute(&circuit, &self.inputs, &[])?;
-        Ok(GarbledUint::new(result))
-    }
 }
 
 macro_rules! build_and_execute {
@@ -400,9 +406,9 @@ macro_rules! build_and_execute {
             lhs: &GarbledUint<N>,
             rhs: &GarbledUint<N>,
         ) -> GarbledUint<N> {
-            let mut builder = CircuitBuilder::default();
+            let mut builder = WRK17CircuitBuilder::default();
             // Access the global CircuitBuilder instance
-            //let mut builder = CircuitBuilder::instance().lock().unwrap();
+            //let mut builder = WRK17CircuitBuilder::instance().lock().unwrap();
 
             let a = builder.input(lhs);
             let b = builder.input(rhs);
@@ -431,7 +437,7 @@ build_and_execute!(build_and_execute_division, div);
 build_and_execute!(build_and_execute_remainder, rem);
 
 fn full_adder(
-    builder: &mut CircuitBuilder,
+    builder: &mut WRK17CircuitBuilder,
     a: GateIndex,
     b: GateIndex,
     carry: Option<GateIndex>,
@@ -465,7 +471,7 @@ fn full_adder(
 }
 
 fn full_subtractor(
-    builder: &mut CircuitBuilder,
+    builder: &mut WRK17CircuitBuilder,
     a: &u32,
     b: &u32,
     borrow: &Option<u32>,
@@ -500,7 +506,7 @@ fn full_subtractor(
 }
 
 fn partial_product_shift(
-    builder: &mut CircuitBuilder,
+    builder: &mut WRK17CircuitBuilder,
     lhs: &GateIndexVec,
     rhs: &GateIndexVec,
     shift: usize,
@@ -528,7 +534,7 @@ pub(crate) fn build_and_execute_equality<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> bool {
-    let mut builder = CircuitBuilder::default();
+    let mut builder = WRK17CircuitBuilder::default();
     let a = builder.input(lhs);
     let b = builder.input(rhs);
 
@@ -543,7 +549,7 @@ pub(crate) fn build_and_execute_comparator<const N: usize>(
     lhs: &GarbledUint<N>,
     rhs: &GarbledUint<N>,
 ) -> Ordering {
-    let mut builder = CircuitBuilder::default();
+    let mut builder = WRK17CircuitBuilder::default();
     let a = builder.input(lhs);
     let b = builder.input(rhs);
 
@@ -566,7 +572,7 @@ pub(crate) fn build_and_execute_comparator<const N: usize>(
 }
 
 pub(crate) fn build_and_execute_not<const N: usize>(input: &GarbledUint<N>) -> GarbledUint<N> {
-    let mut builder = CircuitBuilder::default();
+    let mut builder = WRK17CircuitBuilder::default();
     builder.input(input);
 
     let mut output_indices = GateIndexVec::default();
@@ -587,7 +593,7 @@ pub(crate) fn build_and_execute_mux<const N: usize>(
     if_true: &GarbledUint<N>,
     if_false: &GarbledUint<N>,
 ) -> GarbledUint<N> {
-    let mut builder = CircuitBuilder::default();
+    let mut builder = WRK17CircuitBuilder::default();
     let a = builder.input(if_true);
     let b = builder.input(if_false);
     let s = builder.input(condition);
@@ -613,6 +619,8 @@ pub(crate) fn build_and_execute_mux<const N: usize>(
 // tests
 #[cfg(test)]
 mod tests {
+    use tracing::debug;
+
     use super::*;
     use crate::uint::GarbledBit;
     use crate::uint::GarbledUint32;
@@ -709,7 +717,7 @@ mod tests {
         let a: GarbledUint8 = 42_u8.into();
         let b: GarbledUint8 = 42_u8.into();
 
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a = builder.input(&a);
         let b = builder.input(&b);
 
@@ -728,7 +736,7 @@ mod tests {
         let a: GarbledUint8 = 123_u8.into();
         let b: GarbledUint8 = 124_u8.into();
 
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a = builder.input(&a);
         let b = builder.input(&b);
 
@@ -747,7 +755,7 @@ mod tests {
         let a: GarbledUint8 = 123_u8.into();
         let b: GarbledUint8 = 124_u8.into();
 
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a = builder.input(&a);
         let b = builder.input(&b);
 
@@ -766,7 +774,7 @@ mod tests {
         let a: GarbledUint8 = 42_u8.into();
         let b: GarbledUint8 = 42_u8.into();
 
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a = builder.input(&a);
         let b = builder.input(&b);
 
@@ -785,7 +793,7 @@ mod tests {
         let a: GarbledUint8 = 42_u8.into();
         let b: GarbledUint8 = 43_u8.into();
 
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a = builder.input(&a);
         let b = builder.input(&b);
 
@@ -804,7 +812,7 @@ mod tests {
         let a: GarbledUint8 = 43_u8.into();
         let b: GarbledUint8 = 42_u8.into();
 
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a = builder.input(&a);
         let b = builder.input(&b);
 
@@ -824,7 +832,7 @@ mod tests {
             lhs: &GarbledUint<N>,
             rhs: &GarbledUint<N>,
         ) -> GarbledUint<N> {
-            let mut builder = CircuitBuilder::default();
+            let mut builder = WRK17CircuitBuilder::default();
             let a = builder.input(lhs);
             let b = builder.input(rhs);
 
@@ -860,7 +868,7 @@ mod tests {
 
     #[test]
     fn test_add_three() {
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a: GarbledUint8 = 2_u8.into();
         let a = builder.input(&a);
 
@@ -873,11 +881,7 @@ mod tests {
         let output = builder.add(&a, &b);
         let output = builder.add(&output, &c);
 
-        println!("output: {:?}", output);
-        // debug gates
-        builder.gates.iter().for_each(|gate| {
-            println!("{:?}", gate);
-        });
+        debug!("{:#?}", builder);
 
         let circuit = builder.compile(&output);
 
@@ -892,7 +896,7 @@ mod tests {
 
     #[test]
     fn test_embedded_if_else() {
-        let mut builder = CircuitBuilder::default();
+        let mut builder = WRK17CircuitBuilder::default();
         let a: GarbledUint8 = 2_u8.into();
         let a = builder.input(&a);
 
