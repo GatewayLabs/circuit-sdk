@@ -33,28 +33,28 @@ use compute::prelude::*;
 #[encrypted(execute)]
 fn check_loan_eligibility(credit_score: u16, income: u16, debt_ratio: u16) -> u16 {
     // Eligibility levels
-    let PRIME = 1;
-    let SUBPRIME = 2;
-    let HIGH_RISK = 3;
-    let INELIGIBLE = 0;
+    let prime = 1;
+    let subprime = 2;
+    let high_risk = 3;
+    let ineligible = 0;
 
     match credit_score {
         750..=850 => match income {
             50..=200 => match debt_ratio {
-                1..=30 => PRIME, // High income, low debt ratio, prime credit score
-                _ => HIGH_RISK,  // High debt ratio, even with prime credit score and high income
+                1..=30 => prime, // High income, low debt ratio, prime credit score
+                _ => high_risk,  // High debt ratio, even with prime credit score and high income
             },
-            _ => SUBPRIME, // Prime credit score but income does not meet high-income range
+            _ => subprime, // Prime credit score but income does not meet high-income range
         },
         650..=749 => match income {
             35..=199 => match debt_ratio {
-                1..=40 => SUBPRIME, // Moderate income and debt ratio, subprime credit score
-                _ => HIGH_RISK,     // High debt ratio for subprime credit
+                1..=40 => subprime, // Moderate income and debt ratio, subprime credit score
+                _ => high_risk,     // High debt ratio for subprime credit
             },
-            _ => HIGH_RISK, // Income below acceptable range for subprime category
+            _ => high_risk, // Income below acceptable range for subprime category
         },
-        300..=649 => HIGH_RISK, // Low credit score is always high risk
-        _ => INELIGIBLE,        // Credit score out of bounds
+        300..=649 => high_risk, // Low credit score is always high risk
+        _ => ineligible,        // Credit score out of bounds
     }
 }
 

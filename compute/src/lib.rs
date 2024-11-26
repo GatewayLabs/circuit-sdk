@@ -6,7 +6,7 @@ pub mod operations;
 pub mod uint;
 
 pub mod prelude {
-    pub use crate::operations::circuits::builder::CircuitBuilder;
+    pub use crate::operations::circuits::builder::WRK17CircuitBuilder;
 
     pub use crate::executor::get_executor;
     pub use crate::int::{
@@ -25,4 +25,5 @@ pub mod prelude {
     pub use crate::evaluator::GatewayEvaluator;
     pub use crate::garbler::Garbler;
     pub use crate::garbler::GatewayGarbler;
+    pub use crate::operations::circuits::traits::CircuitExecutor;
 }

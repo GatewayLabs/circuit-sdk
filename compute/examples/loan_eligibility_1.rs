@@ -31,40 +31,40 @@ use compute::prelude::*;
 /// ```
 
 #[encrypted(execute)]
-fn check_loan_eligibility(credit_score: u16, income: u16, debt_ratio: u16) -> u8 {
+fn check_loan_eligibility(credit_score: u16, income: u16, debt_ratio: u16) -> u16 {
     // Eligibility levels
-    let PRIME = 1;
-    let SUBPRIME = 2;
-    let HIGH_RISK = 3;
-    let INELIGIBLE = 0;
+    let prime = 1;
+    let subprime = 2;
+    let high_risk = 3;
+    let ineligible = 0;
 
     // Use `if let` with range checks to determine eligibility
     if let 750..=850 = credit_score {
         if let 50..=200 = income {
             if let 1..=30 = debt_ratio {
                 // High income, low debt ratio, prime credit score
-                PRIME
+                prime
             } else {
-                HIGH_RISK // High debt ratio, even with prime credit score and high income
+                high_risk // High debt ratio, even with prime credit score and high income
             }
         } else {
-            SUBPRIME // Prime credit score but income does not meet high-income range
+            subprime // Prime credit score but income does not meet high-income range
         }
     } else if let 650..=749 = credit_score {
         if let 35..=199 = income {
             if let 1..=40 = debt_ratio {
                 // Moderate income and debt ratio, subprime credit score
-                SUBPRIME
+                subprime
             } else {
-                HIGH_RISK // High debt ratio for subprime credit
+                high_risk // High debt ratio for subprime credit
             }
         } else {
-            HIGH_RISK // Income below acceptable range for subprime category
+            high_risk // Income below acceptable range for subprime category
         }
     } else if let 300..=649 = credit_score {
-        HIGH_RISK // Low credit score is always high risk
+        high_risk // Low credit score is always high risk
     } else {
-        INELIGIBLE // Credit score out of bounds
+        ineligible // Credit score out of bounds
     }
 }
 
