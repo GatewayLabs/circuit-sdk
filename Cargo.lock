@@ -149,7 +149,8 @@ version = "0.1.0"
 dependencies = [
  "compute",
  "criterion",
- "tfhe",
+ "tfhe 0.10.0",
+ "tfhe 0.9.1",
 ]
 
 [[package]]
@@ -2039,6 +2040,29 @@ dependencies = [
 
 [[package]]
 name = "tfhe"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf50da57f871bae30942edcc272db3a3943ec1a0c9cb3011d34c130ca9cde9bc"
+dependencies = [
+ "aligned-vec",
+ "bincode",
+ "bytemuck",
+ "concrete-csprng",
+ "concrete-fft",
+ "concrete-ntt",
+ "dyn-stack",
+ "itertools 0.11.0",
+ "paste",
+ "pulp",
+ "rand_core 0.6.4",
+ "rayon",
+ "serde",
+ "sha3",
+ "tfhe-versionable",
+]
+
+[[package]]
+name = "tfhe"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7190b3967c9322674bae8f247380c8a90d38448fbd8cd35b17a1958f39190ec2"
@@ -2252,9 +2276,9 @@ dependencies = [
 
 [[package]]
 name = "tracing-subscriber"
-version = "0.3.18"
+version = "0.3.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ad0f048c97dbd9faa9b7df56362b8ebcaa52adb06b498c050d2f4e32f90a7a8b"
+checksum = "e8189decb5ac0fa7bc8b96b7cb9b2701d60d48805aca84a238004d665fcc4008"
 dependencies = [
  "nu-ansi-term",
  "sharded-slab",
