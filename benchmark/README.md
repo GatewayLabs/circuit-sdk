@@ -2,6 +2,8 @@
 
 This benchmark suite compares the performance of encrypted operations for two encryption schemes: Gateway and TFHE, on a set of fundamental operations including addition, bitwise operations, comparison, and mux operations. The computations use 128-bit integers and aim to demonstrate the efficiency of these two approaches in privacy-preserving computation.
 
+Our benchmarks show that we're on average **12-25x faster** than TFHE-rs.
+
 The Gateway and TFHE frameworks differ significantly in speed, as seen in the measured times. While Gateway encryption consistently completes operations in the millisecond range, TFHE operations take substantially longer, ranging from hundreds of milliseconds to several seconds. These differences underscore the suitability of Gateway encryption for performance-sensitive applications where computational overhead needs to be minimized, especially in real-time or high-throughput environments.
 
 Each function is tested in isolation to benchmark its specific computational characteristics, and the results, with times measured in milliseconds, indicate that Gateway generally performs at a much higher speed, making it more suitable for use cases that require frequent and rapid encrypted operations.
