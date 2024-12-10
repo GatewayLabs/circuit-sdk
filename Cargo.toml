@@ -16,4 +16,4 @@ license = "MIT"
 
 [workspace.dependencies]
 anyhow = "1.0.94"
-tracing = { version = "0.1.40", features = ["log"] }
+tracing = { version = "0.1.41", features = ["log"] }
