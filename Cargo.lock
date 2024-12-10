@@ -2028,7 +2028,7 @@ dependencies = [
 [[package]]
 name = "tandem"
 version = "0.3.0"
-source = "git+https://github.com/sine-fdn/tandem.git#de9a0c07032cb589faae5bd472170e5eab0048de"
+source = "git+https://github.com/sine-fdn/tandem.git#49c6ae336d6de82ad627c655b51e0b9edef7ecb9"
 dependencies = [
  "bincode",
  "blake3",
