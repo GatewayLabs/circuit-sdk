@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::uint::GarbledUint;
 use std::convert::From;
 use std::fmt::Display;
@@ -17,7 +19,7 @@ pub type GarbledInt512 = GarbledInt<512>;
 pub type GarbledInt1024 = GarbledInt<1024>;
 
 // Define a new type GarbledInt<N>
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GarbledInt<const N: usize> {
     pub bits: Vec<bool>, // Store the bits of the signed integer (in two's complement form)
     _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size

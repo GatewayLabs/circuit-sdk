@@ -1,7 +1,8 @@
 use crate::operations::circuits::builder::GateIndex;
 use crate::uint::GarbledBoolean;
+use serde::{Deserialize, Serialize};
 
-#[derive(Default, Debug, Eq, Hash, PartialEq, Clone)]
+#[derive(Default, Debug, Eq, Hash, PartialEq, Clone, Serialize, Deserialize)]
 pub struct GateIndexVec(Vec<GateIndex>);
 
 impl GateIndexVec {
