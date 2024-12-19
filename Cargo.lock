@@ -2056,7 +2056,7 @@ dependencies = [
 [[package]]
 name = "tandem"
 version = "0.3.0"
-source = "git+https://github.com/GatewayLabs/tandem.git?branch=feat/serde-serialization#bfa2e1030bc284e06c2945258d5e194150e78e8d"
+source = "git+https://github.com/GatewayLabs/tandem.git#1340a8c360cfa411086f7a1a99a7a39f72420c27"
 dependencies = [
  "bincode",
  "blake3",
