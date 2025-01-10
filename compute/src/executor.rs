@@ -6,9 +6,15 @@ use tandem::Circuit;
 use crate::evaluator::{Evaluator, GatewayEvaluator};
 use crate::garbler::{Garbler, GatewayGarbler};
 
+use std::thread::sleep;
+use std::time::Duration;
+
+// 50 MB per second simulated latency
+const DEFAULT_SIMULATED_LATENCY: f64 = 50.0 * 1024.0 * 1024.0; // bytes per second
 /// A static Lazy instance for holding the singleton LocalSimulator.
-static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> =
-    Lazy::new(|| Arc::new(LocalSimulator) as Arc<dyn Executor + Send + Sync>);
+static SINGLETON_EXECUTOR: Lazy<Arc<dyn Executor + Send + Sync>> = Lazy::new(|| {
+    Arc::new(LocalSimulator::new(DEFAULT_SIMULATED_LATENCY)) as Arc<dyn Executor + Send + Sync>
+});
 
 /// Provides access to the singleton Executor instance.
 pub fn get_executor() -> Arc<dyn Executor + Send + Sync> {
@@ -40,7 +46,23 @@ pub trait Executor {
     }
 }
 
-pub struct LocalSimulator;
+pub struct LocalSimulator {
+    latency: f64,
+}
+
+impl LocalSimulator {
+    pub fn new(latency: f64) -> Self {
+        LocalSimulator { latency }
+    }
+}
+
+impl Default for LocalSimulator {
+    fn default() -> Self {
+        LocalSimulator {
+            latency: DEFAULT_SIMULATED_LATENCY,
+        }
+    }
+}
 
 impl Executor for LocalSimulator {
     /// The Multi-Party Computation is performed using the full cryptographic protocol exposed by the
@@ -62,9 +84,12 @@ impl Executor for LocalSimulator {
 
         for _ in 0..total_steps {
             let (next_evaluator, msg_for_garbler) = evaluator.next(&msg_for_evaluator)?;
+            simulate_transfer_time_ms(&msg_for_garbler, &self.latency);
+
             evaluator = next_evaluator;
 
             let (next_garbler, reply) = garbler.next(&msg_for_garbler)?;
+            simulate_transfer_time_ms(&reply, &self.latency);
             garbler = next_garbler;
 
             msg_for_evaluator = reply;
@@ -73,4 +98,10 @@ impl Executor for LocalSimulator {
         let output = evaluator.output(&msg_for_evaluator)?;
         Ok(output)
     }
+}
+
+fn simulate_transfer_time_ms(payload: &Vec<u8>, latency: &f64) {
+    let bytes_size = payload.len() as f64;
+    let transfer_time = bytes_size / latency * 1000.0; // Convert seconds to milliseconds
+    sleep(Duration::from_millis(transfer_time as u64))
 }
