@@ -100,7 +100,7 @@ impl Executor for LocalSimulator {
     }
 }
 
-fn simulate_transfer_time_ms(payload: &Vec<u8>, latency: &f64) {
+fn simulate_transfer_time_ms(payload: &[u8], latency: &f64) {
     let bytes_size = payload.len() as f64;
     let transfer_time = bytes_size / latency * 1000.0; // Convert seconds to milliseconds
     sleep(Duration::from_millis(transfer_time as u64))
