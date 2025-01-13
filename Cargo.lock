@@ -147,8 +147,7 @@ version = "0.1.0"
 dependencies = [
  "compute",
  "criterion",
- "tfhe 0.10.0",
- "tfhe 0.9.1",
+ "tfhe",
 ]
 
 [[package]]
@@ -2051,29 +2050,6 @@ dependencies = [
  "rand_chacha 0.3.1",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "tfhe"
-version = "0.9.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf50da57f871bae30942edcc272db3a3943ec1a0c9cb3011d34c130ca9cde9bc"
-dependencies = [
- "aligned-vec",
- "bincode",
- "bytemuck",
- "concrete-csprng",
- "concrete-fft",
- "concrete-ntt",
- "dyn-stack",
- "itertools 0.11.0",
- "paste",
- "pulp",
- "rand_core 0.6.4",
- "rayon",
- "serde",
- "sha3",
- "tfhe-versionable",
 ]
 
 [[package]]
