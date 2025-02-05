@@ -27,11 +27,11 @@ pub struct GarbledUint<const N: usize> {
 
 impl<const N: usize> GarbledUint<N> {
     pub fn zero() -> Self {
-        GarbledUint::new(vec![false])
+        GarbledUint::new(vec![false; N])
     }
 
     pub fn one() -> Self {
-        GarbledUint::new(vec![true])
+        GarbledUint::new(vec![true; N])
     }
 
     pub fn len(&self) -> usize {
