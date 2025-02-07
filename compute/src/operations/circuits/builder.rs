@@ -9,7 +9,7 @@ use tandem::{Circuit, Gate};
 
 pub type GateIndex = u32;
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Clone, Serialize, Deserialize)]
 pub struct WRK17CircuitBuilder {
     inputs: Vec<bool>,
     gates: Vec<Gate>,
