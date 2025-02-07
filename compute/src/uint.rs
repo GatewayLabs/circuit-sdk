@@ -19,7 +19,7 @@ pub type GarbledUint512 = GarbledUint<512>;
 pub type GarbledUint1024 = GarbledUint<1024>;
 
 // Define a new type Uint<N>
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct GarbledUint<const N: usize> {
     pub bits: Vec<bool>,              // Store the bits of the unsigned integer
     _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size
