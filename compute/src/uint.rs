@@ -264,19 +264,16 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
 }
 
 // Implement ruint::Uint support for GarbledUint<N>
-
-impl<const BITS: usize, const LIMBS: usize> TryFrom<GarbledUint<BITS>> for Uint<BITS, LIMBS> {
-    type Error = ruint::ToUintError<Uint<BITS, LIMBS>>;
-
-    fn try_from(guint: GarbledUint<BITS>) -> Result<Self, Self::Error> {
+impl<const BITS: usize, const LIMBS: usize> Into<Uint<BITS, LIMBS>> for GarbledUint<BITS> {
+    fn into(self) -> Uint<BITS, LIMBS> {
         let mut value = Uint::<BITS, LIMBS>::ZERO;
-        for (i, &bit) in guint.bits.iter().enumerate() {
+        for (i, &bit) in self.bits.iter().enumerate() {
             if bit {
                 value.set_bit(i, bit);
             }
         }
 
-        Ok(value)
+        value
     }
 }
 
