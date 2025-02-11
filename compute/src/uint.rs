@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::int::GarbledInt;
+use ruint::Uint;
 use std::fmt::Display;
 use std::marker::PhantomData;
 
@@ -88,7 +89,10 @@ impl<const N: usize> From<bool> for GarbledUint<N> {
 
 impl<const N: usize> From<u8> for GarbledUint<N> {
     fn from(value: u8) -> Self {
-        assert!(N <= 8, "Uint<N> can only support up to 8 bits for u8");
+        assert!(
+            N <= 8,
+            "GarbledUint<N> can only support up to 8 bits for u8"
+        );
 
         let mut bits = Vec::with_capacity(N);
         for i in 0..N {
@@ -101,7 +105,10 @@ impl<const N: usize> From<u8> for GarbledUint<N> {
 
 impl<const N: usize> From<u16> for GarbledUint<N> {
     fn from(value: u16) -> Self {
-        assert!(N <= 16, "Uint<N> can only support up to 16 bits for u16");
+        assert!(
+            N <= 16,
+            "GarbledUint<N> can only support up to 16 bits for u16"
+        );
 
         let mut bits = Vec::with_capacity(N);
         for i in 0..N {
@@ -114,7 +121,10 @@ impl<const N: usize> From<u16> for GarbledUint<N> {
 
 impl<const N: usize> From<u32> for GarbledUint<N> {
     fn from(value: u32) -> Self {
-        assert!(N <= 32, "Uint<N> can only support up to 32 bits for u32");
+        assert!(
+            N <= 32,
+            "GarbledUint<N> can only support up to 32 bits for u32"
+        );
 
         let mut bits = Vec::with_capacity(N);
         for i in 0..N {
@@ -127,7 +137,10 @@ impl<const N: usize> From<u32> for GarbledUint<N> {
 
 impl<const N: usize> From<u64> for GarbledUint<N> {
     fn from(value: u64) -> Self {
-        assert!(N <= 64, "Uint<N> can only support up to 64 bits for u64");
+        assert!(
+            N <= 64,
+            "GarbledUint<N> can only support up to 64 bits for u64"
+        );
 
         let mut bits = Vec::with_capacity(N);
         for i in 0..N {
@@ -140,7 +153,10 @@ impl<const N: usize> From<u64> for GarbledUint<N> {
 
 impl<const N: usize> From<u128> for GarbledUint<N> {
     fn from(value: u128) -> Self {
-        assert!(N <= 128, "Uint<N> can only support up to 128 bits for u128");
+        assert!(
+            N <= 128,
+            "GarbledUint<N> can only support up to 128 bits for u128"
+        );
 
         let mut bits = Vec::with_capacity(N);
         for i in 0..N {
@@ -159,7 +175,10 @@ impl<const N: usize> From<GarbledUint<N>> for bool {
 
 impl<const N: usize> From<GarbledUint<N>> for u8 {
     fn from(guint: GarbledUint<N>) -> Self {
-        assert!(N <= 8, "Uint<N> can only be converted to u8 if N <= 8");
+        assert!(
+            N <= 8,
+            "GarbledUint<N> can only be converted to u8 if N <= 8"
+        );
 
         let mut value: u8 = 0;
         for (i, &bit) in guint.bits.iter().enumerate() {
@@ -174,7 +193,10 @@ impl<const N: usize> From<GarbledUint<N>> for u8 {
 
 impl<const N: usize> From<GarbledUint<N>> for u16 {
     fn from(guint: GarbledUint<N>) -> Self {
-        assert!(N <= 16, "Uint<N> can only be converted to u16 if N <= 16");
+        assert!(
+            N <= 16,
+            "GarbledUint<N> can only be converted to u16 if N <= 16"
+        );
 
         let mut value: u16 = 0;
         for (i, &bit) in guint.bits.iter().enumerate() {
@@ -189,7 +211,10 @@ impl<const N: usize> From<GarbledUint<N>> for u16 {
 
 impl<const N: usize> From<GarbledUint<N>> for u32 {
     fn from(guint: GarbledUint<N>) -> Self {
-        assert!(N <= 32, "Uint<N> can only be converted to u32 if N <= 32");
+        assert!(
+            N <= 32,
+            "GarbledUint<N> can only be converted to u32 if N <= 32"
+        );
 
         let mut value: u32 = 0;
         for (i, &bit) in guint.bits.iter().enumerate() {
@@ -204,7 +229,10 @@ impl<const N: usize> From<GarbledUint<N>> for u32 {
 
 impl<const N: usize> From<GarbledUint<N>> for u64 {
     fn from(guint: GarbledUint<N>) -> Self {
-        assert!(N <= 64, "Uint<N> can only be converted to u64 if N <= 64");
+        assert!(
+            N <= 64,
+            "GarbledUint<N> can only be converted to u64 if N <= 64"
+        );
 
         let mut value: u64 = 0;
         for (i, &bit) in guint.bits.iter().enumerate() {
@@ -235,10 +263,64 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
     }
 }
 
-/*
-impl From<GarbledBit> for bool {
-    fn from(guint: GarbledUint<1>) -> Self {
-        guint.bits[0]
+// Implement ruint::Uint support for GarbledUint<N>
+
+impl<const BITS: usize, const LIMBS: usize> TryFrom<GarbledUint<BITS>> for Uint<BITS, LIMBS> {
+    type Error = ruint::ToUintError<Uint<BITS, LIMBS>>;
+
+    fn try_from(guint: GarbledUint<BITS>) -> Result<Self, Self::Error> {
+        let mut value = Uint::<BITS, LIMBS>::ZERO;
+        for (i, &bit) in guint.bits.iter().enumerate() {
+            if bit {
+                value.set_bit(i, bit);
+            }
+        }
+
+        Ok(value)
     }
 }
-*/
+
+impl<const BITS: usize, const LIMBS: usize> From<Uint<BITS, LIMBS>> for GarbledUint<BITS> {
+    fn from(uint: Uint<BITS, LIMBS>) -> Self {
+        let mut bits = Vec::with_capacity(BITS);
+        for i in 0..BITS {
+            bits.push(uint.bit(i));
+        }
+
+        GarbledUint::new(bits)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use ruint::aliases::{U128, U8};
+
+    use crate::uint::GarbledUint;
+
+    #[test]
+    fn test_from_ruint_to_garbleduint() {
+        let value = U8::from(255);
+        let uint = GarbledUint::from(value.clone());
+        assert_eq!(U8::from(uint), value);
+    }
+
+    #[test]
+    fn test_from_garbleduint_8_to_ruint() {
+        let guint = GarbledUint::<8>::from(255u8);
+        let uint8 = U8::from(guint.clone());
+        assert_eq!(GarbledUint::from(uint8), guint);
+    }
+
+    #[test]
+    fn test_from_garbleduint_128_to_ruint() {
+        let guint = GarbledUint::<128>::from(255u128);
+        let uint128 = U128::from(guint.clone());
+        assert_eq!(GarbledUint::from(uint128), guint);
+    }
+
+    #[test]
+    fn test_garbled_uint_from_bool() {
+        let uint = GarbledUint::<1>::from(true);
+        assert_eq!(bool::from(uint), true);
+    }
+}

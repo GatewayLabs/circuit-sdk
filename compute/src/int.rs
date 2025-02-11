@@ -74,7 +74,7 @@ impl<const N: usize> From<&GarbledUint<N>> for GarbledInt<N> {
 
 impl<const N: usize> From<i8> for GarbledInt<N> {
     fn from(value: i8) -> Self {
-        assert!(N <= 8, "Int<N> can only support up to 8 bits for i8");
+        assert!(N <= 8, "GarbledInt<N> can only support up to 8 bits for i8");
 
         // Convert i8 to bits, least-significant bit first (two's complement)
         let mut bits = Vec::with_capacity(N);
@@ -91,7 +91,10 @@ impl<const N: usize> From<i8> for GarbledInt<N> {
 
 impl<const N: usize> From<i16> for GarbledInt<N> {
     fn from(value: i16) -> Self {
-        assert!(N <= 16, "Int<N> can only support up to 16 bits for i16");
+        assert!(
+            N <= 16,
+            "GarbledInt<N> can only support up to 16 bits for i16"
+        );
 
         let mut bits = Vec::with_capacity(N);
         let mut mask = 1;
@@ -107,7 +110,10 @@ impl<const N: usize> From<i16> for GarbledInt<N> {
 
 impl<const N: usize> From<i32> for GarbledInt<N> {
     fn from(value: i32) -> Self {
-        assert!(N <= 32, "Int<N> can only support up to 32 bits for i32");
+        assert!(
+            N <= 32,
+            "GarbledInt<N> can only support up to 32 bits for i32"
+        );
 
         let mut bits = Vec::with_capacity(N);
         let mut mask = 1;
@@ -123,7 +129,10 @@ impl<const N: usize> From<i32> for GarbledInt<N> {
 
 impl<const N: usize> From<i64> for GarbledInt<N> {
     fn from(value: i64) -> Self {
-        assert!(N <= 64, "Int<N> can only support up to 64 bits for i64");
+        assert!(
+            N <= 64,
+            "GarbledInt<N> can only support up to 64 bits for i64"
+        );
 
         let mut bits = Vec::with_capacity(N);
         let mut mask = 1;
@@ -139,7 +148,10 @@ impl<const N: usize> From<i64> for GarbledInt<N> {
 
 impl<const N: usize> From<i128> for GarbledInt<N> {
     fn from(value: i128) -> Self {
-        assert!(N <= 128, "Int<N> can only support up to 128 bits for i128");
+        assert!(
+            N <= 128,
+            "GarbledInt<N> can only support up to 128 bits for i128"
+        );
 
         let mut bits = Vec::with_capacity(N);
         let mut mask = 1;
@@ -155,7 +167,10 @@ impl<const N: usize> From<i128> for GarbledInt<N> {
 
 impl<const N: usize> From<GarbledInt<N>> for i8 {
     fn from(gint: GarbledInt<N>) -> Self {
-        assert!(N <= 8, "Int<N> can only be converted to i8 if N <= 8");
+        assert!(
+            N <= 8,
+            "GarbledInt<N> can only be converted to i8 if N <= 8"
+        );
 
         let mut value: i8 = 0;
         for (i, &bit) in gint.bits.iter().enumerate() {
@@ -170,7 +185,10 @@ impl<const N: usize> From<GarbledInt<N>> for i8 {
 
 impl<const N: usize> From<GarbledInt<N>> for i16 {
     fn from(gint: GarbledInt<N>) -> Self {
-        assert!(N <= 16, "Int<N> can only be converted to i16 if N <= 16");
+        assert!(
+            N <= 16,
+            "GarbledInt<N> can only be converted to i16 if N <= 16"
+        );
 
         let mut value: i16 = 0;
         for (i, &bit) in gint.bits.iter().enumerate() {
@@ -185,7 +203,10 @@ impl<const N: usize> From<GarbledInt<N>> for i16 {
 
 impl<const N: usize> From<GarbledInt<N>> for i32 {
     fn from(gint: GarbledInt<N>) -> Self {
-        assert!(N <= 32, "Int<N> can only be converted to i32 if N <= 32");
+        assert!(
+            N <= 32,
+            "GarbledInt<N> can only be converted to i32 if N <= 32"
+        );
 
         let mut value: i32 = 0;
         for (i, &bit) in gint.bits.iter().enumerate() {
@@ -200,7 +221,10 @@ impl<const N: usize> From<GarbledInt<N>> for i32 {
 
 impl<const N: usize> From<GarbledInt<N>> for i64 {
     fn from(gint: GarbledInt<N>) -> Self {
-        assert!(N <= 64, "Int<N> can only be converted to i64 if N <= 64");
+        assert!(
+            N <= 64,
+            "GarbledInt<N> can only be converted to i64 if N <= 64"
+        );
 
         let mut value: i64 = 0;
         for (i, &bit) in gint.bits.iter().enumerate() {
@@ -215,7 +239,10 @@ impl<const N: usize> From<GarbledInt<N>> for i64 {
 
 impl<const N: usize> From<GarbledInt<N>> for i128 {
     fn from(gint: GarbledInt<N>) -> Self {
-        assert!(N <= 128, "Int<N> can only be converted to i128 if N <= 128");
+        assert!(
+            N <= 128,
+            "GarbledInt<N> can only be converted to i128 if N <= 128"
+        );
 
         let mut value: i128 = 0;
         for (i, &bit) in gint.bits.iter().enumerate() {
