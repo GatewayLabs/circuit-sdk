@@ -234,22 +234,38 @@ impl<const BITS: usize, const LIMBS: usize> TryFrom<GarbledInt<BITS>> for Uint<B
     type Error = ruint::ToUintError<Uint<BITS, LIMBS>>;
 
     fn try_from(guint: GarbledInt<BITS>) -> Result<Self, Self::Error> {
-        let mut value = Uint::<BITS, LIMBS>::ZERO;
+        let mut value: [u8; BITS] = [0; BITS];
+        let is_negative = guint.bits[BITS - 1]; // check MSB for 2's complement; e.g. if neg
+
         for (i, &bit) in guint.bits.iter().enumerate() {
-            if bit {
-                value.set_bit(i, bit);
+            if is_negative {
+                value[i] = if bit { 0 } else { 1 };
+            } else {
+                value[i] = if bit { 1 } else { 0 };
             }
         }
 
-        Ok(value)
+        if is_negative {
+            Ok(Uint::<BITS, LIMBS>::from_le_bytes(value).overflowing_add(Uint::<BITS, LIMBS>::from(1)).0)
+        } else {
+            Ok(Uint::<BITS, LIMBS>::from_le_bytes(value))
+        }
     }
 }
 
 impl<const BITS: usize, const LIMBS: usize> From<Uint<BITS, LIMBS>> for GarbledInt<BITS> {
     fn from(uint: Uint<BITS, LIMBS>) -> Self {
         let mut bits = Vec::with_capacity(BITS);
+        let is_negative = uint.bit(BITS - 1);
+
+        let mut value = uint;
+        if is_negative {
+            // Convert from positive value to two's complement
+            value = !value + Uint::<BITS, LIMBS>::from(1);
+        }
+
         for i in 0..BITS {
-            bits.push(uint.bit(i));
+            bits.push(value.bit(i));
         }
 
         GarbledInt::new(bits)
@@ -282,4 +298,21 @@ mod tests {
         let ruint = U128::try_from(gint).unwrap();
         assert_eq!(ruint, ruint::Uint::from(255_i128));
     }
+
+    #[test]
+    pub fn from_negative_garbledint_8_to_ruint () {
+        let gint = GarbledInt::<8>::from(-5_i8);
+        let ruint = U8::try_from(gint.clone()).unwrap();        
+
+        assert_eq!(U8::try_from(-5_i8).unwrap(), ruint);
+    }
+
+    #[test]
+    pub fn from_negative_garbledint_128_to_ruint () {        
+        let gint = GarbledInt::<128>::from(-255_i128);
+        let ruint = U128::try_from(gint.clone()).unwrap();
+        assert_eq!(GarbledInt::from(ruint), gint);
+    }
+
+
 }
