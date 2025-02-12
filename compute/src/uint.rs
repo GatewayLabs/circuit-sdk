@@ -300,7 +300,7 @@ mod tests {
     #[test]
     fn test_from_ruint_to_garbleduint() {
         let value = U8::from(255);
-        let uint = GarbledUint::from(value.clone());
+        let uint = GarbledUint::from(value);
         assert_eq!(U8::from(uint), value);
     }
 
@@ -321,6 +321,6 @@ mod tests {
     #[test]
     fn test_garbled_uint_from_bool() {
         let uint = GarbledUint::<1>::from(true);
-        assert_eq!(bool::from(uint), true);
+        assert!(bool::from(uint));
     }
 }
