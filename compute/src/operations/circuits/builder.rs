@@ -981,6 +981,6 @@ mod tests {
             .expect("Failed to execute circuit");
 
         // Should be equal
-        assert_eq!(bool::from(result), true);
+        assert!(bool::from(result));
     }
 }
