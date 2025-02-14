@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::int::GarbledInt;
 use ruint::Uint;
-use std::fmt::Display;
+use std::fmt::{Display, Formatter, LowerHex};
 use std::marker::PhantomData;
 
 pub type GarbledBoolean = GarbledUint<1>;
@@ -47,6 +47,29 @@ impl<const N: usize> GarbledUint<N> {
 impl<const N: usize> Display for GarbledUint<N> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", u128::from(self.clone()))
+    }
+}
+
+impl<const BITS: usize> LowerHex for GarbledUint<BITS> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let nibbles = (BITS + 3) / 4;
+
+        let mut padded_bits = self.bits.clone();
+        while padded_bits.len() < nibbles * 4 {
+            padded_bits.insert(0, false);
+        }
+
+        let mut hex_str = String::with_capacity(nibbles);
+
+        for nibble_bits in padded_bits.chunks(4) {
+            let mut value = 0;
+            for &bit in nibble_bits {
+                value = (value << 1) | (if bit { 1 } else { 0 });
+            }
+            hex_str.push(std::char::from_digit(value as u32, 16).expect("valid nibble"));
+        }
+
+        write!(f, "{}", hex_str)
     }
 }
 
