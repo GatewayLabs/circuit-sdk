@@ -4,6 +4,7 @@ use crate::uint::GarbledUint;
 use crate::{executor::get_executor, uint::GarbledBoolean};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use std::fmt::Debug;
 use tandem::{Circuit, Gate};
 
@@ -13,6 +14,7 @@ pub type GateIndex = u32;
 pub struct WRK17CircuitBuilder {
     inputs: Vec<bool>,
     gates: Vec<Gate>,
+    constant_cache: HashMap<String, GateIndexVec>,
 }
 
 impl Debug for WRK17CircuitBuilder {
@@ -37,15 +39,28 @@ impl WRK17CircuitBuilder {
         // get the cumulative size of all inputs in input_labels
         //let input_offset = self.input_labels.iter().map(|x| x.len()).sum::<usize>();
 
-        let input_offset = self.inputs.len();
         let mut input_label = GateIndexVec::default();
-        for (i, bool_value) in input.bits.iter().enumerate() {
-            self.gates.insert(0, Gate::InContrib);
+        for bool_value in input.bits.iter() {
+            let new_gate_index = self.gates.len() as GateIndex;
 
+            self.gates.push(Gate::InContrib);
             self.inputs.push(*bool_value);
-            input_label.push((input_offset + i) as GateIndex);
+
+            input_label.push(new_gate_index);
         }
         input_label
+    }
+
+    pub fn constant<const R: usize>(&mut self, value: &GarbledUint<R>) -> GateIndexVec {
+        let key = format!("{:x}", value);
+        if let Some(cached) = self.constant_cache.get(&key) {
+            return cached.clone();
+        }
+
+        // Convert the value to a GarbledUint using From<Uint> implementation
+        let wire = self.input(value);
+        self.constant_cache.insert(key, wire.clone());
+        wire
     }
 
     pub fn len(&self) -> GateIndex {
@@ -925,5 +940,47 @@ mod tests {
 
         let result_value: u8 = result.into();
         assert_eq!(result_value, 2 + 5);
+    }
+
+    #[test]
+    fn test_constant_caching() {
+        let mut builder = WRK17CircuitBuilder::default();
+
+        // Get constant 1 twice
+        let one: GarbledUint32 = 1u32.into();
+        let wire1 = builder.constant::<32>(&one);
+        let wire2 = builder.constant::<32>(&one);
+
+        // Verify we got the same wire indices
+        assert_eq!(wire1, wire2);
+
+        // Verify the cache size is 1 (not 2)
+        assert_eq!(builder.constant_cache.len(), 1);
+    }
+
+    #[test]
+    fn test_constant_in_circuit() {
+        let mut builder = WRK17CircuitBuilder::default();
+
+        // Create a circuit that compares a variable with constant 1
+        let var: GarbledUint32 = 1u32.into();
+        let var_wire = builder.input(&var);
+
+        let one: GarbledUint32 = 1u32.into();
+        let const_wire = builder.constant::<32>(&one);
+
+        // Take first 32 bits of const_wire for comparison
+        let const_wire_32 = GateIndexVec::new(const_wire.iter().take(32).copied().collect());
+
+        // Compare them for equality
+        let eq = builder.eq(&var_wire, &const_wire_32);
+
+        let circuit = builder.compile(&vec![eq].into());
+        let result = builder
+            .execute::<1>(&circuit)
+            .expect("Failed to execute circuit");
+
+        // Should be equal
+        assert_eq!(bool::from(result), true);
     }
 }
