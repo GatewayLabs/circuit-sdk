@@ -189,6 +189,34 @@ impl WRK17CircuitBuilder {
         new_vec
     }
 
+    fn fixed_shl(&mut self, a: &GateIndexVec, amount: usize) -> GateIndexVec {
+        let n = a.len();
+        let zero = self.constant::<1>(&0u128.into())[0];
+        let mut new_vec = GateIndexVec::default();
+        for i in 0..n {
+            if i < amount {
+                new_vec.push(zero);
+            } else {
+                new_vec.push(a[i - amount]);
+            }
+        }
+        new_vec
+    }
+
+    fn fixed_shr(&mut self, a: &GateIndexVec, amount: usize) -> GateIndexVec {
+        let n = a.len();
+        let zero = self.constant::<1>(&0u128.into())[0];
+        let mut new_vec = GateIndexVec::default();
+        for i in 0..n {
+            if i + amount < n {
+                new_vec.push(a[i + amount]);
+            } else {
+                new_vec.push(zero);
+            }
+        }
+        new_vec
+    }
+
     pub fn compile(&self, output_indices: &GateIndexVec) -> Circuit {
         Circuit::new(self.gates.clone(), output_indices.clone().into())
     }
@@ -353,6 +381,28 @@ impl CircuitExecutor for WRK17CircuitBuilder {
         self.div_inner(a, b).1
     }
 
+    fn shl(&mut self, a: &GateIndexVec, shift: &GateIndexVec) -> GateIndexVec {
+        let mut result = a.clone();
+        let k = shift.len();
+        for i in 0..k {
+            let amount = 1 << i;
+            let partial = self.fixed_shl(&result, amount);
+            result = self.mux(&shift[i], &partial, &result);
+        }
+        result
+    }
+
+    fn shr(&mut self, a: &GateIndexVec, shift: &GateIndexVec) -> GateIndexVec {
+        let mut result = a.clone();
+        let k = shift.len();
+        for i in 0..k {
+            let amount = 1 << i;
+            let partial = self.fixed_shr(&result, amount);
+            result = self.mux(&shift[i], &partial, &result);
+        }
+        result
+    }
+
     fn eq(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> GateIndex {
         let mut eq_list = vec![0; a.len()];
 
@@ -457,6 +507,28 @@ build_and_execute!(build_and_execute_subtraction, sub);
 build_and_execute!(build_and_execute_multiplication, mul);
 build_and_execute!(build_and_execute_division, div);
 build_and_execute!(build_and_execute_remainder, rem);
+
+macro_rules! build_and_execute_shift {
+    ($fn_name:ident, $op:ident) => {
+        pub(crate) fn $fn_name<const N: usize, const K: usize>(
+            lhs: &GarbledUint<N>,
+            rhs: &GarbledUint<K>,
+        ) -> GarbledUint<N> {
+            let mut builder = WRK17CircuitBuilder::default();
+
+            let a = builder.input(lhs);
+            let b = builder.input(rhs);
+
+            let output = builder.$op(&a, &b);
+            let circuit = builder.compile(&output);
+
+            builder.execute(&circuit).expect("Circuit execution failed")
+        }
+    };
+}
+
+build_and_execute_shift!(build_and_execute_shl, shl);
+build_and_execute_shift!(build_and_execute_shr, shr);
 
 fn full_adder(
     builder: &mut WRK17CircuitBuilder,
@@ -891,6 +963,27 @@ mod tests {
         let result = build_and_execute_multiplication(&a, &b);
         let result_value: u8 = result.into();
         assert_eq!(result_value, 9 * 3);
+    }
+
+    #[test]
+    fn test_build_and_execute_shl() {
+        let a: GarbledUint8 = 31_u8.into();
+        let shift_amt: GarbledUint8 = 2_u8.into();
+
+        // call the macro-based function directly:
+        let shifted = build_and_execute_shl(&a, &shift_amt);
+        let shifted_val: u8 = shifted.into();
+        assert_eq!(shifted_val, 31 << 2); // i.e. 0b01111100 = 124
+    }
+
+    #[test]
+    fn test_build_and_execute_shr() {
+        let a: GarbledUint8 = 240_u8.into();
+        let shift_amt: GarbledUint8 = 3_u8.into();
+
+        let shifted = build_and_execute_shr(&a, &shift_amt);
+        let shifted_val: u8 = shifted.into();
+        assert_eq!(shifted_val, 240 >> 3); // 0b0001_1110 = 30
     }
 
     #[test]
