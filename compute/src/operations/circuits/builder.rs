@@ -141,46 +141,52 @@ impl WRK17CircuitBuilder {
         self.push_or(&and_a_not_s, &and_b_s)
     }
 
+    /// Implements the division circuit using a bit-serial long division algorithm.
     fn div_inner(&mut self, a: &GateIndexVec, b: &GateIndexVec) -> (GateIndexVec, GateIndexVec) {
         let n = a.len();
-        let mut quotient = GateIndexVec::default();
-        let mut remainder = GateIndexVec::default();
 
-        // Initialize remainder with 0
-        for _ in 0..n {
-            remainder.push(GateIndex::default()); // Zero initialize
-        }
+        // zero out quotient, remainder
+        let mut quotient = GateIndexVec::new(vec![self.constant::<1>(&0u128.into())[0]; n]);
+        let mut remainder = GateIndexVec::new(vec![self.constant::<1>(&0u128.into())[0]; n]);
 
-        // Iterate through each bit, starting from the most significant
+        let one_bit_vec = self.constant::<1>(&1u128.into());
+        let zero_bit_vec = self.constant::<1>(&0u128.into());
+
+        // For each bit from MSB down to LSB:
         for i in (0..n).rev() {
-            // Shift remainder left by 1 (equivalent to adding a bit)
-            remainder.insert(0, a[i]);
-            if remainder.len() > n {
-                remainder.truncate(n); // Ensure remainder does not exceed bit width
-            }
+            remainder = self.shift_left(&remainder);
+            remainder = self.set_lsb(&remainder, a[i]);
 
-            // Check if remainder is greater than or equal to divisor
-            let greater_or_equal = self.ge(&remainder, b);
+            let ge_bit = self.ge(&remainder, b);
 
-            // If remainder is greater than or equal to divisor, set quotient bit to 1 and subtract divisor from remainder
-            if greater_or_equal != GateIndex::default() {
-                // Subtract divisor from remainder if it’s greater than or equal
-                let new_remainder = self.sub(&remainder, b);
-                remainder = self.mux(&greater_or_equal, &new_remainder, &remainder);
+            let remainder_sub = self.sub(&remainder, b);
+            remainder = self.mux(&ge_bit, &remainder_sub, &remainder);
 
-                // Set quotient bit to 1
-                quotient.insert(0, greater_or_equal);
-            } else {
-                // Set quotient bit to 0
-                quotient.insert(0, GateIndex::default());
-            }
-
-            if quotient.len() > n {
-                quotient.truncate(n); // Ensure quotient does not exceed bit width
-            }
+            let q_bit = self.mux(&ge_bit, &one_bit_vec, &zero_bit_vec)[0];
+            quotient = self.shift_left(&quotient);
+            quotient = self.set_lsb(&quotient, q_bit);
         }
 
         (quotient, remainder)
+    }
+
+    fn shift_left(&mut self, vec: &GateIndexVec) -> GateIndexVec {
+        let n = vec.len();
+        let zero = self.constant::<1>(&0u128.into())[0];
+        let mut new_vec = GateIndexVec::default();
+        new_vec.push(zero);
+        for i in 0..(n - 1) {
+            new_vec.push(vec[i]);
+        }
+        new_vec
+    }
+
+    fn set_lsb(&mut self, vec: &GateIndexVec, bit: GateIndex) -> GateIndexVec {
+        let mut new_vec = vec.clone();
+        if !new_vec.is_empty() {
+            new_vec.set(0, bit);
+        }
+        new_vec
     }
 
     pub fn compile(&self, output_indices: &GateIndexVec) -> Circuit {
@@ -638,10 +644,9 @@ mod tests {
     use tracing::debug;
 
     use super::*;
-    use crate::uint::GarbledBit;
-    use crate::uint::GarbledUint32;
-    use crate::uint::GarbledUint64;
-    use crate::uint::GarbledUint8;
+    use crate::uint::{
+        GarbledBit, GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8,
+    };
 
     #[test]
     fn test_div() {
@@ -661,6 +666,166 @@ mod tests {
         let result = build_and_execute_remainder(&a, &b);
         let result_value: u8 = result.into();
         assert_eq!(result_value, 10 % 3);
+    }
+
+    // Test several u8 (8-bit) cases.
+    #[test]
+    fn test_div_rem_u8_complex() {
+        let test_cases: &[(u8, u8, u8, u8)] = &[
+            (10, 2, 5, 0),
+            (250, 3, 83, 1),
+            (255, 3, 85, 0),
+            (200, 7, 28, 4),
+            (123, 5, 24, 3),
+            (17, 4, 4, 1),
+        ];
+        for &(dividend, divisor, expected_q, expected_r) in test_cases {
+            let a: GarbledUint8 = dividend.into();
+            let b: GarbledUint8 = divisor.into();
+            let quotient = build_and_execute_division(&a, &b);
+            let remainder = build_and_execute_remainder(&a, &b);
+            let q: u8 = quotient.into();
+            let r: u8 = remainder.into();
+            println!(
+                "dividing {} by {}: quotient {} remainder {}",
+                dividend, divisor, q, r
+            );
+            assert_eq!(
+                q, expected_q,
+                "Incorrect quotient for {} / {}",
+                dividend, divisor
+            );
+            assert_eq!(
+                r, expected_r,
+                "Incorrect remainder for {} / {}",
+                dividend, divisor
+            );
+        }
+    }
+
+    // Test several u16 (16-bit) cases.
+    #[test]
+    fn test_div_rem_u16_complex() {
+        let test_cases: &[(u16, u16, u16, u16)] = &[
+            (1000, 7, 142, 6),
+            (12345, 123, 100, 45),
+            (65535, 255, 257, 0),
+            (4321, 13, 332, 5),
+            (100, 3, 33, 1),
+        ];
+        for &(dividend, divisor, expected_q, expected_r) in test_cases {
+            let a: GarbledUint16 = dividend.into();
+            let b: GarbledUint16 = divisor.into();
+            let quotient = build_and_execute_division(&a, &b);
+            let remainder = build_and_execute_remainder(&a, &b);
+            let q: u16 = quotient.into();
+            let r: u16 = remainder.into();
+            println!(
+                "dividing {} by {}: quotient {} remainder {}",
+                dividend, divisor, q, r
+            );
+            assert_eq!(
+                q, expected_q,
+                "Incorrect quotient for {} / {}",
+                dividend, divisor
+            );
+            assert_eq!(
+                r, expected_r,
+                "Incorrect remainder for {} / {}",
+                dividend, divisor
+            );
+        }
+    }
+
+    #[test]
+    fn test_div_rem_u32_complex() {
+        let test_cases: &[(u32, u32, u32, u32)] = &[
+            (1_000_000_000, 3, 333_333_333, 1),
+            (2863311530, 7, 409044504, 2),
+            (123456789, 12345, 10000, 6789),
+        ];
+        for &(dividend, divisor, expected_q, expected_r) in test_cases {
+            let a: GarbledUint32 = dividend.into();
+            let b: GarbledUint32 = divisor.into();
+            let quotient = build_and_execute_division(&a, &b);
+            let remainder = build_and_execute_remainder(&a, &b);
+            let q: u32 = quotient.into();
+            let r: u32 = remainder.into();
+            println!(
+                "dividing {} by {}: quotient {} remainder {}",
+                dividend, divisor, q, r
+            );
+            assert_eq!(
+                q, expected_q,
+                "Incorrect quotient for {} / {}",
+                dividend, divisor
+            );
+            assert_eq!(
+                r, expected_r,
+                "Incorrect remainder for {} / {}",
+                dividend, divisor
+            );
+        }
+    }
+
+    #[test]
+    fn test_div_rem_u64_complex() {
+        let test_cases: &[(u64, u64, u64, u64)] = &[
+            (u64::MAX, 3, 6148914691236517205, 0),
+            (100_000_000_000, 3, 33_333_333_333, 1),
+        ];
+        for &(dividend, divisor, expected_q, expected_r) in test_cases {
+            let a: GarbledUint64 = dividend.into();
+            let b: GarbledUint64 = divisor.into();
+            let quotient = build_and_execute_division(&a, &b);
+            let remainder = build_and_execute_remainder(&a, &b);
+            let q: u64 = quotient.into();
+            let r: u64 = remainder.into();
+            println!(
+                "dividing {} by {}: quotient {} remainder {}",
+                dividend, divisor, q, r
+            );
+            assert_eq!(
+                q, expected_q,
+                "Incorrect quotient for {} / {}",
+                dividend, divisor
+            );
+            assert_eq!(
+                r, expected_r,
+                "Incorrect remainder for {} / {}",
+                dividend, divisor
+            );
+        }
+    }
+
+    #[test]
+    fn test_div_rem_u128_complex() {
+        let test_cases: &[(u128, u128, u128, u128)] = &[
+            (12297829382473034410u128, 3, 4099276460824344803, 1),
+            (500u128, 7, 71, 3),
+        ];
+        for &(dividend, divisor, expected_q, expected_r) in test_cases {
+            let a: GarbledUint128 = dividend.into();
+            let b: GarbledUint128 = divisor.into();
+            let quotient = build_and_execute_division(&a, &b);
+            let remainder = build_and_execute_remainder(&a, &b);
+            let q: u128 = quotient.into();
+            let r: u128 = remainder.into();
+            println!(
+                "dividing {} by {}: quotient {} remainder {}",
+                dividend, divisor, q, r
+            );
+            assert_eq!(
+                q, expected_q,
+                "Incorrect quotient for {} / {}",
+                dividend, divisor
+            );
+            assert_eq!(
+                r, expected_r,
+                "Incorrect remainder for {} / {}",
+                dividend, divisor
+            );
+        }
     }
 
     #[test]

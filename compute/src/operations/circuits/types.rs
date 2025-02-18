@@ -45,6 +45,10 @@ impl GateIndexVec {
     pub fn truncate(&mut self, len: usize) {
         self.0.truncate(len);
     }
+
+    pub fn set(&mut self, index: usize, value: GateIndex) {
+        self.0[index] = value;
+    }
 }
 
 // Implement indexing for GateVector
