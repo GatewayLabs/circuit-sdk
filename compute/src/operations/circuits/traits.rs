@@ -286,4 +286,28 @@ pub trait CircuitExecutor {
     ///
     /// A single element of type `Type` representing the logical OR result across the input vectors.
     fn lor(&mut self, a: &Self::TypeVec, b: &Self::TypeVec) -> Self::Type;
+
+    /// Shifts a vector to the left by a specified number of positions.
+    ///
+    /// # Parameters
+    ///
+    /// - `a`: A reference to the vector to be shifted.
+    /// - `shift`: A reference to the vector containing the number of positions to shift.
+    ///
+    /// # Returns
+    ///
+    /// A vector of elements resulting from the left shift operation.
+    fn shl(&mut self, a: &Self::TypeVec, shift: &Self::TypeVec) -> Self::TypeVec;
+
+    /// Shifts a vector to the right by a specified number of positions.
+    ///
+    /// # Parameters
+    ///
+    /// - `a`: A reference to the vector to be shifted.
+    /// - `shift`: A reference to the vector containing the number of positions to shift.
+    ///
+    /// # Returns
+    ///
+    /// A vector of elements resulting from the right shift operation.
+    fn shr(&mut self, a: &Self::TypeVec, shift: &Self::TypeVec) -> Self::TypeVec;
 }

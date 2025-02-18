@@ -1,7 +1,8 @@
 use crate::int::GarbledInt;
 use crate::operations::circuits::builder::{
     build_and_execute_and, build_and_execute_nand, build_and_execute_nor, build_and_execute_not,
-    build_and_execute_or, build_and_execute_xnor, build_and_execute_xor,
+    build_and_execute_or, build_and_execute_shl, build_and_execute_shr, build_and_execute_xnor,
+    build_and_execute_xor,
 };
 use crate::uint::GarbledUint;
 use std::ops::{
@@ -237,164 +238,203 @@ impl<const N: usize> Not for &GarbledInt<N> {
     }
 }
 
-// Helper function for shift operations
-fn shift_bits_left<const N: usize>(bits: &mut Vec<bool>, shift: usize) {
-    for _ in 0..shift {
-        bits.remove(N - 1); // Remove the most significant bit
-        bits.insert(0, false); // Insert a 0 to the least significant bit
+// Implement the Shift-left operation for GarbledUint<N>
+impl<const N: usize, const K: usize> Shl<&GarbledUint<K>> for GarbledUint<N> {
+    type Output = GarbledUint<N>;
+    fn shl(self, rhs: &GarbledUint<K>) -> Self::Output {
+        build_and_execute_shl::<N, K>(&self, rhs)
     }
 }
 
-fn shift_bits_right<const N: usize>(bits: &mut Vec<bool>, shift: usize) {
-    for _ in 0..shift {
-        bits.remove(0); // Remove the least significant bit
-        bits.push(false); // Insert a 0 to the most significant bit
+// Implement the Shift-left operation for &GarbledUint<N>
+impl<const N: usize, const K: usize> Shl<&GarbledUint<K>> for &GarbledUint<N> {
+    type Output = GarbledUint<N>;
+    fn shl(self, rhs: &GarbledUint<K>) -> Self::Output {
+        build_and_execute_shl::<N, K>(self, rhs)
     }
 }
 
-// Implement Shift Left operation for Uint<N>
+// Implement the Shift-left operation for GarbledUint<N> with a literal shift amount
 impl<const N: usize> Shl<usize> for GarbledUint<N> {
-    type Output = Self;
-
-    fn shl(mut self, shift: usize) -> Self::Output {
-        shift_bits_left::<N>(&mut self.bits, shift);
-        self
+    type Output = GarbledUint<N>;
+    fn shl(self, shift: usize) -> Self::Output {
+        let shift_wire: GarbledUint<8> = shift.into();
+        build_and_execute_shl::<N, 8>(&self, &shift_wire)
     }
 }
 
-// Implement Shift Left operation for &GarbledUint<N>
+// Implement the Shift-left operation for &GarbledUint<N> with a literal shift amount
 impl<const N: usize> Shl<usize> for &GarbledUint<N> {
     type Output = GarbledUint<N>;
-
     fn shl(self, shift: usize) -> Self::Output {
-        let mut bits = self.bits.clone();
-        shift_bits_left::<N>(&mut bits, shift);
-        GarbledUint::new(bits)
+        let shift_wire: GarbledUint<8> = shift.into();
+        build_and_execute_shl::<N, 8>(self, &shift_wire)
     }
 }
 
-// Implement ShlAssign for GarbledUint<N>
+// Implement the Shift-left assignment operation for GarbledUint<N>
+impl<const N: usize, const K: usize> ShlAssign<&GarbledUint<K>> for GarbledUint<N> {
+    fn shl_assign(&mut self, rhs: &GarbledUint<K>) {
+        *self = self.clone().shl(rhs);
+    }
+}
+
+// Implement the Shift-left assignment operation for GarbledUint<N> with a literal shift amount
 impl<const N: usize> ShlAssign<usize> for GarbledUint<N> {
     fn shl_assign(&mut self, shift: usize) {
-        shift_bits_left::<N>(&mut self.bits, shift);
+        *self = self.clone().shl(shift);
     }
 }
 
-// Implement ShlAssign for &GarbledUint<N>
-impl<const N: usize> ShlAssign<usize> for &GarbledUint<N> {
-    fn shl_assign(&mut self, shift: usize) {
-        let mut bits: Vec<bool> = self.bits.clone();
-        shift_bits_left::<N>(&mut bits, shift);
+// Implement the Shift-right operation for GarbledUint<N>
+impl<const N: usize, const K: usize> Shr<&GarbledUint<K>> for GarbledUint<N> {
+    type Output = GarbledUint<N>;
+    fn shr(self, rhs: &GarbledUint<K>) -> Self::Output {
+        build_and_execute_shr::<N, K>(&self, rhs)
     }
 }
 
-// Implement Shift Left operation for GarbledInt<N>
-impl<const N: usize> Shl<usize> for GarbledInt<N> {
-    type Output = Self;
-
-    fn shl(self, shift: usize) -> Self::Output {
-        let mut bits = self.bits;
-        shift_bits_left::<N>(&mut bits, shift);
-        GarbledInt::new(bits)
+// Implement the Shift-right operation for &GarbledUint<N>
+impl<const N: usize, const K: usize> Shr<&GarbledUint<K>> for &GarbledUint<N> {
+    type Output = GarbledUint<N>;
+    fn shr(self, rhs: &GarbledUint<K>) -> Self::Output {
+        build_and_execute_shr::<N, K>(self, rhs)
     }
 }
 
-// Implement Shift Left operation for &GarbledInt<N>
-impl<const N: usize> Shl<usize> for &GarbledInt<N> {
-    type Output = GarbledInt<N>;
-
-    fn shl(self, shift: usize) -> Self::Output {
-        let mut bits = self.bits.clone();
-        shift_bits_left::<N>(&mut bits, shift);
-        GarbledInt::new(bits)
-    }
-}
-
-// Implement ShlAssign for GarbledInt<N>
-impl<const N: usize> ShlAssign<usize> for GarbledInt<N> {
-    fn shl_assign(&mut self, shift: usize) {
-        shift_bits_left::<N>(&mut self.bits, shift);
-    }
-}
-
-// Implement ShlAssign for &GarbledInt<N>
-impl<const N: usize> ShlAssign<usize> for &GarbledInt<N> {
-    fn shl_assign(&mut self, shift: usize) {
-        let mut bits: Vec<bool> = self.bits.clone();
-        shift_bits_left::<N>(&mut bits, shift);
-    }
-}
-
-// Implement Shift Right operation for Uint<N>
+// Implement the Shift-right operation for GarbledUint<N> with a literal shift amount
 impl<const N: usize> Shr<usize> for GarbledUint<N> {
-    type Output = Self;
-
-    fn shr(mut self, shift: usize) -> Self::Output {
-        shift_bits_right::<N>(&mut self.bits, shift);
-        self
+    type Output = GarbledUint<N>;
+    fn shr(self, shift: usize) -> Self::Output {
+        let shift_wire: GarbledUint<8> = shift.into();
+        build_and_execute_shr::<N, 8>(&self, &shift_wire)
     }
 }
 
-// Implement Shift Right operation for &GarbledUint<N>
+// Implement the Shift-right operation for &GarbledUint<N> with a literal shift amount
 impl<const N: usize> Shr<usize> for &GarbledUint<N> {
     type Output = GarbledUint<N>;
-
     fn shr(self, shift: usize) -> Self::Output {
-        let mut bits = self.bits.clone();
-        shift_bits_right::<N>(&mut bits, shift);
-        GarbledUint::new(bits)
+        let shift_wire: GarbledUint<8> = shift.into();
+        build_and_execute_shr::<N, 8>(self, &shift_wire)
     }
 }
 
-// Implement ShrAssign for GarbledUint<N>
+// Implement the Shift-right assignment operation for GarbledUint<N>
+impl<const N: usize, const K: usize> ShrAssign<&GarbledUint<K>> for GarbledUint<N> {
+    fn shr_assign(&mut self, rhs: &GarbledUint<K>) {
+        *self = self.clone().shr(rhs);
+    }
+}
+
+// Implement the Shift-right assignment operation for GarbledUint<N> with a literal shift amount
 impl<const N: usize> ShrAssign<usize> for GarbledUint<N> {
     fn shr_assign(&mut self, shift: usize) {
-        shift_bits_right::<N>(&mut self.bits, shift);
+        *self = self.clone().shr(shift);
     }
 }
 
-// Implement ShrAssign for &GarbledUint<N>
-impl<const N: usize> ShrAssign<usize> for &GarbledUint<N> {
-    fn shr_assign(&mut self, shift: usize) {
-        let mut bits: Vec<bool> = self.bits.clone();
-        shift_bits_right::<N>(&mut bits, shift);
+// Implement the Shift-left operation for GarbledInt<N>
+impl<const N: usize, const K: usize> Shl<&GarbledUint<K>> for GarbledInt<N> {
+    type Output = GarbledInt<N>;
+    fn shl(self, rhs: &GarbledUint<K>) -> Self::Output {
+        let u: GarbledUint<N> = self.into();
+        u.shl(rhs).into()
     }
 }
 
-// Implement Shift Right operation for GarbledInt<N>
+// Implement the Shift-left operation for &GarbledInt<N>
+impl<const N: usize, const K: usize> Shl<&GarbledUint<K>> for &GarbledInt<N> {
+    type Output = GarbledInt<N>;
+    fn shl(self, rhs: &GarbledUint<K>) -> Self::Output {
+        let u: GarbledUint<N> = self.clone().into();
+        u.shl(rhs).into()
+    }
+}
+
+// Implement the Shift-left operation for GarbledInt<N> with a literal shift amount
+impl<const N: usize> Shl<usize> for GarbledInt<N> {
+    type Output = GarbledInt<N>;
+    fn shl(self, shift: usize) -> Self::Output {
+        let shift_wire: GarbledUint<8> = shift.into();
+        let u: GarbledUint<N> = self.into();
+        u.shl(&shift_wire).into()
+    }
+}
+
+// Implement the Shift-left operation for &GarbledInt<N> with a literal shift amount
+impl<const N: usize> Shl<usize> for &GarbledInt<N> {
+    type Output = GarbledInt<N>;
+    fn shl(self, shift: usize) -> Self::Output {
+        let shift_wire: GarbledUint<8> = shift.into();
+        let u: GarbledUint<N> = self.clone().into();
+        u.shl(&shift_wire).into()
+    }
+}
+
+// Implement the Shift-left assignment operation for GarbledInt<N>
+impl<const N: usize, const K: usize> ShlAssign<&GarbledUint<K>> for GarbledInt<N> {
+    fn shl_assign(&mut self, rhs: &GarbledUint<K>) {
+        *self = self.clone().shl(rhs);
+    }
+}
+
+// Implement the Shift-left assignment operation for GarbledInt<N> with a literal shift amount
+impl<const N: usize> ShlAssign<usize> for GarbledInt<N> {
+    fn shl_assign(&mut self, shift: usize) {
+        *self = self.clone().shl(shift);
+    }
+}
+
+// Implement the Shift-right operation for GarbledInt<N>
+impl<const N: usize, const K: usize> Shr<&GarbledUint<K>> for GarbledInt<N> {
+    type Output = GarbledInt<N>;
+    fn shr(self, rhs: &GarbledUint<K>) -> Self::Output {
+        let u: GarbledUint<N> = self.into();
+        u.shr(rhs).into()
+    }
+}
+
+// Implement the Shift-right operation for &GarbledInt<N>
+impl<const N: usize, const K: usize> Shr<&GarbledUint<K>> for &GarbledInt<N> {
+    type Output = GarbledInt<N>;
+    fn shr(self, rhs: &GarbledUint<K>) -> Self::Output {
+        let u: GarbledUint<N> = self.clone().into();
+        u.shr(rhs).into()
+    }
+}
+
+// Implement the Shift-right operation for GarbledInt<N> with a literal shift amount
 impl<const N: usize> Shr<usize> for GarbledInt<N> {
-    type Output = Self;
-
+    type Output = GarbledInt<N>;
     fn shr(self, shift: usize) -> Self::Output {
-        let mut bits = self.bits;
-        shift_bits_right::<N>(&mut bits, shift);
-        GarbledInt::new(bits)
+        let shift_wire: GarbledUint<8> = shift.into();
+        let u: GarbledUint<N> = self.into();
+        u.shr(&shift_wire).into()
     }
 }
 
-// Implement Shift Right operation for &GarbledInt<N>
+// Implement the Shift-right operation for &GarbledInt<N> with a literal shift amount
 impl<const N: usize> Shr<usize> for &GarbledInt<N> {
     type Output = GarbledInt<N>;
-
     fn shr(self, shift: usize) -> Self::Output {
-        let mut bits = self.bits.clone();
-        shift_bits_right::<N>(&mut bits, shift);
-        GarbledInt::new(bits)
+        let shift_wire: GarbledUint<8> = shift.into();
+        let u: GarbledUint<N> = self.clone().into();
+        u.shr(&shift_wire).into()
     }
 }
 
-// Implement ShrAssign for GarbledInt<N>
+// Implement the Shift-right assignment operation for GarbledInt<N>
+impl<const N: usize, const K: usize> ShrAssign<&GarbledUint<K>> for GarbledInt<N> {
+    fn shr_assign(&mut self, rhs: &GarbledUint<K>) {
+        *self = self.clone().shr(rhs);
+    }
+}
+
+// Implement the Shift-right assignment operation for GarbledInt<N> with a literal shift amount
 impl<const N: usize> ShrAssign<usize> for GarbledInt<N> {
     fn shr_assign(&mut self, shift: usize) {
-        shift_bits_right::<N>(&mut self.bits, shift);
-    }
-}
-
-// Implement ShrAssign for &GarbledInt<N>
-impl<const N: usize> ShrAssign<usize> for &GarbledInt<N> {
-    fn shr_assign(&mut self, shift: usize) {
-        let mut bits: Vec<bool> = self.bits.clone();
-        shift_bits_right::<N>(&mut bits, shift);
+        *self = self.clone().shr(shift);
     }
 }
 

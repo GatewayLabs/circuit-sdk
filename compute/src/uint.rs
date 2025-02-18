@@ -22,8 +22,8 @@ pub type GarbledUint1024 = GarbledUint<1024>;
 // Define a new type Uint<N>
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct GarbledUint<const N: usize> {
-    pub bits: Vec<bool>,              // Store the bits of the unsigned integer
-    _phantom: PhantomData<[bool; N]>, // PhantomData to ensure the N bit size
+    pub bits: Vec<bool>,
+    _phantom: PhantomData<[bool; N]>,
 }
 
 impl<const N: usize> GarbledUint<N> {
@@ -286,7 +286,22 @@ impl<const N: usize> From<GarbledUint<N>> for u128 {
     }
 }
 
-// Implement ruint::Uint support for GarbledUint<N>
+impl<const N: usize> From<usize> for GarbledUint<N> {
+    fn from(value: usize) -> Self {
+        assert!(
+            N <= (usize::BITS as usize),
+            "GarbledUint<N> can only support up to {} bits for usize",
+            usize::BITS
+        );
+
+        let mut bits = Vec::with_capacity(N);
+        for i in 0..N {
+            bits.push((value >> i) & 1 == 1);
+        }
+
+        GarbledUint::new(bits)
+    }
+}
 
 impl<const BITS: usize, const LIMBS: usize> TryFrom<GarbledUint<BITS>> for Uint<BITS, LIMBS> {
     type Error = ruint::ToUintError<Uint<BITS, LIMBS>>;

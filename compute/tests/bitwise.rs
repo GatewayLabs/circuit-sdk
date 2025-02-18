@@ -578,7 +578,7 @@ fn test_int_left_shift_and_assign() {
 }
 
 #[test]
-fn test_right_shift_uint() {
+fn test_uint_right_shift() {
     let a = GarbledUint::<4>::new(vec![false, false, false, true]); // Binary 1000
 
     let result: u8 = (a >> 1).into(); // Perform right shift by 1
