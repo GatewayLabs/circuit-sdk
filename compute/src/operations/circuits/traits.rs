@@ -310,4 +310,15 @@ pub trait CircuitExecutor {
     ///
     /// A vector of elements resulting from the right shift operation.
     fn shr(&mut self, a: &Self::TypeVec, shift: &Self::TypeVec) -> Self::TypeVec;
+
+    /// Performs a Keccak256 hash operation on a vector of `Type`.
+    ///
+    /// # Parameters
+    ///
+    /// - `input`: A reference to the vector of elements to be hashed.
+    ///
+    /// # Returns
+    ///
+    /// A vector of elements representing the Keccak256 hash of the input vector.
+    fn keccak256(&mut self, input: &Self::TypeVec) -> Self::TypeVec;
 }

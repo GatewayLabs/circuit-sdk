@@ -142,3 +142,9 @@ impl<'a> From<&'a mut &GateIndexVec> for &'a GateIndexVec {
         vec
     }
 }
+
+impl FromIterator<GateIndex> for GateIndexVec {
+    fn from_iter<I: IntoIterator<Item = GateIndex>>(iter: I) -> Self {
+        Self(Vec::from_iter(iter))
+    }
+}

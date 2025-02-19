@@ -1,3 +1,4 @@
+use crate::operations::circuits::keccak::keccak256;
 use crate::operations::circuits::traits::CircuitExecutor;
 use crate::operations::circuits::types::GateIndexVec;
 use crate::uint::GarbledUint;
@@ -12,8 +13,8 @@ pub type GateIndex = u32;
 
 #[derive(Default, Clone, Serialize, Deserialize)]
 pub struct WRK17CircuitBuilder {
-    inputs: Vec<bool>,
-    gates: Vec<Gate>,
+    pub inputs: Vec<bool>,
+    pub gates: Vec<Gate>,
     constant_cache: HashMap<String, GateIndexVec>,
 }
 
@@ -470,6 +471,10 @@ impl CircuitExecutor for WRK17CircuitBuilder {
 
         (lt_list[0], eq_list[0])
     }
+
+    fn keccak256(&mut self, input: &GateIndexVec) -> GateIndexVec {
+        keccak256(self, input)
+    }
 }
 
 macro_rules! build_and_execute {
@@ -716,6 +721,7 @@ mod tests {
     use tracing::debug;
 
     use super::*;
+    use crate::operations::circuits::types::GateIndexVec;
     use crate::uint::{
         GarbledBit, GarbledUint128, GarbledUint16, GarbledUint32, GarbledUint64, GarbledUint8,
     };
