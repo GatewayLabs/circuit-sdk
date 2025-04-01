@@ -1,0 +1,24 @@
+(MIT OR Apache-2.0) AND Unicode-3.0 (1): unicode-ident
+0BSD OR Apache-2.0 OR MIT (1): adler2
+Apache-2.0 (22): benchmark, ciborium, ciborium-io, ciborium-ll, circuit_macro, clang-sys, compute, parity-scale-codec, parity-scale-codec-derive, s2n-codec, s2n-quic, s2n-quic-core, s2n-quic-crypto, s2n-quic-platform, s2n-quic-rustls, s2n-quic-tls, s2n-quic-tls-default, s2n-quic-transport, s2n-tls, s2n-tls-sys, server, vm
+Apache-2.0 OR Apache-2.0 WITH LLVM-exception OR CC0-1.0 (1): blake3
+Apache-2.0 OR Apache-2.0 WITH LLVM-exception OR MIT (4): linux-raw-sys, rustix, wasi, wasi
+Apache-2.0 OR BSD-1-Clause OR MIT (1): fiat-crypto
+Apache-2.0 OR BSD-2-Clause OR MIT (2): zerocopy, zerocopy-derive
+Apache-2.0 OR BSL-1.0 (1): ryu
+Apache-2.0 OR CC0-1.0 OR MIT-0 (2): constant_time_eq, dunce
+Apache-2.0 OR ISC OR MIT (3): rustls, rustls-native-certs, rustls-pemfile
+Apache-2.0 OR MIT (203): addr2line, aes, allocator-api2, alloy-rlp, anes, anstyle, anyhow, ark-ff, ark-ff, ark-ff-asm, ark-ff-asm, ark-ff-macros, ark-ff-macros, ark-serialize, ark-serialize, ark-std, ark-std, arrayvec, atomic-waker, auto_impl, autocfg, backtrace, base64, bitflags, block-buffer, bumpalo, cast, cc, cesu8, cexpr, cfg-if, cipher, clap, clap_builder, clap_lex, cmake, core-foundation, core-foundation-sys, cpufeatures, criterion, criterion-plot, crossbeam-deque, crossbeam-epoch, crossbeam-utils, crypto-common, curve25519-dalek-derive, deranged, derivative, digest, digest, either, equivalent, errno, fixed-hash, fnv, futures, futures-channel, futures-core, futures-io, futures-macro, futures-sink, futures-task, futures-util, getrandom, getrandom, gimli, glob, half, hash_hasher, hashbrown, hermit-abi, hex, hex-literal, home, impl-codec, impl-trait-for-tuples, indexmap, inout, intrusive-collections, itertools, itertools, itertools, itoa, jni, jni-sys, jobserver, js-sys, keccak, lazy_static, lazycell, libc, lock_api, log, minimal-lexical, num-bigint, num-complex, num-conv, num-integer, num-rational, num-traits, object, once_cell, openssl-probe, parking_lot, parking_lot_core, paste, pest, pin-project-lite, pin-utils, powerfmt, ppv-lite86, prettyplease, primitive-types, proc-macro-crate, proc-macro2, proptest, quinn, quinn-proto, quinn-udp, quote, rand, rand, rand_chacha, rand_chacha, rand_core, rand_core, rand_hc, rand_xorshift, rayon, rayon-core, rcgen, regex, regex-automata, regex-syntax, rlp, rustc-demangle, rustc-hash, rustc-hash, rustc-hex, rustc_version, rustc_version, rustls-pki-types, rustls-platform-verifier, rustls-platform-verifier-android, rustversion, scopeguard, security-framework, security-framework-sys, semver, semver, semver-parser, serde, serde_derive, serde_json, sha3, shlex, signal-hook-registry, siphasher, smallvec, socket2, static_assertions, syn, syn, thiserror, thiserror, thiserror-impl, thiserror-impl, thread_local, time, time-core, tinytemplate, toml_datetime, toml_edit, typenum, ucd-trie, uint, unarray, unicode-xid, version_check, wasm-bindgen, wasm-bindgen-backend, wasm-bindgen-macro, wasm-bindgen-macro-support, wasm-bindgen-shared, web-sys, web-time, winapi, winapi-i686-pc-windows-gnu, winapi-x86_64-pc-windows-gnu, windows-sys, windows-sys, windows-targets, windows_aarch64_gnullvm, windows_aarch64_msvc, windows_i686_gnu, windows_i686_gnullvm, windows_i686_msvc, windows_x86_64_gnu, windows_x86_64_gnullvm, windows_x86_64_msvc, yasna, zeroize, zeroize_derive
+Apache-2.0 OR MIT OR Zlib (4): bytemuck, miniz_oxide, tinyvec, tinyvec_macros
+Apache-2.0) OR MIT AND (MIT (1): libm
+BSD-2-Clause (1): arrayref
+BSD-3-Clause (5): bindgen, curve25519-dalek, curve25519-dalek-ng, subtle, subtle-ng
+BSD-3-Clause-Clear (7): concrete-csprng, concrete-fft, concrete-ntt, tfhe, tfhe, tfhe-versionable, tfhe-versionable-derive
+Custom License File (1): ring
+ISC (4): libloading, rustls-webpki, untrusted, untrusted
+ISC AND (Apache-2.0 OR ISC) (1): aws-lc-rs
+ISC AND (Apache-2.0 OR ISC) AND OpenSSL (1): aws-lc-sys
+MIT (48): aligned-vec, bincode, bitvec, byte-slice-cast, bytes, cfg_aliases, combine, crunchy, cuckoofilter, dyn-stack, fs_extra, funty, garble_lang, generic-array, is-terminal, memoffset, mio, nom, nu-ansi-term, oorandom, overload, pem, plotters, plotters-backend, plotters-svg, pulp, radium, reborrow, redox_syscall, ruint, ruint-macro, schannel, sharded-slab, slab, spin, tandem, tap, tokio, tokio-macros, tracing, tracing-attributes, tracing-core, tracing-log, tracing-subscriber, valuable, which, winnow, wyz
+MIT OR Unlicense (6): aho-corasick, byteorder, memchr, same-file, walkdir, winapi-util
+MPL-2.0 (3): fastrlp, fastrlp, webpki-root-certs
+Zlib (3): const_format, const_format_proc_macros, foldhash
