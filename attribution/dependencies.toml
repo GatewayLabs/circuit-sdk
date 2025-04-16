@@ -1,0 +1,3357 @@
+[[dependencies]]
+name = "addr2line"
+version = "0.24.2"
+description = "A cross-platform symbolication library written in Rust, using `gimli`"
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2016-2018 The gimli Developers"]
+repository = "https://github.com/gimli-rs/addr2line"
+
+[[dependencies]]
+name = "adler2"
+version = "2.0.0"
+description = "A simple clean-room implementation of the Adler-32 checksum"
+license = "0BSD OR MIT OR Apache-2.0"
+notices = ["Copyright (C) Jonas Schievink <jonasschievink@gmail.com>"]
+authors = [
+  "Jonas Schievink <jonasschievink@gmail.com>",
+  "oyvindln <oyvindln@users.noreply.github.com>",
+]
+repository = "https://github.com/oyvindln/adler2"
+
+[[dependencies]]
+name = "aes"
+version = "0.8.4"
+description = "Pure Rust implementation of the Advanced Encryption Standard (a.k.a. Rijndael)"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018 Artyom Pavlov"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/block-ciphers"
+
+[[dependencies]]
+name = "aho-corasick"
+version = "1.1.3"
+description = "Fast multiple substring searching."
+license = "Unlicense OR MIT"
+notices = ["Copyright (c) 2015 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/aho-corasick"
+
+[[dependencies]]
+name = "aligned-vec"
+version = "0.5.0"
+description = "Aligned vector and box containers"
+license = "MIT"
+notices = ["Copyright (c) 2022 sarah"]
+authors = ["sarah <>"]
+repository = "https://github.com/sarah-ek/aligned-vec/"
+
+[[dependencies]]
+name = "allocator-api2"
+version = "0.2.21"
+description = "Mirror of Rust's allocator API"
+license = "MIT OR Apache-2.0"
+authors = ["Zakarum <zaq.dev@icloud.com>"]
+repository = "https://github.com/zakarumych/allocator-api2"
+
+[[dependencies]]
+name = "alloy-rlp"
+version = "0.3.11"
+description = "Implementation of Ethereum RLP serialization"
+license = "MIT OR Apache-2.0"
+authors = ["Alloy Contributors"]
+repository = "https://github.com/alloy-rs/rlp"
+homepage = "https://github.com/alloy-rs/rlp/tree/main/crates/rlp"
+
+[[dependencies]]
+name = "anes"
+version = "0.1.6"
+description = "ANSI Escape Sequences provider & parser"
+license = "MIT OR Apache-2.0"
+authors = ["Robert Vojta <rvojta@me.com>"]
+repository = "https://github.com/zrzka/anes-rs"
+
+[[dependencies]]
+name = "anstyle"
+version = "1.0.10"
+description = "ANSI text styling"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2022 The rust-cli Developers"]
+repository = "https://github.com/rust-cli/anstyle.git"
+homepage = "https://github.com/rust-cli/anstyle"
+
+[[dependencies]]
+name = "anyhow"
+version = "1.0.96"
+description = "Flexible concrete Error type built on std::error::Error"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/anyhow"
+
+[[dependencies]]
+name = "ark-ff"
+version = "0.3.0"
+description = "A library for finite fields"
+license = "MIT/Apache-2.0"
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-ff"
+version = "0.4.2"
+description = "A library for finite fields"
+license = "MIT/Apache-2.0"
+notices = ["Copyright 2022 arkworks contributors"]
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-ff-asm"
+version = "0.3.0"
+description = "A library for generating x86-64 assembly for finite field multiplication"
+license = "MIT/Apache-2.0"
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-ff-asm"
+version = "0.4.2"
+description = "A library for generating x86-64 assembly for finite field multiplication"
+license = "MIT/Apache-2.0"
+notices = ["Copyright 2022 arkworks contributors"]
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-ff-macros"
+version = "0.3.0"
+description = "A library for generating x86-64 assembly for finite field multiplication"
+license = "MIT/Apache-2.0"
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-ff-macros"
+version = "0.4.2"
+description = "A library for generating x86-64 assembly for finite field multiplication"
+license = "MIT/Apache-2.0"
+notices = ["Copyright 2022 arkworks contributors"]
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-serialize"
+version = "0.3.0"
+description = "A library for serializing types in the arkworks ecosystem"
+license = "MIT/Apache-2.0"
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-serialize"
+version = "0.4.2"
+description = "A library for serializing types in the arkworks ecosystem"
+license = "MIT/Apache-2.0"
+notices = ["Copyright 2022 arkworks contributors"]
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/algebra"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-std"
+version = "0.3.0"
+description = "A library for no_std compatibility"
+license = "MIT/Apache-2.0"
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/utils"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "ark-std"
+version = "0.4.0"
+description = "A library for no_std compatibility"
+license = "MIT/Apache-2.0"
+authors = ["arkworks contributors"]
+repository = "https://github.com/arkworks-rs/std"
+homepage = "https://arkworks.rs"
+
+[[dependencies]]
+name = "arrayref"
+version = "0.3.9"
+description = "Macros to take array references of slices"
+license = "BSD-2-Clause"
+notices = ["Copyright (c) 2015 David Roundy <roundyd@physics.oregonstate.edu>"]
+authors = ["David Roundy <roundyd@physics.oregonstate.edu>"]
+repository = "https://github.com/droundy/arrayref"
+
+[[dependencies]]
+name = "arrayvec"
+version = "0.7.6"
+description = "A vector with fixed capacity, backed by an array (it can be stored on the stack too). Implements fixed capacity ArrayVec and ArrayString."
+license = "MIT OR Apache-2.0"
+notices = ['Copyright (c) Ulrik Sverdrup "bluss" 2015-2023']
+authors = ["bluss"]
+repository = "https://github.com/bluss/arrayvec"
+
+[[dependencies]]
+name = "atomic-waker"
+version = "1.1.2"
+description = "A synchronization primitive for task wakeup"
+license = "Apache-2.0 OR MIT"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+authors = ["Stjepan Glavina <stjepang@gmail.com>", "Contributors to futures-rs"]
+repository = "https://github.com/smol-rs/atomic-waker"
+
+[[dependencies]]
+name = "auto_impl"
+version = "1.2.1"
+description = "Automatically implement traits for common smart pointers and closures"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018 auto_impl Developers"]
+authors = [
+  "Ashley Mannix <ashleymannix@live.com.au>",
+  "Lukas Kalbertodt <lukas.kalbertodt@gmail.com>",
+]
+repository = "https://github.com/auto-impl-rs/auto_impl/"
+
+[[dependencies]]
+name = "autocfg"
+version = "1.4.0"
+description = "Automatic cfg for Rust compiler features"
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2018 Josh Stone"]
+authors = ["Josh Stone <cuviper@gmail.com>"]
+repository = "https://github.com/cuviper/autocfg"
+
+[[dependencies]]
+name = "aws-lc-rs"
+version = "1.12.2"
+description = "aws-lc-rs is a cryptographic library using AWS-LC for its cryptographic operations. This library strives to be API-compatible with the popular Rust library named ring."
+license = "ISC AND (Apache-2.0 OR ISC)"
+authors = ["AWS-LibCrypto"]
+repository = "https://github.com/aws/aws-lc-rs"
+
+[[dependencies]]
+name = "aws-lc-sys"
+version = "0.25.1"
+description = "AWS-LC is a general-purpose cryptographic library maintained by the AWS Cryptography team for AWS and their customers. It іs based on code from the Google BoringSSL project and the OpenSSL project."
+license = "ISC AND (Apache-2.0 OR ISC) AND OpenSSL"
+notices = [
+  "* Copyright (c) 1998-2011 The OpenSSL Project.  All rights reserved.",
+  "/* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)",
+  "/* Copyright (c) 2015, Google Inc.",
+  "Copyright (C) 2017 - 2021, Stephan Mueller <smueller@chronox.de>",
+  "Copyright (c) 2009 The Go Authors. All rights reserved.",
+  "Copyright (c) 2015-2016 the fiat-crypto authors (see",
+  "Copyright 2015 The Chromium Authors. All rights reserved.",
+]
+authors = ["AWS-LC"]
+repository = "https://github.com/aws/aws-lc-rs"
+
+[[dependencies]]
+name = "backtrace"
+version = "0.3.74"
+description = """
+A library to acquire a stack trace (backtrace) at runtime in a Rust program.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang/backtrace-rs"
+
+[[dependencies]]
+name = "base64"
+version = "0.22.1"
+description = "encodes and decodes base64 as bytes or utf8"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015 Alice Maz"]
+authors = ["Marshall Pierce <marshall@mpierce.org>"]
+repository = "https://github.com/marshallpierce/rust-base64"
+
+[[dependencies]]
+name = "benchmark"
+version = "0.1.0"
+license = "MIT"
+notices = ["Copyright (c) 2024 Gateway"]
+
+[[dependencies]]
+name = "bincode"
+version = "1.3.3"
+description = "A binary serialization / deserialization strategy that uses Serde for transforming structs into bytes and vice versa!"
+license = "MIT"
+notices = ["Copyright (c) 2014 Ty Overby"]
+authors = [
+  "Ty Overby <ty@pre-alpha.com>",
+  "Francesco Mazzoli <f@mazzo.li>",
+  "David Tolnay <dtolnay@gmail.com>",
+  "Zoey Riordan <zoey@dos.cafe>",
+]
+repository = "https://github.com/servo/bincode"
+
+[[dependencies]]
+name = "bindgen"
+version = "0.69.5"
+description = "Automatically generates Rust FFI bindings to C and C++ libraries."
+license = "BSD-3-Clause"
+notices = ["Copyright (c) 2013, Jyun-Yan You"]
+authors = [
+  "Jyun-Yan You <jyyou.tw@gmail.com>",
+  "Emilio Cobos Álvarez <emilio@crisal.io>",
+  "Nick Fitzgerald <fitzgen@gmail.com>",
+  "The Servo project developers",
+]
+repository = "https://github.com/rust-lang/rust-bindgen"
+homepage = "https://rust-lang.github.io/rust-bindgen/"
+
+[[dependencies]]
+name = "bitflags"
+version = "2.8.0"
+description = """
+A macro to generate structures which behave like bitflags.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/bitflags/bitflags"
+
+[[dependencies]]
+name = "bitvec"
+version = "1.0.1"
+description = "Addresses memory by bits, for packed collections and bitfields"
+license = "MIT"
+notices = ["Copyright (c) 2018 myrrlyn (Alexander Payne)"]
+repository = "https://github.com/bitvecto-rs/bitvec"
+homepage = "https://bitvecto-rs.github.io/bitvec"
+
+[[dependencies]]
+name = "blake3"
+version = "1.6.0"
+description = "the BLAKE3 hash function"
+license = "CC0-1.0 OR Apache-2.0 OR Apache-2.0 WITH LLVM-exception"
+notices = ["Copyright 2019 Jack O'Connor and Samuel Neves"]
+authors = ["Jack O'Connor <oconnor663@gmail.com>", "Samuel Neves"]
+repository = "https://github.com/BLAKE3-team/BLAKE3"
+
+[[dependencies]]
+name = "block-buffer"
+version = "0.10.4"
+description = "Buffer type for block processing of data"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018-2019 The RustCrypto Project Developers"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/utils"
+
+[[dependencies]]
+name = "bumpalo"
+version = "3.17.0"
+description = "A fast bump allocation arena for Rust."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2019 Nick Fitzgerald"]
+authors = ["Nick Fitzgerald <fitzgen@gmail.com>"]
+repository = "https://github.com/fitzgen/bumpalo"
+
+[[dependencies]]
+name = "byte-slice-cast"
+version = "1.2.2"
+description = "Safely cast bytes slices from/to slices of built-in fundamental numeric types"
+license = "MIT"
+notices = ["Copyright (c) 2017 Sebastian Dröge <sebastian@centricular.com>."]
+authors = ["Sebastian Dröge <sebastian@centricular.com>"]
+repository = "https://github.com/sdroege/bytes-num-slice-cast"
+
+[[dependencies]]
+name = "bytemuck"
+version = "1.21.0"
+description = "A crate for mucking around with piles of bytes."
+license = "Zlib OR Apache-2.0 OR MIT"
+notices = [
+  "(c) You must retain, in the Source form of any Derivative Works that You distribute, all copyright, patent, trademark, and attribution notices from the Source form of the Work, excluding those notices that do not pertain to any part of the Derivative Works; and",
+  'Copyright (c) 2019 Daniel "Lokathor" Gee.',
+]
+authors = ["Lokathor <zefria@gmail.com>"]
+repository = "https://github.com/Lokathor/bytemuck"
+
+[[dependencies]]
+name = "byteorder"
+version = "1.5.0"
+description = "Library for reading/writing numbers in big-endian and little-endian."
+license = "Unlicense OR MIT"
+notices = ["Copyright (c) 2015 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/byteorder"
+
+[[dependencies]]
+name = "bytes"
+version = "1.10.0"
+description = "Types and traits for working with bytes"
+license = "MIT"
+notices = ["Copyright (c) 2018 Carl Lerche"]
+authors = [
+  "Carl Lerche <me@carllerche.com>",
+  "Sean McArthur <sean@seanmonstar.com>",
+]
+repository = "https://github.com/tokio-rs/bytes"
+
+[[dependencies]]
+name = "cast"
+version = "0.3.0"
+description = "Ergonomic, checked cast functions for primitive types"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014-2017 Jorge Aparicio"]
+authors = ["Jorge Aparicio <jorge@japaric.io>"]
+repository = "https://github.com/japaric/cast.rs"
+
+[[dependencies]]
+name = "cc"
+version = "1.2.12"
+description = """
+A build-time dependency for Cargo build scripts to assist in invoking the native
+C compiler to compile native C code into a static archive to be linked into Rust
+code.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/rust-lang/cc-rs"
+
+[[dependencies]]
+name = "cesu8"
+version = "1.1.0"
+description = "Convert to and from CESU-8 encoding (similar to UTF-8)"
+license = "Apache-2.0/MIT"
+authors = ["Eric Kidd <git@randomhacks.net>"]
+repository = "https://github.com/emk/cesu8-rs"
+
+[[dependencies]]
+name = "cexpr"
+version = "0.6.0"
+description = "A C expression parser and evaluator"
+license = "Apache-2.0/MIT"
+notices = ["(C) Copyright 2016 Jethro G. Beekman"]
+authors = ["Jethro Beekman <jethro@jbeekman.nl>"]
+repository = "https://github.com/jethrogb/rust-cexpr"
+
+[[dependencies]]
+name = "cfg-if"
+version = "1.0.0"
+description = """
+A macro to ergonomically define an item depending on a large number of #[cfg]
+parameters. Structured like an if-else chain, the first matching branch is the
+item that gets emitted.
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/alexcrichton/cfg-if"
+
+[[dependencies]]
+name = "cfg_aliases"
+version = "0.2.1"
+description = "A tiny utility to help save you a lot of effort with long winded `#[cfg()]` checks."
+license = "MIT"
+notices = ["Copyright (c) 2020 Katharos Technology"]
+authors = ["Zicklag <zicklag@katharostech.com>"]
+repository = "https://github.com/katharostech/cfg_aliases"
+
+[[dependencies]]
+name = "ciborium"
+version = "0.2.2"
+description = "serde implementation of CBOR using ciborium-basic"
+license = "Apache-2.0"
+authors = ["Nathaniel McCallum <npmccallum@profian.com>"]
+repository = "https://github.com/enarx/ciborium"
+
+[[dependencies]]
+name = "ciborium-io"
+version = "0.2.2"
+description = "Simplified Read/Write traits for no_std usage"
+license = "Apache-2.0"
+authors = ["Nathaniel McCallum <npmccallum@profian.com>"]
+repository = "https://github.com/enarx/ciborium"
+
+[[dependencies]]
+name = "ciborium-ll"
+version = "0.2.2"
+description = "Low-level CBOR codec primitives"
+license = "Apache-2.0"
+authors = ["Nathaniel McCallum <npmccallum@profian.com>"]
+repository = "https://github.com/enarx/ciborium"
+
+[[dependencies]]
+name = "cipher"
+version = "0.4.4"
+description = "Traits for describing block ciphers and stream ciphers"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016-2020 RustCrypto Developers"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/traits"
+
+[[dependencies]]
+name = "circuit_macro"
+version = "0.1.0"
+license = "MIT"
+notices = ["Copyright (c) 2024 Gateway"]
+
+[[dependencies]]
+name = "clang-sys"
+version = "1.8.1"
+description = "Rust bindings for libclang."
+license = "Apache-2.0"
+authors = ["Kyle Mayes <kyle@mayeses.com>"]
+repository = "https://github.com/KyleMayes/clang-sys"
+
+[[dependencies]]
+name = "clap"
+version = "4.5.28"
+description = "A simple to use, efficient, and full-featured Command Line Argument Parser"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Individual contributors"]
+repository = "https://github.com/clap-rs/clap"
+
+[[dependencies]]
+name = "clap_builder"
+version = "4.5.27"
+description = "A simple to use, efficient, and full-featured Command Line Argument Parser"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015-2022 Kevin B. Knapp and Clap Contributors"]
+repository = "https://github.com/clap-rs/clap"
+
+[[dependencies]]
+name = "clap_lex"
+version = "0.7.4"
+description = "Minimal, flexible command line parser"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015-2022 Kevin B. Knapp and Clap Contributors"]
+repository = "https://github.com/clap-rs/clap"
+
+[[dependencies]]
+name = "cmake"
+version = "0.1.53"
+description = """
+A build dependency for running `cmake` to build a native library
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/rust-lang/cmake-rs"
+
+[[dependencies]]
+name = "combine"
+version = "4.6.7"
+description = "Fast parser combinators on arbitrary streams with zero-copy support."
+license = "MIT"
+notices = ["Copyright (c) 2015 Markus Westerlind"]
+authors = ["Markus Westerlind <marwes91@gmail.com>"]
+repository = "https://github.com/Marwes/combine"
+
+[[dependencies]]
+name = "compute"
+version = "0.1.0"
+license = "MIT"
+notices = ["Copyright (c) 2024 Gateway"]
+
+[[dependencies]]
+name = "concrete-csprng"
+version = "0.4.1"
+description = "Cryptographically Secure PRNG used in the TFHE-rs library."
+license = "BSD-3-Clause-Clear"
+notices = ["Copyright © 2024 ZAMA."]
+repository = "https://github.com/zama-ai/tfhe-rs"
+homepage = "https://zama.ai/"
+
+[[dependencies]]
+name = "concrete-fft"
+version = "0.5.1"
+description = "Concrete-FFT is a pure Rust high performance fast Fourier transform library."
+license = "BSD-3-Clause-Clear"
+notices = ["Copyright © 2023 ZAMA."]
+authors = ["sarah el kazdadi <sarah.elkazdadi@zama.ai>"]
+repository = "https://github.com/zama-ai/concrete-fft"
+homepage = "https://zama.ai/"
+
+[[dependencies]]
+name = "concrete-ntt"
+version = "0.2.0"
+description = "Concrete-NTT is a pure Rust high performance number theoretic transform library."
+license = "BSD-3-Clause-Clear"
+notices = ["Copyright © 2023 ZAMA."]
+repository = "https://github.com/zama-ai/concrete-ntt"
+homepage = "https://zama.ai/"
+
+[[dependencies]]
+name = "const_format"
+version = "0.2.34"
+description = "Compile-time string formatting"
+license = "Zlib"
+notices = ["Copyright (c) 2020 Matias Rodriguez."]
+authors = ["rodrimati1992 <rodrimatt1985@gmail.com>"]
+repository = "https://github.com/rodrimati1992/const_format_crates/"
+
+[[dependencies]]
+name = "const_format_proc_macros"
+version = "0.2.34"
+description = "Implementation detail of the `const_format` crate"
+license = "Zlib"
+notices = ["Copyright (c) 2020 Matias Rodriguez."]
+authors = ["rodrimati1992 <rodrimatt1985@gmail.com>"]
+repository = "https://github.com/rodrimati1992/const_format_crates/"
+
+[[dependencies]]
+name = "constant_time_eq"
+version = "0.3.1"
+description = "Compares two equal-sized byte strings in constant time."
+license = "CC0-1.0 OR MIT-0 OR Apache-2.0"
+authors = ["Cesar Eduardo Barros <cesarb@cesarb.eti.br>"]
+repository = "https://github.com/cesarb/constant_time_eq"
+
+[[dependencies]]
+name = "core-foundation"
+version = "0.9.4"
+description = "Bindings to Core Foundation for macOS"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2012-2013 Mozilla Foundation"]
+authors = ["The Servo Project Developers"]
+repository = "https://github.com/servo/core-foundation-rs"
+
+[[dependencies]]
+name = "core-foundation-sys"
+version = "0.8.7"
+description = "Bindings to Core Foundation for macOS"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2012-2013 Mozilla Foundation"]
+authors = ["The Servo Project Developers"]
+repository = "https://github.com/servo/core-foundation-rs"
+
+[[dependencies]]
+name = "cpufeatures"
+version = "0.2.17"
+description = """
+Lightweight runtime CPU feature detection for aarch64, loongarch64, and x86/x86_64 targets, 
+with no_std support and support for mobile targets including Android and iOS
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2020-2025 The RustCrypto Project Developers"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/utils"
+
+[[dependencies]]
+name = "criterion"
+version = "0.5.1"
+description = "Statistics-driven micro-benchmarking library"
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2014 Jorge Aparicio"]
+authors = [
+  "Jorge Aparicio <japaricious@gmail.com>",
+  "Brook Heisler <brookheisler@gmail.com>",
+]
+repository = "https://github.com/bheisler/criterion.rs"
+homepage = "https://bheisler.github.io/criterion.rs/book/index.html"
+
+[[dependencies]]
+name = "criterion-plot"
+version = "0.5.0"
+description = "Criterion's plotting library"
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 Jorge Aparicio"]
+authors = [
+  "Jorge Aparicio <japaricious@gmail.com>",
+  "Brook Heisler <brookheisler@gmail.com>",
+]
+repository = "https://github.com/bheisler/criterion.rs"
+
+[[dependencies]]
+name = "crossbeam-deque"
+version = "0.8.6"
+description = "Concurrent work-stealing deque"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2019 The Crossbeam Project Developers"]
+repository = "https://github.com/crossbeam-rs/crossbeam"
+homepage = "https://github.com/crossbeam-rs/crossbeam/tree/master/crossbeam-deque"
+
+[[dependencies]]
+name = "crossbeam-epoch"
+version = "0.9.18"
+description = "Epoch-based garbage collection"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2019 The Crossbeam Project Developers"]
+repository = "https://github.com/crossbeam-rs/crossbeam"
+homepage = "https://github.com/crossbeam-rs/crossbeam/tree/master/crossbeam-epoch"
+
+[[dependencies]]
+name = "crossbeam-utils"
+version = "0.8.21"
+description = "Utilities for concurrent programming"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2019 The Crossbeam Project Developers"]
+repository = "https://github.com/crossbeam-rs/crossbeam"
+homepage = "https://github.com/crossbeam-rs/crossbeam/tree/master/crossbeam-utils"
+
+[[dependencies]]
+name = "crunchy"
+version = "0.2.3"
+description = "Crunchy unroller: deterministically unroll constant loops"
+license = "MIT"
+notices = ["Copyright 2017-2023 Eira Fransham."]
+authors = ["Eira Fransham <jackefransham@gmail.com>"]
+repository = "https://github.com/eira-fransham/crunchy"
+
+[[dependencies]]
+name = "crypto-common"
+version = "0.1.6"
+description = "Common cryptographic traits"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2021 RustCrypto Developers"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/traits"
+
+[[dependencies]]
+name = "cuckoofilter"
+version = "0.5.0"
+description = "Cuckoo Filter: Practically Better Than Bloom"
+license = "MIT"
+notices = ["Copyright (c) 2015 Seif Lotfy"]
+authors = [
+  "Seif Lotfy <seif.lotfy@gmail.com>",
+  "Seif Lotfy <seif@axiom.co>",
+  "Florian Jacob <accounts+git@florianjacob.de>",
+  "The cuckoofilter contributors",
+]
+repository = "https://github.com/axiomhq/rust-cuckoofilter"
+homepage = "http://axiom.co"
+
+[[dependencies]]
+name = "curve25519-dalek"
+version = "4.1.3"
+description = "A pure-Rust implementation of group operations on ristretto255 and Curve25519"
+license = "BSD-3-Clause"
+notices = [
+  "Copyright (c) 2012 The Go Authors. All rights reserved.",
+  "Copyright (c) 2016-2021 Henry de Valence. All rights reserved.",
+  "Copyright (c) 2016-2021 isis agora lovecruft. All rights reserved.",
+]
+authors = [
+  "Isis Lovecruft <isis@patternsinthevoid.net>",
+  "Henry de Valence <hdevalence@hdevalence.ca>",
+]
+repository = "https://github.com/dalek-cryptography/curve25519-dalek/tree/main/curve25519-dalek"
+homepage = "https://github.com/dalek-cryptography/curve25519-dalek"
+
+[[dependencies]]
+name = "curve25519-dalek-derive"
+version = "0.1.1"
+description = "curve25519-dalek Derives"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/dalek-cryptography/curve25519-dalek"
+
+[[dependencies]]
+name = "curve25519-dalek-ng"
+version = "4.1.1"
+description = "A pure-Rust implementation of group operations on ristretto255 and Curve25519"
+license = "BSD-3-Clause"
+notices = [
+  "Copyright (c) 2012 The Go Authors. All rights reserved.",
+  "Copyright (c) 2016-2019 Isis Agora Lovecruft, Henry de Valence. All rights reserved.",
+]
+authors = [
+  "Isis Lovecruft <isis@patternsinthevoid.net>",
+  "Henry de Valence <hdevalence@hdevalence.ca>",
+]
+repository = "https://github.com/zkcrypto/curve25519-dalek-ng"
+
+[[dependencies]]
+name = "deranged"
+version = "0.3.11"
+description = "Ranged integers"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2022 Jacob Pratt et al.",
+  "Copyright 2022 Jacob Pratt et al.",
+]
+authors = ["Jacob Pratt <jacob@jhpratt.dev>"]
+repository = "https://github.com/jhpratt/deranged"
+
+[[dependencies]]
+name = "derivative"
+version = "2.2.0"
+description = "A set of alternative `derive` attributes for Rust"
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2016 Martin Carton"]
+authors = ["mcarton <cartonmartin+git@gmail.com>"]
+repository = "https://github.com/mcarton/rust-derivative"
+
+[[dependencies]]
+name = "digest"
+version = "0.9.0"
+description = "Traits for cryptographic hash functions"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2017 Artyom Pavlov"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/traits"
+
+[[dependencies]]
+name = "digest"
+version = "0.10.7"
+description = "Traits for cryptographic hash functions and message authentication codes"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2017 Artyom Pavlov"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/traits"
+
+[[dependencies]]
+name = "dunce"
+version = "1.0.5"
+description = "Normalize Windows paths to the most compatible format, avoiding UNC where possible"
+license = "CC0-1.0 OR MIT-0 OR Apache-2.0"
+authors = ["Kornel <kornel@geekhood.net>"]
+repository = "https://gitlab.com/kornelski/dunce"
+homepage = "https://lib.rs/crates/dunce"
+
+[[dependencies]]
+name = "dyn-stack"
+version = "0.10.0"
+description = "Dynamic stack wrapper for unsized allocations"
+license = "MIT"
+notices = ["Copyright (c) 2022 sarah"]
+authors = ["sarah <>"]
+repository = "https://github.com/kitegi/dynstack/"
+
+[[dependencies]]
+name = "either"
+version = "1.13.0"
+description = """
+The enum `Either` with variants `Left` and `Right` is a general purpose sum type with two cases.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015"]
+authors = ["bluss"]
+repository = "https://github.com/rayon-rs/either"
+
+[[dependencies]]
+name = "equivalent"
+version = "1.0.1"
+description = "Traits for key comparison in maps."
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2016--2023"]
+repository = "https://github.com/cuviper/equivalent"
+
+[[dependencies]]
+name = "errno"
+version = "0.3.10"
+description = "Cross-platform interface to the `errno` variable."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Chris Wong"]
+authors = ["Chris Wong <lambda.fairy@gmail.com>"]
+repository = "https://github.com/lambda-fairy/rust-errno"
+
+[[dependencies]]
+name = "fastrlp"
+version = "0.3.1"
+description = "Fast RLP serialization library"
+license = "MPL-2.0"
+repository = "https://github.com/vorot93/fastrlp"
+
+[[dependencies]]
+name = "fastrlp"
+version = "0.4.0"
+description = "Fast RLP serialization library"
+license = "MPL-2.0"
+repository = "https://github.com/vorot93/fastrlp"
+
+[[dependencies]]
+name = "fiat-crypto"
+version = "0.2.9"
+description = "Fiat-crypto generated Rust"
+license = "MIT OR Apache-2.0 OR BSD-1-Clause"
+notices = [
+  "Copyright (c) 2015-2020 the fiat-crypto authors (see the AUTHORS file)",
+  "Copyright (c) 2015-2020 the fiat-crypto authors (see the AUTHORS file).",
+  "Copyright 2015-2020 the fiat-crypto authors (see the AUTHORS file)",
+]
+authors = ["Fiat Crypto library authors <jgross@mit.edu>"]
+repository = "https://github.com/mit-plv/fiat-crypto"
+
+[[dependencies]]
+name = "fixed-hash"
+version = "0.8.0"
+description = "Macros to define custom fixed-size hash types"
+license = "MIT OR Apache-2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+repository = "https://github.com/paritytech/parity-common"
+
+[[dependencies]]
+name = "fnv"
+version = "1.0.7"
+description = "Fowler–Noll–Vo hash function"
+license = "Apache-2.0 / MIT"
+notices = ["Copyright (c) 2017 Contributors"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/servo/rust-fnv"
+
+[[dependencies]]
+name = "foldhash"
+version = "0.1.4"
+description = "A fast, non-cryptographic, minimally DoS-resistant hashing algorithm."
+license = "Zlib"
+notices = ["Copyright (c) 2024 Orson Peters"]
+authors = ["Orson Peters <orsonpeters@gmail.com>"]
+repository = "https://github.com/orlp/foldhash"
+
+[[dependencies]]
+name = "fs_extra"
+version = "1.3.0"
+description = "Expanding std::fs and std::io. Recursively copy folders with information about process and much more."
+license = "MIT"
+notices = ["Copyright (c) 2017 Denis Kurilenko"]
+authors = ["Denis Kurilenko <webdesus@gmail.com>"]
+repository = "https://github.com/webdesus/fs_extra"
+
+[[dependencies]]
+name = "funty"
+version = "2.0.0"
+description = "Trait generalization over the primitive types"
+license = "MIT"
+notices = ["Copyright (c) 2020 myrrlyn (Alexander Payne)"]
+authors = ["myrrlyn <self@myrrlyn.dev>"]
+repository = "https://github.com/myrrlyn/funty"
+
+[[dependencies]]
+name = "futures"
+version = "0.3.31"
+description = """
+An implementation of futures and streams featuring zero allocations,
+composability, and iterator-like interfaces.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-channel"
+version = "0.3.31"
+description = """
+Channels for asynchronous communication using futures-rs.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-core"
+version = "0.3.31"
+description = """
+The core traits and types in for the `futures` library.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-io"
+version = "0.3.31"
+description = """
+The `AsyncRead`, `AsyncWrite`, `AsyncSeek`, and `AsyncBufRead` traits for the futures-rs library.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-macro"
+version = "0.3.31"
+description = """
+The futures-rs procedural macro implementations.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-sink"
+version = "0.3.31"
+description = """
+The asynchronous `Sink` trait for the futures-rs library.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-task"
+version = "0.3.31"
+description = """
+Tools for working with tasks.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "futures-util"
+version = "0.3.31"
+description = """
+Common utilities and extension traits for the futures-rs library.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2016 Alex Crichton",
+  "Copyright (c) 2017 The Tokio Authors",
+]
+repository = "https://github.com/rust-lang/futures-rs"
+homepage = "https://rust-lang.github.io/futures-rs"
+
+[[dependencies]]
+name = "garble_lang"
+version = "0.5.0"
+description = "Turing-Incomplete Programming Language for Multi-Party Computation with Garbled Circuits"
+license = "MIT"
+notices = ["Copyright (c) 2022 SINE e.V."]
+repository = "https://github.com/sine-fdn/garble/"
+
+[[dependencies]]
+name = "generic-array"
+version = "0.14.7"
+description = "Generic types implementing functionality of arrays"
+license = "MIT"
+notices = ["Copyright (c) 2015 Bartłomiej Kamiński"]
+authors = [
+  "Bartłomiej Kamiński <fizyk20@gmail.com>",
+  "Aaron Trent <novacrazy@gmail.com>",
+]
+repository = "https://github.com/fizyk20/generic-array.git"
+
+[[dependencies]]
+name = "getrandom"
+version = "0.1.16"
+description = "A small cross-platform library for retrieving random data from system source"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = ["The Rand Project Developers"]
+repository = "https://github.com/rust-random/getrandom"
+
+[[dependencies]]
+name = "getrandom"
+version = "0.2.15"
+description = "A small cross-platform library for retrieving random data from system source"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright (c) 2018-2024 The rust-random Project Developers",
+]
+authors = ["The Rand Project Developers"]
+repository = "https://github.com/rust-random/getrandom"
+
+[[dependencies]]
+name = "gimli"
+version = "0.31.1"
+description = "A library for reading and writing the DWARF debugging format."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015 The Rust Project Developers"]
+repository = "https://github.com/gimli-rs/gimli"
+
+[[dependencies]]
+name = "glob"
+version = "0.3.2"
+description = """
+Support for matching file paths against Unix shell style patterns.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang/glob"
+
+[[dependencies]]
+name = "half"
+version = "2.4.1"
+description = "Half-precision floating point f16 and bf16 types for Rust implementing the IEEE 754-2008 standard binary16 and bfloat16 types."
+license = "MIT OR Apache-2.0"
+authors = ["Kathryn Long <squeeself@gmail.com>"]
+repository = "https://github.com/starkat99/half-rs"
+
+[[dependencies]]
+name = "hash_hasher"
+version = "2.0.3"
+description = "A hasher which is designed to work with already-hashed or hash-like data."
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2016 Fraser Hutchison"]
+authors = ["Fraser Hutchison <fraser.hutchison@maidsafe.net>"]
+repository = "https://github.com/Fraser999/Hash-Hasher.git"
+
+[[dependencies]]
+name = "hashbrown"
+version = "0.15.2"
+description = "A Rust port of Google's SwissTable hash map"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 Amanieu d'Antras"]
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+repository = "https://github.com/rust-lang/hashbrown"
+
+[[dependencies]]
+name = "hermit-abi"
+version = "0.4.0"
+description = "Hermit system calls definitions."
+license = "MIT OR Apache-2.0"
+authors = ["Stefan Lankes"]
+repository = "https://github.com/hermit-os/hermit-rs"
+
+[[dependencies]]
+name = "hex"
+version = "0.4.3"
+description = "Encoding and decoding data into/from hexadecimal representation."
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2013-2014 The Rust Project Developers.",
+  "Copyright (c) 2015-2020 The rust-hex Developers",
+]
+authors = ["KokaKiwi <kokakiwi@kokakiwi.net>"]
+repository = "https://github.com/KokaKiwi/rust-hex"
+
+[[dependencies]]
+name = "hex-literal"
+version = "0.4.1"
+description = "Macro for converting hexadecimal string to a byte array at compile time"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2018 Artyom Pavlov",
+  "Copyright (c) 2018 The RustCrypto Project Developers",
+]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/utils"
+
+[[dependencies]]
+name = "home"
+version = "0.5.11"
+description = "Shared definitions of home directories."
+license = "MIT OR Apache-2.0"
+authors = ["Brian Anderson <andersrb@gmail.com>"]
+repository = "https://github.com/rust-lang/cargo"
+
+[[dependencies]]
+name = "impl-codec"
+version = "0.6.0"
+description = "Parity Codec serialization support for uint and fixed hash."
+license = "MIT OR Apache-2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+homepage = "https://github.com/paritytech/parity-common"
+
+[[dependencies]]
+name = "impl-trait-for-tuples"
+version = "0.2.3"
+description = """
+Attribute macro to implement a trait for tuples
+"""
+license = "Apache-2.0/MIT"
+authors = ["Bastian Köcher <git@kchr.de>"]
+repository = "https://github.com/bkchr/impl-trait-for-tuples"
+
+[[dependencies]]
+name = "indexmap"
+version = "2.7.1"
+description = "A hash table with consistent order and fast iteration."
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2016--2017"]
+repository = "https://github.com/indexmap-rs/indexmap"
+
+[[dependencies]]
+name = "inout"
+version = "0.1.3"
+description = "Custom reference types for code generic over in-place and buffer-to-buffer modes of operation."
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2022 Artyom Pavlov",
+  "Copyright (c) 2022 The RustCrypto Project Developers",
+]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/utils"
+
+[[dependencies]]
+name = "intrusive-collections"
+version = "0.9.7"
+description = "Intrusive collections for Rust (linked list and red-black tree)"
+license = "Apache-2.0/MIT"
+notices = ["Copyright (c) 2016 Amanieu d'Antras"]
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+repository = "https://github.com/Amanieu/intrusive-rs"
+
+[[dependencies]]
+name = "is-terminal"
+version = "0.4.15"
+description = "Test whether a given stream is a terminal"
+license = "MIT"
+notices = ["Copyright (c) 2015-2019 Doug Tangren"]
+authors = [
+  "softprops <d.tangren@gmail.com>",
+  "Dan Gohman <dev@sunfishcode.online>",
+]
+repository = "https://github.com/sunfishcode/is-terminal"
+
+[[dependencies]]
+name = "itertools"
+version = "0.10.5"
+description = "Extra iterator adaptors, iterator methods, free functions, and macros."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2015"]
+authors = ["bluss"]
+repository = "https://github.com/rust-itertools/itertools"
+
+[[dependencies]]
+name = "itertools"
+version = "0.11.0"
+description = "Extra iterator adaptors, iterator methods, free functions, and macros."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015"]
+authors = ["bluss"]
+repository = "https://github.com/rust-itertools/itertools"
+
+[[dependencies]]
+name = "itertools"
+version = "0.12.1"
+description = "Extra iterator adaptors, iterator methods, free functions, and macros."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015"]
+authors = ["bluss"]
+repository = "https://github.com/rust-itertools/itertools"
+
+[[dependencies]]
+name = "itoa"
+version = "1.0.14"
+description = "Fast integer primitive to string conversion"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/itoa"
+
+[[dependencies]]
+name = "jni"
+version = "0.19.0"
+description = "Rust bindings to the JNI"
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2016 Prevoty, Inc. and jni-rs contributors"]
+authors = ["Josh Chase <josh@prevoty.com>"]
+repository = "https://github.com/jni-rs/jni-rs"
+
+[[dependencies]]
+name = "jni-sys"
+version = "0.3.0"
+description = "Rust definitions corresponding to jni.h"
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2015 The rust-jni-sys Developers"]
+authors = ["Steven Fackler <sfackler@gmail.com>"]
+repository = "https://github.com/sfackler/rust-jni-sys"
+
+[[dependencies]]
+name = "jobserver"
+version = "0.1.32"
+description = """
+An implementation of the GNU Make jobserver for Rust.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/rust-lang/jobserver-rs"
+
+[[dependencies]]
+name = "js-sys"
+version = "0.3.77"
+description = """
+Bindings for all JS global objects and functions in all JS environments like
+Node.js and browsers, built on `#[wasm_bindgen]` using the `wasm-bindgen` crate.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The wasm-bindgen Developers"]
+repository = "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/js-sys"
+homepage = "https://rustwasm.github.io/wasm-bindgen/"
+
+[[dependencies]]
+name = "keccak"
+version = "0.1.5"
+description = """
+Pure Rust implementation of the Keccak sponge function including the keccak-f
+and keccak-p variants
+"""
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2018-2022 RustCrypto Developers"]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/sponges/tree/master/keccak"
+
+[[dependencies]]
+name = "lazy_static"
+version = "1.5.0"
+description = "A macro for declaring lazily evaluated statics in Rust."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2010 The Rust Project Developers"]
+authors = ["Marvin Löbel <loebel.marvin@gmail.com>"]
+repository = "https://github.com/rust-lang-nursery/lazy-static.rs"
+
+[[dependencies]]
+name = "lazycell"
+version = "1.3.0"
+description = "A library providing a lazily filled Cell struct"
+license = "MIT/Apache-2.0"
+notices = [
+  "Modified work Copyright (c) 2016-2018 Nikita Pekin and lazycell contributors",
+  "Original work Copyright (c) 2014 The Rust Project Developers",
+]
+authors = [
+  "Alex Crichton <alex@alexcrichton.com>",
+  "Nikita Pekin <contact@nikitapek.in>",
+]
+repository = "https://github.com/indiv0/lazycell"
+
+[[dependencies]]
+name = "libc"
+version = "0.2.169"
+description = """
+Raw FFI bindings to platform libraries like libc.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014-2020 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang/libc"
+
+[[dependencies]]
+name = "libloading"
+version = "0.8.6"
+description = "Bindings around the platform's dynamic library loading primitives with greatly improved memory safety."
+license = "ISC"
+notices = ["Copyright © 2015, Simonas Kazlauskas"]
+authors = ["Simonas Kazlauskas <libloading@kazlauskas.me>"]
+repository = "https://github.com/nagisa/rust_libloading/"
+
+[[dependencies]]
+name = "libm"
+version = "0.2.11"
+description = "libm in pure Rust"
+license = "MIT AND (MIT OR Apache-2.0)"
+notices = [
+  "Copyright (c) 2018 Jorge Aparicio",
+  "Copyright © 1993,2004 Sun Microsystems or",
+  "Copyright © 2003-2009 Bruce D. Evans or",
+  "Copyright © 2003-2009 Steven G. Kargl or",
+  "Copyright © 2003-2011 David Schultz or",
+  "Copyright © 2005-2020 Rich Felker, et al.",
+  "Copyright © 2008 Stephen L. Moshier or",
+  "Copyright © 2017-2018 Arm Limited",
+]
+authors = ["Jorge Aparicio <jorge@japaric.io>"]
+repository = "https://github.com/rust-lang/libm"
+
+[[dependencies]]
+name = "linux-raw-sys"
+version = "0.4.15"
+description = "Generated bindings for Linux's userspace API"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = ["Dan Gohman <dev@sunfishcode.online>"]
+repository = "https://github.com/sunfishcode/linux-raw-sys"
+
+[[dependencies]]
+name = "lock_api"
+version = "0.4.12"
+description = "Wrappers to create fully-featured Mutex and RwLock types. Compatible with no_std."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 The Rust Project Developers"]
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+repository = "https://github.com/Amanieu/parking_lot"
+
+[[dependencies]]
+name = "log"
+version = "0.4.25"
+description = """
+A lightweight logging facade for Rust
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang/log"
+
+[[dependencies]]
+name = "memchr"
+version = "2.7.4"
+description = """
+Provides extremely fast (uses SIMD on x86_64, aarch64 and wasm32) routines for
+1, 2 or 3 byte search and single substring search.
+"""
+license = "Unlicense OR MIT"
+notices = ["Copyright (c) 2015 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>", "bluss"]
+repository = "https://github.com/BurntSushi/memchr"
+
+[[dependencies]]
+name = "memmap2"
+version = "0.9.5"
+description = "Cross-platform Rust API for memory-mapped file IO"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2015 Dan Burkert",
+  "Copyright (c) 2020 Yevhenii Reizner",
+  "Copyright [2015] [Dan Burkert]",
+]
+authors = [
+  "Dan Burkert <dan@danburkert.com>",
+  "Yevhenii Reizner <razrfalcon@gmail.com>",
+]
+repository = "https://github.com/RazrFalcon/memmap2-rs"
+
+[[dependencies]]
+name = "memoffset"
+version = "0.9.1"
+description = "offset_of functionality for Rust structs."
+license = "MIT"
+notices = ["Copyright (c) 2017 Gilad Naaman"]
+authors = ["Gilad Naaman <gilad.naaman@gmail.com>"]
+repository = "https://github.com/Gilnaa/memoffset"
+
+[[dependencies]]
+name = "minimal-lexical"
+version = "0.2.1"
+description = "Fast float parsing conversion routines."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2009 The Go Authors. All rights reserved."]
+authors = ["Alex Huszagh <ahuszagh@gmail.com>"]
+repository = "https://github.com/Alexhuszagh/minimal-lexical"
+
+[[dependencies]]
+name = "miniz_oxide"
+version = "0.8.3"
+description = "DEFLATE compression and decompression library rewritten in Rust based on miniz"
+license = "MIT OR Zlib OR Apache-2.0"
+notices = [
+  "Copyright (c) 2017 Frommi",
+  "Copyright (c) 2017-2024 oyvindln",
+  "Copyright (c) 2020 Frommi",
+  "Copyright 2010-2014 Rich Geldreich and Tenacious Software LLC",
+  "Copyright 2013-2014 RAD Game Tools and Valve Software",
+]
+authors = [
+  "Frommi <daniil.liferenko@gmail.com>",
+  "oyvindln <oyvindln@users.noreply.github.com>",
+  "Rich Geldreich richgel99@gmail.com",
+]
+repository = "https://github.com/Frommi/miniz_oxide/tree/master/miniz_oxide"
+
+[[dependencies]]
+name = "mio"
+version = "1.0.3"
+description = "Lightweight non-blocking I/O."
+license = "MIT"
+notices = ["Copyright (c) 2014 Carl Lerche and other MIO contributors"]
+authors = [
+  "Carl Lerche <me@carllerche.com>",
+  "Thomas de Zeeuw <thomasdezeeuw@gmail.com>",
+  "Tokio Contributors <team@tokio.rs>",
+]
+repository = "https://github.com/tokio-rs/mio"
+
+[[dependencies]]
+name = "nom"
+version = "7.1.3"
+description = "A byte-oriented, zero-copy, parser combinators library"
+license = "MIT"
+notices = ["Copyright (c) 2014-2019 Geoffroy Couprie"]
+authors = ["contact@geoffroycouprie.com"]
+repository = "https://github.com/Geal/nom"
+
+[[dependencies]]
+name = "nu-ansi-term"
+version = "0.46.0"
+description = "Library for ANSI terminal colors and styles (bold, underline)"
+license = "MIT"
+authors = [
+  "ogham@bsago.me",
+  "Ryan Scheel (Havvy) <ryan.havvy@gmail.com>",
+  "Josh Triplett <josh@joshtriplett.org>",
+  "The Nushell Project Developers",
+]
+repository = "https://github.com/nushell/nu-ansi-term"
+
+[[dependencies]]
+name = "num-bigint"
+version = "0.4.6"
+description = "Big integer implementation for Rust"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-num/num-bigint"
+
+[[dependencies]]
+name = "num-complex"
+version = "0.4.6"
+description = "Complex numbers implementation for Rust"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-num/num-complex"
+
+[[dependencies]]
+name = "num-conv"
+version = "0.1.0"
+description = """
+`num_conv` is a crate to convert between integer types without using `as` casts. This provides
+better certainty when refactoring, makes the exact behavior of code more explicit, and allows using
+turbofish syntax.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2023 Jacob Pratt", "Copyright 2023 Jacob Pratt"]
+authors = ["Jacob Pratt <jacob@jhpratt.dev>"]
+repository = "https://github.com/jhpratt/num-conv"
+
+[[dependencies]]
+name = "num-integer"
+version = "0.1.46"
+description = "Integer traits and functions"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-num/num-integer"
+
+[[dependencies]]
+name = "num-rational"
+version = "0.4.2"
+description = "Rational numbers implementation for Rust"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-num/num-rational"
+
+[[dependencies]]
+name = "num-traits"
+version = "0.2.19"
+description = "Numeric traits for generic mathematics"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-num/num-traits"
+
+[[dependencies]]
+name = "object"
+version = "0.36.7"
+description = "A unified interface for reading and writing object file formats."
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2015 The Gimli Developers"]
+repository = "https://github.com/gimli-rs/object"
+
+[[dependencies]]
+name = "once_cell"
+version = "1.20.3"
+description = "Single assignment cells and lazy values."
+license = "MIT OR Apache-2.0"
+authors = ["Aleksey Kladov <aleksey.kladov@gmail.com>"]
+repository = "https://github.com/matklad/once_cell"
+
+[[dependencies]]
+name = "oorandom"
+version = "11.1.4"
+description = "A tiny, robust PRNG implementation."
+license = "MIT"
+notices = ["Copyright (c) 2019 Simon Heath"]
+authors = ["Simon Heath <icefox@dreamquest.io>"]
+repository = "https://hg.sr.ht/~icefox/oorandom"
+
+[[dependencies]]
+name = "openssl-probe"
+version = "0.1.6"
+description = """
+Tool for helping to find SSL certificate locations on the system for OpenSSL
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/alexcrichton/openssl-probe"
+
+[[dependencies]]
+name = "overload"
+version = "0.1.1"
+description = "Provides a macro to simplify operator overloading."
+license = "MIT"
+notices = ["Copyright (c) 2019 Daniel Augusto Rizzi Salvadori"]
+authors = ["Daniel Salvadori <danaugrs@gmail.com>"]
+repository = "https://github.com/danaugrs/overload"
+
+[[dependencies]]
+name = "parity-scale-codec"
+version = "3.7.4"
+description = "SCALE - Simple Concatenating Aggregated Little Endians"
+license = "Apache-2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+repository = "https://github.com/paritytech/parity-scale-codec"
+
+[[dependencies]]
+name = "parity-scale-codec-derive"
+version = "3.7.4"
+description = "Serialization and deserialization derive macro for Parity SCALE Codec"
+license = "Apache-2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+repository = "https://github.com/paritytech/parity-scale-codec"
+
+[[dependencies]]
+name = "parking_lot"
+version = "0.12.3"
+description = "More compact and efficient implementations of the standard synchronization primitives."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 The Rust Project Developers"]
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+repository = "https://github.com/Amanieu/parking_lot"
+
+[[dependencies]]
+name = "parking_lot_core"
+version = "0.9.10"
+description = "An advanced API for creating custom synchronization primitives."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 The Rust Project Developers"]
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+repository = "https://github.com/Amanieu/parking_lot"
+
+[[dependencies]]
+name = "paste"
+version = "1.0.15"
+description = "Macros for all your token pasting needs"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/paste"
+
+[[dependencies]]
+name = "pem"
+version = "3.0.4"
+description = "Parse and encode PEM-encoded data."
+license = "MIT"
+notices = ["Copyright (c) 2016 Jonathan Creekmore"]
+authors = ["Jonathan Creekmore <jonathan@thecreekmores.org>"]
+repository = "https://github.com/jcreekmore/pem-rs.git"
+
+[[dependencies]]
+name = "pest"
+version = "2.7.15"
+description = "The Elegant Parser"
+license = "MIT OR Apache-2.0"
+authors = ["Dragoș Tiselice <dragostiselice@gmail.com>"]
+repository = "https://github.com/pest-parser/pest"
+homepage = "https://pest.rs/"
+
+[[dependencies]]
+name = "pin-project-lite"
+version = "0.2.16"
+description = """
+A lightweight version of pin-project written with declarative macros.
+"""
+license = "Apache-2.0 OR MIT"
+repository = "https://github.com/taiki-e/pin-project-lite"
+
+[[dependencies]]
+name = "pin-utils"
+version = "0.1.0"
+description = """
+Utilities for pinning
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2018 The pin-utils authors",
+  "Copyright 2018 The pin-utils authors",
+]
+authors = ["Josef Brandl <mail@josefbrandl.de>"]
+repository = "https://github.com/rust-lang-nursery/pin-utils"
+
+[[dependencies]]
+name = "plotters"
+version = "0.3.7"
+description = "A Rust drawing library focus on data plotting for both WASM and native applications"
+license = "MIT"
+authors = ["Hao Hou <haohou302@gmail.com>"]
+repository = "https://github.com/plotters-rs/plotters"
+homepage = "https://plotters-rs.github.io/"
+
+[[dependencies]]
+name = "plotters-backend"
+version = "0.3.7"
+description = "Plotters Backend API"
+license = "MIT"
+authors = ["Hao Hou <haohou302@gmail.com>"]
+repository = "https://github.com/plotters-rs/plotters"
+homepage = "https://plotters-rs.github.io"
+
+[[dependencies]]
+name = "plotters-svg"
+version = "0.3.7"
+description = "Plotters SVG backend"
+license = "MIT"
+authors = ["Hao Hou <haohou302@gmail.com>"]
+repository = "https://github.com/plotters-rs/plotters.git"
+homepage = "https://plotters-rs.github.io"
+
+[[dependencies]]
+name = "powerfmt"
+version = "0.2.0"
+description = """
+    `powerfmt` is a library that provides utilities for formatting values. This crate makes it
+    significantly easier to support filling to a minimum width with alignment, avoid heap
+    allocation, and avoid repetitive calculations.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2023 Jacob Pratt et al.",
+  "Copyright 2023 Jacob Pratt et al.",
+]
+authors = ["Jacob Pratt <jacob@jhpratt.dev>"]
+repository = "https://github.com/jhpratt/powerfmt"
+
+[[dependencies]]
+name = "ppv-lite86"
+version = "0.2.20"
+description = "Implementation of the crypto-simd API for x86"
+license = "MIT/Apache-2.0"
+notices = [
+  "Copyright (c) 2019 The CryptoCorrosion Contributors",
+  "Copyright 2019 The CryptoCorrosion Contributors",
+]
+authors = ["The CryptoCorrosion Contributors"]
+repository = "https://github.com/cryptocorrosion/cryptocorrosion"
+
+[[dependencies]]
+name = "prettyplease"
+version = "0.2.29"
+description = "A minimal `syn` syntax tree pretty-printer"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/prettyplease"
+
+[[dependencies]]
+name = "primitive-types"
+version = "0.12.2"
+description = "Primitive types shared by Ethereum and Substrate"
+license = "MIT OR Apache-2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+homepage = "https://github.com/paritytech/parity-common"
+
+[[dependencies]]
+name = "proc-macro-crate"
+version = "3.2.0"
+description = """
+Replacement for crate (macro_rules keyword) in proc-macros
+"""
+license = "MIT OR Apache-2.0"
+authors = ["Bastian Köcher <git@kchr.de>"]
+repository = "https://github.com/bkchr/proc-macro-crate"
+
+[[dependencies]]
+name = "proc-macro2"
+version = "1.0.93"
+description = "A substitute implementation of the compiler's `proc_macro` API to decouple token-based libraries from the procedural macro use case."
+license = "MIT OR Apache-2.0"
+authors = [
+  "David Tolnay <dtolnay@gmail.com>",
+  "Alex Crichton <alex@alexcrichton.com>",
+]
+repository = "https://github.com/dtolnay/proc-macro2"
+
+[[dependencies]]
+name = "proptest"
+version = "1.6.0"
+description = """
+Hypothesis-like property-based testing and shrinking.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 FullContact, Inc"]
+authors = ["Jason Lingle"]
+repository = "https://github.com/proptest-rs/proptest"
+homepage = "https://proptest-rs.github.io/proptest/proptest/index.html"
+
+[[dependencies]]
+name = "pulp"
+version = "0.18.22"
+description = "Safe generic simd"
+license = "MIT"
+notices = ["Copyright (c) 2021 sarah"]
+authors = ["sarah <>"]
+repository = "https://github.com/sarah-ek/pulp/"
+
+[[dependencies]]
+name = "quinn"
+version = "0.11.6"
+description = "Versatile QUIC transport protocol implementation"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018 The quinn Developers"]
+repository = "https://github.com/quinn-rs/quinn"
+
+[[dependencies]]
+name = "quinn-proto"
+version = "0.11.9"
+description = "State machine for the QUIC transport protocol"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018 The quinn Developers"]
+repository = "https://github.com/quinn-rs/quinn"
+
+[[dependencies]]
+name = "quinn-udp"
+version = "0.5.9"
+description = "UDP sockets with ECN information for the QUIC transport protocol"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018 The quinn Developers"]
+repository = "https://github.com/quinn-rs/quinn"
+
+[[dependencies]]
+name = "quote"
+version = "1.0.38"
+description = "Quasi-quoting macro quote!(...)"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/quote"
+
+[[dependencies]]
+name = "radium"
+version = "0.7.0"
+description = "Portable interfaces for maybe-atomic types"
+license = "MIT"
+notices = ["Copyright (c) 2019 kneecaw (Nika Layzell)"]
+authors = ["Nika Layzell <nika@thelayzells.com>", "myrrlyn <self@myrrlyn.dev>"]
+repository = "https://github.com/bitvecto-rs/radium"
+
+[[dependencies]]
+name = "rand"
+version = "0.7.3"
+description = """
+Random number generators and other randomness functionality.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = ["The Rand Project Developers", "The Rust Project Developers"]
+repository = "https://github.com/rust-random/rand"
+homepage = "https://crates.io/crates/rand"
+
+[[dependencies]]
+name = "rand"
+version = "0.8.5"
+description = """
+Random number generators and other randomness functionality.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = ["The Rand Project Developers", "The Rust Project Developers"]
+repository = "https://github.com/rust-random/rand"
+homepage = "https://rust-random.github.io/book"
+
+[[dependencies]]
+name = "rand_chacha"
+version = "0.2.2"
+description = """
+ChaCha random number generator
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = [
+  "The Rand Project Developers",
+  "The Rust Project Developers",
+  "The CryptoCorrosion Contributors",
+]
+repository = "https://github.com/rust-random/rand"
+homepage = "https://crates.io/crates/rand_chacha"
+
+[[dependencies]]
+name = "rand_chacha"
+version = "0.3.1"
+description = """
+ChaCha random number generator
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = [
+  "The Rand Project Developers",
+  "The Rust Project Developers",
+  "The CryptoCorrosion Contributors",
+]
+repository = "https://github.com/rust-random/rand"
+homepage = "https://rust-random.github.io/book"
+
+[[dependencies]]
+name = "rand_core"
+version = "0.5.1"
+description = """
+Core random number generator traits and tools for implementation.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = ["The Rand Project Developers", "The Rust Project Developers"]
+repository = "https://github.com/rust-random/rand"
+homepage = "https://crates.io/crates/rand_core"
+
+[[dependencies]]
+name = "rand_core"
+version = "0.6.4"
+description = """
+Core random number generator traits and tools for implementation.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = ["The Rand Project Developers", "The Rust Project Developers"]
+repository = "https://github.com/rust-random/rand"
+homepage = "https://rust-random.github.io/book"
+
+[[dependencies]]
+name = "rand_hc"
+version = "0.2.0"
+description = """
+HC128 random number generator
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright 2018 Developers of the Rand project"]
+authors = ["The Rand Project Developers"]
+repository = "https://github.com/rust-random/rand"
+homepage = "https://crates.io/crates/rand_hc"
+
+[[dependencies]]
+name = "rand_xorshift"
+version = "0.3.0"
+description = """
+Xorshift random number generator
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 The Rust Project Developers",
+  "Copyright 2018 Developers of the Rand project",
+]
+authors = ["The Rand Project Developers", "The Rust Project Developers"]
+repository = "https://github.com/rust-random/rngs"
+homepage = "https://rust-random.github.io/book"
+
+[[dependencies]]
+name = "rayon"
+version = "1.10.0"
+description = "Simple work-stealing parallelism for Rust"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2010 The Rust Project Developers"]
+authors = [
+  "Niko Matsakis <niko@alum.mit.edu>",
+  "Josh Stone <cuviper@gmail.com>",
+]
+repository = "https://github.com/rayon-rs/rayon"
+
+[[dependencies]]
+name = "rayon-core"
+version = "1.12.1"
+description = "Core APIs for Rayon"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2010 The Rust Project Developers"]
+authors = [
+  "Niko Matsakis <niko@alum.mit.edu>",
+  "Josh Stone <cuviper@gmail.com>",
+]
+repository = "https://github.com/rayon-rs/rayon"
+
+[[dependencies]]
+name = "rcgen"
+version = "0.13.2"
+description = "Rust X.509 certificate generator"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2019-2022 est31 <MTest31@outlook.com> and contributors",
+]
+repository = "https://github.com/rustls/rcgen"
+
+[[dependencies]]
+name = "reborrow"
+version = "0.5.5"
+description = "Emulate reborrowing for user types."
+license = "MIT"
+notices = ["Copyright (c) 2022 sarah"]
+authors = ["sarah <>"]
+repository = "https://github.com/sarah-ek/reborrow/"
+
+[[dependencies]]
+name = "redox_syscall"
+version = "0.5.8"
+description = "A Rust library to access raw Redox system calls"
+license = "MIT"
+notices = ["Copyright (c) 2017 Redox OS Developers"]
+authors = ["Jeremy Soller <jackpot51@gmail.com>"]
+repository = "https://gitlab.redox-os.org/redox-os/syscall"
+
+[[dependencies]]
+name = "regex"
+version = "1.11.1"
+description = """
+An implementation of regular expressions for Rust. This implementation uses
+finite automata and guarantees linear time matching on all inputs.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers", "Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/rust-lang/regex"
+
+[[dependencies]]
+name = "regex-automata"
+version = "0.4.9"
+description = "Automata construction and matching using regular expressions."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers", "Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/rust-lang/regex/tree/master/regex-automata"
+
+[[dependencies]]
+name = "regex-syntax"
+version = "0.8.5"
+description = "A regular expression parser."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = ["The Rust Project Developers", "Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/rust-lang/regex/tree/master/regex-syntax"
+
+[[dependencies]]
+name = "ring"
+version = "0.17.8"
+description = "Safe, fast, small crypto using Rust."
+notices = [
+  "* Copyright (c) 1998-2011 The OpenSSL Project.  All rights reserved.",
+  "/* Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)",
+  "/* Copyright (c) 2015, Google Inc.",
+  "Copyright (c) 2015-2016 the fiat-crypto authors (see",
+  "Copyright 2015-2016 Brian Smith.",
+]
+authors = ["Brian Smith <brian@briansmith.org>"]
+repository = "https://github.com/briansmith/ring"
+
+[[dependencies]]
+name = "rlp"
+version = "0.5.2"
+description = "Recursive-length prefix encoding, decoding, and compression"
+license = "MIT OR Apache-2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+repository = "https://github.com/paritytech/parity-common"
+
+[[dependencies]]
+name = "ruint"
+version = "1.13.1"
+description = "Unsigned integer type with const-generic bit length"
+license = "MIT"
+authors = ["Remco Bloemen <remco@wicked.ventures>"]
+repository = "https://github.com/recmo/uint"
+
+[[dependencies]]
+name = "ruint-macro"
+version = "1.2.1"
+description = "The `uint!` macro for `Uint` and `Bits` literals"
+license = "MIT"
+authors = ["Remco Bloemen <remco@wicked.ventures>"]
+repository = "https://github.com/recmo/uint"
+
+[[dependencies]]
+name = "rustc-demangle"
+version = "0.1.24"
+description = """
+Rust compiler symbol demangling.
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/rust-lang/rustc-demangle"
+
+[[dependencies]]
+name = "rustc-hash"
+version = "1.1.0"
+description = "speed, non-cryptographic hash used in rustc"
+license = "Apache-2.0/MIT"
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang-nursery/rustc-hash"
+
+[[dependencies]]
+name = "rustc-hash"
+version = "2.1.1"
+description = "A speedy, non-cryptographic hashing algorithm used by rustc"
+license = "Apache-2.0 OR MIT"
+authors = ["The Rust Project Developers"]
+repository = "https://github.com/rust-lang/rustc-hash"
+
+[[dependencies]]
+name = "rustc-hex"
+version = "2.1.0"
+description = """
+rustc-serialize compatible hex conversion traits
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = [
+  "The Rust Project Developers",
+  "debris <marek.kotewicz@gmail.com>",
+  "Robert Habermeier",
+]
+repository = "https://github.com/debris/rustc-hex"
+
+[[dependencies]]
+name = "rustc_version"
+version = "0.3.3"
+description = "A library for querying the version of a installed rustc compiler"
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2016 The Rust Project Developers"]
+authors = ["Marvin Löbel <loebel.marvin@gmail.com>"]
+repository = "https://github.com/Kimundi/rustc-version-rs"
+
+[[dependencies]]
+name = "rustc_version"
+version = "0.4.1"
+description = "A library for querying the version of a installed rustc compiler"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 The Rust Project Developers"]
+repository = "https://github.com/djc/rustc-version-rs"
+
+[[dependencies]]
+name = "rustix"
+version = "0.38.44"
+description = "Safe Rust bindings to POSIX/Unix/Linux/Winsock-like syscalls"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = [
+  "Dan Gohman <dev@sunfishcode.online>",
+  "Jakub Konka <kubkon@jakubkonka.com>",
+]
+repository = "https://github.com/bytecodealliance/rustix"
+
+[[dependencies]]
+name = "rustls"
+version = "0.23.22"
+description = "Rustls is a modern TLS library written in Rust."
+license = "Apache-2.0 OR ISC OR MIT"
+notices = [
+  "Copyright (c) 2016 Joseph Birr-Pixton <jpixton@gmail.com>",
+  "Copyright (c) 2016, Joseph Birr-Pixton <jpixton@gmail.com>",
+]
+repository = "https://github.com/rustls/rustls"
+
+[[dependencies]]
+name = "rustls-native-certs"
+version = "0.7.3"
+description = "rustls-native-certs allows rustls to use the platform native certificate store"
+license = "Apache-2.0 OR ISC OR MIT"
+notices = [
+  "Copyright (c) 2016 Joseph Birr-Pixton <jpixton@gmail.com>",
+  "Copyright (c) 2016, Joseph Birr-Pixton <jpixton@gmail.com>",
+]
+repository = "https://github.com/rustls/rustls-native-certs"
+
+[[dependencies]]
+name = "rustls-pemfile"
+version = "2.2.0"
+description = "Basic .pem file parser for keys and certificates"
+license = "Apache-2.0 OR ISC OR MIT"
+notices = [
+  "Copyright (c) 2016 Joseph Birr-Pixton <jpixton@gmail.com>",
+  "Copyright (c) 2016, Joseph Birr-Pixton <jpixton@gmail.com>",
+]
+repository = "https://github.com/rustls/pemfile"
+
+[[dependencies]]
+name = "rustls-pki-types"
+version = "1.11.0"
+description = "Shared types for the rustls PKI ecosystem"
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2023 Dirkjan Ochtman <dirkjan@ochtman.nl>",
+  "Copyright 2023 Dirkjan Ochtman",
+]
+repository = "https://github.com/rustls/pki-types"
+
+[[dependencies]]
+name = "rustls-platform-verifier"
+version = "0.4.0"
+description = "rustls-platform-verifier supports verifying TLS certificates in rustls with the operating system verifier"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2022 1Password"]
+authors = ["ComplexSpaces <complexspacescode@gmail.com>", "1Password"]
+repository = "https://github.com/rustls/rustls-platform-verifier"
+
+[[dependencies]]
+name = "rustls-platform-verifier-android"
+version = "0.1.1"
+description = "The internal JVM support component of the rustls-platform-verifier crate. You shouldn't depend on this directly."
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rustls/rustls-platform-verifier"
+
+[[dependencies]]
+name = "rustls-webpki"
+version = "0.102.8"
+description = "Web PKI X.509 Certificate Verification."
+license = "ISC"
+notices = ["Copyright 2015 Brian Smith."]
+repository = "https://github.com/rustls/webpki"
+
+[[dependencies]]
+name = "rustversion"
+version = "1.0.19"
+description = "Conditional compilation according to rustc compiler version"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/rustversion"
+
+[[dependencies]]
+name = "ryu"
+version = "1.0.19"
+description = "Fast floating point to string conversion"
+license = "Apache-2.0 OR BSL-1.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/ryu"
+
+[[dependencies]]
+name = "s2n-codec"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic"
+version = "1.53.0"
+description = "A Rust implementation of the IETF QUIC protocol"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic-core"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic-crypto"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic-platform"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic-rustls"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic-tls"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic-tls-default"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-quic-transport"
+version = "0.53.0"
+description = "Internal crate used by s2n-quic"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-quic"
+
+[[dependencies]]
+name = "s2n-tls"
+version = "0.3.10"
+description = "A C99 implementation of the TLS/SSL protocols"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-tls"
+
+[[dependencies]]
+name = "s2n-tls-sys"
+version = "0.3.10"
+description = "A C99 implementation of the TLS/SSL protocols"
+license = "Apache-2.0"
+authors = ["AWS s2n"]
+repository = "https://github.com/aws/s2n-tls"
+
+[[dependencies]]
+name = "same-file"
+version = "1.0.6"
+description = """
+A simple crate for determining whether two file paths point to the same file.
+"""
+license = "Unlicense/MIT"
+notices = ["Copyright (c) 2017 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/same-file"
+
+[[dependencies]]
+name = "schannel"
+version = "0.1.27"
+description = "Schannel bindings for rust, allowing SSL/TLS (e.g. https) without openssl"
+license = "MIT"
+notices = ["Copyright (c) 2015 steffengy"]
+authors = [
+  "Steven Fackler <sfackler@gmail.com>",
+  "Steffen Butzer <steffen.butzer@outlook.com>",
+]
+repository = "https://github.com/steffengy/schannel-rs"
+
+[[dependencies]]
+name = "scopeguard"
+version = "1.2.0"
+description = """
+A RAII scope guard that will run a given closure when it goes out of scope,
+even if the code between panics (assuming unwinding panic).
+
+Defines the macros `defer!`, `defer_on_unwind!`, `defer_on_success!` as
+shorthands for guards with one of the implemented strategies.
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  'Copyright (c) 2016-2019 Ulrik Sverdrup "bluss" and scopeguard developers',
+]
+authors = ["bluss"]
+repository = "https://github.com/bluss/scopeguard"
+
+[[dependencies]]
+name = "security-framework"
+version = "2.11.1"
+description = "Security.framework bindings for macOS and iOS"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015 Steven Fackler"]
+authors = [
+  "Steven Fackler <sfackler@gmail.com>",
+  "Kornel <kornel@geekhood.net>",
+]
+repository = "https://github.com/kornelski/rust-security-framework"
+homepage = "https://lib.rs/crates/security_framework"
+
+[[dependencies]]
+name = "security-framework-sys"
+version = "2.14.0"
+description = "Apple `Security.framework` low-level FFI bindings"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015 Steven Fackler"]
+authors = [
+  "Steven Fackler <sfackler@gmail.com>",
+  "Kornel <kornel@geekhood.net>",
+]
+repository = "https://github.com/kornelski/rust-security-framework"
+homepage = "https://lib.rs/crates/security-framework-sys"
+
+[[dependencies]]
+name = "semver"
+version = "0.11.0"
+description = """
+Semantic version parsing and comparison.
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2014 The Rust Project Developers"]
+authors = [
+  "Steve Klabnik <steve@steveklabnik.com>",
+  "The Rust Project Developers",
+]
+repository = "https://github.com/steveklabnik/semver"
+homepage = "https://docs.rs/crate/semver/"
+
+[[dependencies]]
+name = "semver"
+version = "1.0.25"
+description = "Parser and evaluator for Cargo's flavor of Semantic Versioning"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/semver"
+
+[[dependencies]]
+name = "semver-parser"
+version = "0.10.3"
+description = """
+Parsing of the semver spec.
+"""
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2016 Steve Klabnik"]
+authors = ["Steve Klabnik <steve@steveklabnik.com>"]
+repository = "https://github.com/steveklabnik/semver-parser"
+
+[[dependencies]]
+name = "serde"
+version = "1.0.218"
+description = "A generic serialization/deserialization framework"
+license = "MIT OR Apache-2.0"
+authors = [
+  "Erick Tryzelaar <erick.tryzelaar@gmail.com>",
+  "David Tolnay <dtolnay@gmail.com>",
+]
+repository = "https://github.com/serde-rs/serde"
+homepage = "https://serde.rs"
+
+[[dependencies]]
+name = "serde_derive"
+version = "1.0.218"
+description = "Macros 1.1 implementation of #[derive(Serialize, Deserialize)]"
+license = "MIT OR Apache-2.0"
+authors = [
+  "Erick Tryzelaar <erick.tryzelaar@gmail.com>",
+  "David Tolnay <dtolnay@gmail.com>",
+]
+repository = "https://github.com/serde-rs/serde"
+homepage = "https://serde.rs"
+
+[[dependencies]]
+name = "serde_json"
+version = "1.0.138"
+description = "A JSON serialization file format"
+license = "MIT OR Apache-2.0"
+authors = [
+  "Erick Tryzelaar <erick.tryzelaar@gmail.com>",
+  "David Tolnay <dtolnay@gmail.com>",
+]
+repository = "https://github.com/serde-rs/json"
+
+[[dependencies]]
+name = "server"
+version = "0.1.0"
+license = "MIT"
+notices = ["Copyright (c) 2024 Gateway"]
+authors = ["Gateway"]
+
+[[dependencies]]
+name = "sha3"
+version = "0.10.8"
+description = """
+Pure Rust implementation of SHA-3, a family of Keccak-based hash functions
+including the SHAKE family of eXtendable-Output Functions (XOFs), as well as
+the accelerated variant TurboSHAKE
+"""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2006-2009 Graydon Hoare",
+  "Copyright (c) 2009-2013 Mozilla Foundation",
+  "Copyright (c) 2014 Sébastien Martini",
+  "Copyright (c) 2016-2023 Artyom Pavlov, Marek Kotewicz",
+]
+authors = ["RustCrypto Developers"]
+repository = "https://github.com/RustCrypto/hashes"
+
+[[dependencies]]
+name = "sharded-slab"
+version = "0.1.7"
+description = """
+A lock-free concurrent slab.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Eliza Weisman"]
+authors = ["Eliza Weisman <eliza@buoyant.io>"]
+repository = "https://github.com/hawkw/sharded-slab"
+
+[[dependencies]]
+name = "shlex"
+version = "1.3.0"
+description = "Split a string into shell words, like Python's shlex."
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2015 Nicholas Allegra (comex).",
+  "Copyright 2015 Nicholas Allegra (comex).",
+]
+authors = [
+  "comex <comexk@gmail.com>",
+  "Fenhl <fenhl@fenhl.net>",
+  "Adrian Taylor <adetaylor@chromium.org>",
+  "Alex Touchet <alextouchet@outlook.com>",
+  "Daniel Parks <dp+git@oxidized.org>",
+  "Garrett Berg <googberg@gmail.com>",
+]
+repository = "https://github.com/comex/rust-shlex"
+
+[[dependencies]]
+name = "signal-hook-registry"
+version = "1.4.2"
+description = "Backend crate for signal-hook"
+license = "Apache-2.0/MIT"
+notices = ["Copyright (c) 2017 tokio-jsonrpc developers"]
+authors = [
+  "Michal 'vorner' Vaner <vorner@vorner.cz>",
+  "Masaki Hara <ackie.h.gmai@gmail.com>",
+]
+repository = "https://github.com/vorner/signal-hook"
+
+[[dependencies]]
+name = "siphasher"
+version = "1.0.1"
+description = "SipHash-2-4, SipHash-1-3 and 128-bit variants in pure Rust"
+license = "MIT/Apache-2.0"
+notices = [
+  "Copyright 2012-2016 The Rust Project Developers.",
+  "Copyright 2016-2024 Frank Denis.",
+]
+authors = ["Frank Denis <github@pureftpd.org>"]
+repository = "https://github.com/jedisct1/rust-siphash"
+homepage = "https://docs.rs/siphasher"
+
+[[dependencies]]
+name = "slab"
+version = "0.4.9"
+description = "Pre-allocated storage for a uniform data type"
+license = "MIT"
+notices = ["Copyright (c) 2019 Carl Lerche"]
+authors = ["Carl Lerche <me@carllerche.com>"]
+repository = "https://github.com/tokio-rs/slab"
+
+[[dependencies]]
+name = "smallvec"
+version = "1.13.2"
+description = "'Small vector' optimization: store up to a small number of items on the stack"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2018 The Servo Project Developers"]
+authors = ["The Servo Project Developers"]
+repository = "https://github.com/servo/rust-smallvec"
+
+[[dependencies]]
+name = "socket2"
+version = "0.5.8"
+description = """
+Utilities for handling networking sockets with a maximal amount of configuration
+possible intended.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = [
+  "Alex Crichton <alex@alexcrichton.com>",
+  "Thomas de Zeeuw <thomasdezeeuw@gmail.com>",
+]
+repository = "https://github.com/rust-lang/socket2"
+
+[[dependencies]]
+name = "spin"
+version = "0.9.8"
+description = "Spin-based synchronization primitives"
+license = "MIT"
+notices = ["Copyright (c) 2014 Mathijs van de Nes"]
+authors = [
+  "Mathijs van de Nes <git@mathijs.vd-nes.nl>",
+  "John Ericson <git@JohnEricson.me>",
+  "Joshua Barretto <joshua.s.barretto@gmail.com>",
+]
+repository = "https://github.com/mvdnes/spin-rs.git"
+
+[[dependencies]]
+name = "static_assertions"
+version = "1.1.0"
+description = "Compile-time assertions to ensure that invariants are met."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2017 Nikolai Vazquez"]
+authors = ["Nikolai Vazquez"]
+repository = "https://github.com/nvzqz/static-assertions-rs"
+
+[[dependencies]]
+name = "subtle"
+version = "2.6.1"
+description = "Pure-Rust traits and utilities for constant-time cryptographic implementations."
+license = "BSD-3-Clause"
+notices = [
+  "Copyright (c) 2016-2017 Isis Agora Lovecruft, Henry de Valence. All rights reserved.",
+  "Copyright (c) 2016-2024 Isis Agora Lovecruft. All rights reserved.",
+]
+authors = [
+  "Isis Lovecruft <isis@patternsinthevoid.net>",
+  "Henry de Valence <hdevalence@hdevalence.ca>",
+]
+repository = "https://github.com/dalek-cryptography/subtle"
+homepage = "https://dalek.rs/"
+
+[[dependencies]]
+name = "subtle-ng"
+version = "2.5.0"
+description = "Pure-Rust traits and utilities for constant-time cryptographic implementations."
+license = "BSD-3-Clause"
+notices = [
+  "Copyright (c) 2016-2017 Isis Agora Lovecruft, Henry de Valence. All rights reserved.",
+]
+authors = [
+  "Isis Lovecruft <isis@patternsinthevoid.net>",
+  "Henry de Valence <hdevalence@hdevalence.ca>",
+]
+repository = "https://github.com/dalek-cryptography/subtle"
+homepage = "https://dalek.rs/"
+
+[[dependencies]]
+name = "syn"
+version = "1.0.109"
+description = "Parser for Rust source code"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/syn"
+
+[[dependencies]]
+name = "syn"
+version = "2.0.98"
+description = "Parser for Rust source code"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/syn"
+
+[[dependencies]]
+name = "tandem"
+version = "0.3.0"
+description = "Cryptographic Engine for Secure Multi-Party Computation using Garbled Circuits"
+license = "MIT"
+repository = "https://github.com/sine-fdn/tandem/tree/main/tandem"
+
+[[dependencies]]
+name = "tap"
+version = "1.0.1"
+description = "Generic extensions for tapping values in Rust"
+license = "MIT"
+notices = ["Copyright (c) 2017 Elliot Linder <darfink@gmail.com>"]
+authors = [
+  "Elliott Linder <elliott.darfink@gmail.com>",
+  "myrrlyn <self@myrrlyn.dev>",
+]
+repository = "https://github.com/myrrlyn/tap"
+
+[[dependencies]]
+name = "tfhe"
+version = "0.9.1"
+description = "TFHE-rs is a fully homomorphic encryption (FHE) library that implements Zama's variant of TFHE."
+license = "BSD-3-Clause-Clear"
+notices = ["Copyright © 2024 ZAMA."]
+repository = "https://github.com/zama-ai/tfhe-rs"
+homepage = "https://zama.ai/"
+
+[[dependencies]]
+name = "tfhe"
+version = "0.10.0"
+description = "TFHE-rs is a fully homomorphic encryption (FHE) library that implements Zama's variant of TFHE."
+license = "BSD-3-Clause-Clear"
+notices = ["Copyright © 2024 ZAMA."]
+repository = "https://github.com/zama-ai/tfhe-rs"
+homepage = "https://zama.ai/"
+
+[[dependencies]]
+name = "tfhe-versionable"
+version = "0.3.2"
+description = "tfhe-versionable: Add versioning informations/backward compatibility on rust types used for serialization"
+license = "BSD-3-Clause-Clear"
+repository = "https://github.com/zama-ai/tfhe-rs"
+homepage = "https://zama.ai/"
+
+[[dependencies]]
+name = "tfhe-versionable-derive"
+version = "0.3.2"
+description = "tfhe-versionable-derive: A set of proc macro for easier implementation of the tfhe-versionable traits"
+license = "BSD-3-Clause-Clear"
+repository = "https://github.com/zama-ai/tfhe-rs"
+homepage = "https://zama.ai/"
+
+[[dependencies]]
+name = "thiserror"
+version = "1.0.69"
+description = "derive(Error)"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/thiserror"
+
+[[dependencies]]
+name = "thiserror"
+version = "2.0.11"
+description = "derive(Error)"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/thiserror"
+
+[[dependencies]]
+name = "thiserror-impl"
+version = "1.0.69"
+description = "Implementation detail of the `thiserror` crate"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/thiserror"
+
+[[dependencies]]
+name = "thiserror-impl"
+version = "2.0.11"
+description = "Implementation detail of the `thiserror` crate"
+license = "MIT OR Apache-2.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/thiserror"
+
+[[dependencies]]
+name = "thread_local"
+version = "1.1.8"
+description = "Per-object thread-local storage"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2016 The Rust Project Developers"]
+authors = ["Amanieu d'Antras <amanieu@gmail.com>"]
+repository = "https://github.com/Amanieu/thread_local-rs"
+
+[[dependencies]]
+name = "time"
+version = "0.3.37"
+description = "Date and time library. Fully interoperable with the standard library. Mostly compatible with #![no_std]."
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2024 Jacob Pratt et al.",
+  "Copyright 2024 Jacob Pratt et al.",
+]
+authors = ["Jacob Pratt <open-source@jhpratt.dev>", "Time contributors"]
+repository = "https://github.com/time-rs/time"
+homepage = "https://time-rs.github.io"
+
+[[dependencies]]
+name = "time-core"
+version = "0.1.2"
+description = "This crate is an implementation detail and should not be relied upon directly."
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2022 Jacob Pratt et al.",
+  "Copyright 2022 Jacob Pratt et al.",
+]
+authors = ["Jacob Pratt <open-source@jhpratt.dev>", "Time contributors"]
+repository = "https://github.com/time-rs/time"
+
+[[dependencies]]
+name = "tinytemplate"
+version = "1.2.1"
+description = "Simple, lightweight template engine"
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2019 Brook Heisler"]
+authors = ["Brook Heisler <brookheisler@gmail.com>"]
+repository = "https://github.com/bheisler/TinyTemplate"
+
+[[dependencies]]
+name = "tinyvec"
+version = "1.8.1"
+description = "`tinyvec` provides 100% safe vec-like data structures."
+license = "Zlib OR Apache-2.0 OR MIT"
+notices = ['Copyright (c) 2019 Daniel "Lokathor" Gee.']
+authors = ["Lokathor <zefria@gmail.com>"]
+repository = "https://github.com/Lokathor/tinyvec"
+
+[[dependencies]]
+name = "tinyvec_macros"
+version = "0.1.1"
+description = "Some macros for tiny containers"
+license = "MIT OR Apache-2.0 OR Zlib"
+notices = ["Copyright (c) 2020 Soveu", 'Copyright 2020 Tomasz "Soveu" Marx']
+authors = ["Soveu <marx.tomasz@gmail.com>"]
+repository = "https://github.com/Soveu/tinyvec_macros"
+
+[[dependencies]]
+name = "tokio"
+version = "1.43.0"
+description = """
+An event-driven, non-blocking I/O platform for writing asynchronous I/O
+backed applications.
+"""
+license = "MIT"
+notices = ["Copyright (c) Tokio Contributors"]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tokio"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tokio-macros"
+version = "2.5.0"
+description = """
+Tokio's proc macros.
+"""
+license = "MIT"
+notices = [
+  "Copyright (c) 2019 Yoshua Wuyts",
+  "Copyright (c) Tokio Contributors",
+]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tokio"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "toml_datetime"
+version = "0.6.8"
+description = "A TOML-compatible datetime type"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Individual contributors"]
+authors = ["Alex Crichton <alex@alexcrichton.com>"]
+repository = "https://github.com/toml-rs/toml"
+
+[[dependencies]]
+name = "toml_edit"
+version = "0.22.24"
+description = "Yet another format-preserving TOML parser."
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Individual contributors"]
+authors = [
+  "Andronik Ordian <write@reusable.software>",
+  "Ed Page <eopage@gmail.com>",
+]
+repository = "https://github.com/toml-rs/toml"
+
+[[dependencies]]
+name = "tracing"
+version = "0.1.41"
+description = """
+Application-level tracing for Rust.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tokio Contributors"]
+authors = [
+  "Eliza Weisman <eliza@buoyant.io>",
+  "Tokio Contributors <team@tokio.rs>",
+]
+repository = "https://github.com/tokio-rs/tracing"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tracing-attributes"
+version = "0.1.28"
+description = """
+Procedural macro attributes for automatically instrumenting functions.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tokio Contributors"]
+authors = [
+  "Tokio Contributors <team@tokio.rs>",
+  "Eliza Weisman <eliza@buoyant.io>",
+  "David Barsky <dbarsky@amazon.com>",
+]
+repository = "https://github.com/tokio-rs/tracing"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tracing-core"
+version = "0.1.33"
+description = """
+Core primitives for application-level tracing.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tokio Contributors"]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tracing"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tracing-log"
+version = "0.2.0"
+description = """
+Provides compatibility between `tracing` and the `log` crate.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tokio Contributors"]
+authors = ["Tokio Contributors <team@tokio.rs>"]
+repository = "https://github.com/tokio-rs/tracing"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "tracing-subscriber"
+version = "0.3.19"
+description = """
+Utilities for implementing and composing `tracing` subscribers.
+"""
+license = "MIT"
+notices = ["Copyright (c) 2019 Tokio Contributors"]
+authors = [
+  "Eliza Weisman <eliza@buoyant.io>",
+  "David Barsky <me@davidbarsky.com>",
+  "Tokio Contributors <team@tokio.rs>",
+]
+repository = "https://github.com/tokio-rs/tracing"
+homepage = "https://tokio.rs"
+
+[[dependencies]]
+name = "typenum"
+version = "1.17.0"
+description = """
+Typenum is a Rust library for type-level numbers evaluated at
+    compile time. It currently supports bits, unsigned integers, and signed
+    integers. It also provides a type-level array of type-level numbers, but its
+    implementation is incomplete."""
+license = "MIT OR Apache-2.0"
+notices = [
+  "Copyright (c) 2014 Paho Lurie-Gregg",
+  "Copyright 2014 Paho Lurie-Gregg",
+]
+authors = [
+  "Paho Lurie-Gregg <paho@paholg.com>",
+  "Andre Bogus <bogusandre@gmail.com>",
+]
+repository = "https://github.com/paholg/typenum"
+
+[[dependencies]]
+name = "ucd-trie"
+version = "0.1.7"
+description = """
+A trie for storing Unicode codepoint sets and maps.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/ucd-generate"
+
+[[dependencies]]
+name = "uint"
+version = "0.9.5"
+description = "Large fixed-size integer arithmetic"
+license = "MIT OR Apache-2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+repository = "https://github.com/paritytech/parity-common"
+homepage = "http://parity.io"
+
+[[dependencies]]
+name = "unarray"
+version = "0.1.4"
+description = "Utilities for working with uninitialized arrays"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) [year] [fullname]"]
+repository = "https://github.com/cameron1024/unarray"
+
+[[dependencies]]
+name = "unicode-ident"
+version = "1.0.16"
+description = "Determine whether characters have the XID_Start or XID_Continue properties according to Unicode Standard Annex #31"
+license = "(MIT OR Apache-2.0) AND Unicode-3.0"
+notices = ["Copyright © 1991-2023 Unicode, Inc."]
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+repository = "https://github.com/dtolnay/unicode-ident"
+
+[[dependencies]]
+name = "unicode-xid"
+version = "0.2.6"
+description = """
+Determine whether characters have the XID_Start
+or XID_Continue properties according to
+Unicode Standard Annex #31.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2015 The Rust Project Developers"]
+authors = [
+  "erick.tryzelaar <erick.tryzelaar@gmail.com>",
+  "kwantam <kwantam@gmail.com>",
+  "Manish Goregaokar <manishsmail@gmail.com>",
+]
+repository = "https://github.com/unicode-rs/unicode-xid"
+
+[[dependencies]]
+name = "untrusted"
+version = "0.7.1"
+description = "Safe, fast, zero-panic, zero-crashing, zero-allocation parsing of untrusted inputs in Rust."
+license = "ISC"
+notices = ["// Copyright 2015-2016 Brian Smith."]
+authors = ["Brian Smith <brian@briansmith.org>"]
+repository = "https://github.com/briansmith/untrusted"
+
+[[dependencies]]
+name = "untrusted"
+version = "0.9.0"
+description = "Safe, fast, zero-panic, zero-crashing, zero-allocation parsing of untrusted inputs in Rust."
+license = "ISC"
+notices = ["// Copyright 2015-2016 Brian Smith."]
+authors = ["Brian Smith <brian@briansmith.org>"]
+repository = "https://github.com/briansmith/untrusted"
+
+[[dependencies]]
+name = "valuable"
+version = "0.1.1"
+description = """
+Object-safe value inspection, used to pass un-typed structured data across trait-object boundaries.
+"""
+license = "MIT"
+repository = "https://github.com/tokio-rs/valuable"
+
+[[dependencies]]
+name = "version_check"
+version = "0.9.5"
+description = "Tiny crate to check the version of the installed/running rustc."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2017-2018 Sergio Benitez"]
+authors = ["Sergio Benitez <sb@sergio.bz>"]
+repository = "https://github.com/SergioBenitez/version_check"
+
+[[dependencies]]
+name = "vm"
+version = "0.1.0"
+license = "MIT"
+notices = ["Copyright (c) 2024 Gateway"]
+
+[[dependencies]]
+name = "walkdir"
+version = "2.5.0"
+description = "Recursively walk a directory."
+license = "Unlicense/MIT"
+notices = ["Copyright (c) 2015 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/walkdir"
+
+[[dependencies]]
+name = "wasi"
+version = "0.9.0+wasi-snapshot-preview1"
+description = "Experimental WASI API bindings for Rust"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = ["The Cranelift Project Developers"]
+repository = "https://github.com/bytecodealliance/wasi"
+
+[[dependencies]]
+name = "wasi"
+version = "0.11.0+wasi-snapshot-preview1"
+description = "Experimental WASI API bindings for Rust"
+license = "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
+authors = ["The Cranelift Project Developers"]
+repository = "https://github.com/bytecodealliance/wasi"
+
+[[dependencies]]
+name = "wasm-bindgen"
+version = "0.2.100"
+description = """
+Easy support for interacting between JS and Rust.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The wasm-bindgen Developers"]
+repository = "https://github.com/rustwasm/wasm-bindgen"
+homepage = "https://rustwasm.github.io/"
+
+[[dependencies]]
+name = "wasm-bindgen-backend"
+version = "0.2.100"
+description = """
+Backend code generation of the wasm-bindgen tool
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The wasm-bindgen Developers"]
+repository = "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/backend"
+homepage = "https://rustwasm.github.io/wasm-bindgen/"
+
+[[dependencies]]
+name = "wasm-bindgen-macro"
+version = "0.2.100"
+description = """
+Definition of the `#[wasm_bindgen]` attribute, an internal dependency
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The wasm-bindgen Developers"]
+repository = "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/macro"
+homepage = "https://rustwasm.github.io/wasm-bindgen/"
+
+[[dependencies]]
+name = "wasm-bindgen-macro-support"
+version = "0.2.100"
+description = """
+The part of the implementation of the `#[wasm_bindgen]` attribute that is not in the shared backend crate
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The wasm-bindgen Developers"]
+repository = "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/macro-support"
+homepage = "https://rustwasm.github.io/wasm-bindgen/"
+
+[[dependencies]]
+name = "wasm-bindgen-shared"
+version = "0.2.100"
+description = """
+Shared support between wasm-bindgen and wasm-bindgen cli, an internal
+dependency.
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The wasm-bindgen Developers"]
+repository = "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/shared"
+homepage = "https://rustwasm.github.io/wasm-bindgen/"
+
+[[dependencies]]
+name = "web-sys"
+version = "0.3.77"
+description = """
+Bindings for all Web APIs, a procedurally generated crate from WebIDL
+"""
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2014 Alex Crichton"]
+authors = ["The wasm-bindgen Developers"]
+repository = "https://github.com/rustwasm/wasm-bindgen/tree/master/crates/web-sys"
+homepage = "https://rustwasm.github.io/wasm-bindgen/web-sys/index.html"
+
+[[dependencies]]
+name = "web-time"
+version = "1.1.0"
+description = "Drop-in replacement for std::time for Wasm in browsers"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) 2023 dAxpeDDa", "Copyright 2023 dAxpeDDa"]
+repository = "https://github.com/daxpedda/web-time"
+
+[[dependencies]]
+name = "webpki-root-certs"
+version = "0.26.8"
+description = "Mozilla trusted certificate authorities in self-signed X.509 format for use with crates other than webpki"
+license = "MPL-2.0"
+repository = "https://github.com/rustls/webpki-roots"
+
+[[dependencies]]
+name = "which"
+version = "4.4.2"
+description = 'A Rust equivalent of Unix command "which". Locate installed executable in cross platforms.'
+license = "MIT"
+notices = ["Copyright (c) 2015 fangyuanziti"]
+authors = ["Harry Fei <tiziyuanfang@gmail.com>"]
+repository = "https://github.com/harryfei/which-rs.git"
+
+[[dependencies]]
+name = "winapi"
+version = "0.3.9"
+description = "Raw FFI bindings for all of Windows API."
+license = "MIT/Apache-2.0"
+notices = ["Copyright (c) 2015-2018 The winapi-rs Developers"]
+authors = ["Peter Atashian <retep998@gmail.com>"]
+repository = "https://github.com/retep998/winapi-rs"
+
+[[dependencies]]
+name = "winapi-i686-pc-windows-gnu"
+version = "0.4.0"
+description = "Import libraries for the i686-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead."
+license = "MIT/Apache-2.0"
+authors = ["Peter Atashian <retep998@gmail.com>"]
+repository = "https://github.com/retep998/winapi-rs"
+
+[[dependencies]]
+name = "winapi-util"
+version = "0.1.9"
+description = "A dumping ground for high level safe wrappers over windows-sys."
+license = "Unlicense OR MIT"
+notices = ["Copyright (c) 2017 Andrew Gallant"]
+authors = ["Andrew Gallant <jamslam@gmail.com>"]
+repository = "https://github.com/BurntSushi/winapi-util"
+
+[[dependencies]]
+name = "winapi-x86_64-pc-windows-gnu"
+version = "0.4.0"
+description = "Import libraries for the x86_64-pc-windows-gnu target. Please don't use this crate directly, depend on winapi instead."
+license = "MIT/Apache-2.0"
+authors = ["Peter Atashian <retep998@gmail.com>"]
+repository = "https://github.com/retep998/winapi-rs"
+
+[[dependencies]]
+name = "windows-sys"
+version = "0.52.0"
+description = "Rust for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows-sys"
+version = "0.59.0"
+description = "Rust for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows-targets"
+version = "0.52.6"
+description = "Import libs for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_aarch64_gnullvm"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_aarch64_msvc"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_i686_gnu"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_i686_gnullvm"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_i686_msvc"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_x86_64_gnu"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_x86_64_gnullvm"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "windows_x86_64_msvc"
+version = "0.52.6"
+description = "Import lib for Windows"
+license = "MIT OR Apache-2.0"
+notices = ["Copyright (c) Microsoft Corporation."]
+authors = ["Microsoft"]
+repository = "https://github.com/microsoft/windows-rs"
+
+[[dependencies]]
+name = "winnow"
+version = "0.7.2"
+description = "A byte-oriented, zero-copy, parser combinators library"
+license = "MIT"
+repository = "https://github.com/winnow-rs/winnow"
+
+[[dependencies]]
+name = "wyz"
+version = "0.5.1"
+description = "myrrlyn’s utility collection"
+license = "MIT"
+notices = ["Copyright (c) 2018 myrrlyn (Alexander Payne)"]
+authors = ["myrrlyn <self@myrrlyn.dev>"]
+repository = "https://github.com/myrrlyn/wyz"
+homepage = "https://myrrlyn.net/crates/wyz"
+
+[[dependencies]]
+name = "yasna"
+version = "0.5.2"
+description = "ASN.1 library for Rust"
+license = "MIT OR Apache-2.0"
+authors = ["Masaki Hara <ackie.h.gmai@gmail.com>"]
+repository = "https://github.com/qnighy/yasna.rs"
+
+[[dependencies]]
+name = "zerocopy"
+version = "0.7.35"
+description = "Utilities for zero-copy parsing and serialization"
+license = "BSD-2-Clause OR Apache-2.0 OR MIT"
+notices = [
+  "Copyright 2019 The Fuchsia Authors.",
+  "Copyright 2023 The Fuchsia Authors",
+]
+authors = ["Joshua Liebow-Feeser <joshlf@google.com>"]
+repository = "https://github.com/google/zerocopy"
+
+[[dependencies]]
+name = "zerocopy-derive"
+version = "0.7.35"
+description = "Custom derive for traits from the zerocopy crate"
+license = "BSD-2-Clause OR Apache-2.0 OR MIT"
+notices = [
+  "Copyright 2019 The Fuchsia Authors.",
+  "Copyright 2023 The Fuchsia Authors",
+]
+authors = ["Joshua Liebow-Feeser <joshlf@google.com>"]
+repository = "https://github.com/google/zerocopy"
+
+[[dependencies]]
+name = "zeroize"
+version = "1.8.1"
+description = """
+Securely clear secrets from memory with a simple trait built on
+stable Rust primitives which guarantee memory is zeroed using an
+operation will not be 'optimized away' by the compiler.
+Uses a portable pure Rust implementation that works everywhere,
+even WASM!
+"""
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2018-2021 The RustCrypto Project Developers"]
+authors = ["The RustCrypto Project Developers"]
+repository = "https://github.com/RustCrypto/utils/tree/master/zeroize"
+
+[[dependencies]]
+name = "zeroize_derive"
+version = "1.4.2"
+description = "Custom derive support for zeroize"
+license = "Apache-2.0 OR MIT"
+notices = ["Copyright (c) 2019-2023 The RustCrypto Project Developers"]
+authors = ["The RustCrypto Project Developers"]
+repository = "https://github.com/RustCrypto/utils/tree/master/zeroize/derive"
